@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v25</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v26</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -154,7 +154,10 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         <div class="row" style="border:none" onclick="toggleTheme()" style="cursor:pointer"><span style="font-size:19px">🌗</span><span style="flex:1;font:500 15px Anuphan">โหมดมืด / สว่าง</span><span id="themeLbl" class="gray" style="font:500 13px Anuphan"></span></div>
       </div>
       <div class="card" style="padding:6px 16px">
-        <div class="row" onclick="exportCSV()" style="cursor:pointer"><span style="font-size:19px">📤</span><span style="flex:1;font:500 15px Anuphan">ส่งออกข้อมูล CSV</span><span class="gray">›</span></div>
+        <div class="row" onclick="backupData()" style="cursor:pointer"><span style="font-size:19px">💾</span><span style="flex:1;font:500 15px Anuphan">สำรองข้อมูล (ไฟล์ backup)</span><span class="gray">›</span></div>
+        <div class="row" onclick="document.getElementById('restoreFile').click()" style="cursor:pointer"><span style="font-size:19px">📥</span><span style="flex:1;font:500 15px Anuphan">กู้คืนข้อมูลจากไฟล์</span><span class="gray">›</span></div>
+        <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreData(this)">
+        <div class="row" onclick="exportCSV()" style="cursor:pointer"><span style="font-size:19px">📤</span><span style="flex:1;font:500 15px Anuphan">ส่งออก CSV (เปิดใน Excel)</span><span class="gray">›</span></div>
         <div class="row" style="border:none" onclick="clearAll()" style="cursor:pointer"><span style="font-size:19px">🗑️</span><span style="flex:1;font:500 15px Anuphan;color:var(--danger)">ล้างข้อมูลทั้งหมด</span></div>
       </div>
       <div class="gray" style="text-align:center;font:400 12px Anuphan;padding:4px">C-Wallet · ข้อมูลเก็บในเครื่องนี้เท่านั้น</div>
@@ -722,6 +725,36 @@ function saveSettings(){
   save(); toast("บันทึกแล้ว ✓"); render();
 }
 function toggleTheme(){ state.theme = state.theme==="dark"?"light":"dark"; save(); render(); }
+function backupData(){
+  const payload={ app:"C-Wallet", version:1, exportedAt:new Date().toISOString(), data:state };
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+  a.download="cwallet-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+  toast("สำรองข้อมูลแล้ว 💾");
+}
+function restoreData(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const obj=JSON.parse(reader.result);
+      const d=obj && obj.data ? obj.data : obj;   // accept wrapped or raw
+      if(!d || !Array.isArray(d.tx)) throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
+      if(!confirm("กู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ยืนยันไหม?")){ input.value=""; return; }
+      state = Object.assign({name:"ฉัน",wallet:"กระเป๋าหลัก",budget:0,theme:"light",tx:[],goals:[],recurring:[]}, d);
+      if(!Array.isArray(state.goals)) state.goals=[];
+      if(!Array.isArray(state.recurring)) state.recurring=[];
+      save();
+      document.getElementById("setName").value=state.name;
+      document.getElementById("setWallet").value=state.wallet;
+      document.getElementById("setBudget").value=state.budget;
+      render();
+      toast("กู้คืนข้อมูลสำเร็จ ✓");
+    }catch(e){ toast("ไฟล์ไม่ถูกต้อง กู้คืนไม่ได้"); }
+    input.value="";
+  };
+  reader.readAsText(file);
+}
 function exportCSV(){
   const rows=[["วันที่","ประเภท","หมวด","โน้ต","จำนวนเงิน"]];
   state.tx.slice().sort((a,b)=>a.id-b.id).forEach(t=> rows.push([new Date(t.date).toLocaleString("th-TH"), t.kind==="in"?"รายรับ":"รายจ่าย", t.cat, t.note, t.amt]));
