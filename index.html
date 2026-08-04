@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v22</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v23</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -84,7 +84,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
           <button class="qa" onclick="openAdd('out')"><div class="ic" style="background:var(--t1)">➖</div><span>จ่ายเงิน</span></button>
           <button class="qa" onclick="openAdd('in')"><div class="ic" style="background:var(--t2)">➕</div><span>รับเงิน</span></button>
           <button class="qa" onclick="openSplit()"><div class="ic" style="background:var(--t4)">🧮</div><span>หารบิล</span></button>
-          <button class="qa" onclick="go('settings')"><div class="ic" style="background:var(--t3)">⚙️</div><span>ตั้งค่า</span></button>
+          <button class="qa" onclick="openGoals()"><div class="ic" style="background:var(--t3)">🐷</div><span>เป้าหมาย</span></button>
         </div>
       </div>
       <div class="card" style="padding:14px 16px">
@@ -179,6 +179,16 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     </div>
   </div>
 
+  <!-- GOALS (overlay) -->
+  <div id="s-goals" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeGoals()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">เป้าหมายเก็บเงิน 🐷</div>
+      <button onclick="goalAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่มเป้า</button>
+    </div>
+    <div id="goalsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
   <!-- SPLIT BILL (overlay) -->
   <div id="s-split" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
     <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
@@ -211,8 +221,8 @@ let view = new Date();           // month being viewed
 let draft = "0", kind="out", cat=CATS_OUT[0][0];
 
 function load(){
-  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx) return s;}catch(e){}
-  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[]};
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; return s; } }catch(e){}
+  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[]};
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
 
@@ -440,6 +450,85 @@ function mascotSVG(st){
     ${st===4?'<path d="M92 120 l6 -4 M120 116 l6 4" stroke="#7B8494" stroke-width="2" stroke-linecap="round"/>':''}
   </svg>`;
 }
+
+/* ---------- GOALS (savings) ---------- */
+function piggySVG(p){
+  var st = p>=1?4 : p>=.75?3 : p>=.5?2 : p>=.25?1 : 0;
+  var body=["#F3C6D6","#F1B9CD","#EFA9C1","#F195B4","#F07AA5"][st];
+  var scale=[0.86,0.92,1.0,1.07,1.14][st], coins=[0,1,2,3,4][st];
+  var cheek = st>=3 ? '<circle cx="78" cy="96" r="6" fill="#FF9AA0" opacity=".55"/><circle cx="142" cy="96" r="6" fill="#FF9AA0" opacity=".55"/>' : '';
+  var sparkle = st===4 ? '<path d="M52 40 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2Z" fill="#F5CE6E"/><path d="M168 46 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5Z" fill="#F5CE6E"/>' : '';
+  var drop=""; for(var i=0;i<coins;i++){ drop+='<circle cx="'+(96+i*7-((coins-1)*3.5))+'" cy="'+(34+i*8)+'" r="6" fill="#F2C14E" stroke="#D9A93C" stroke-width="1"/>'; }
+  return '<svg viewBox="0 0 220 170" width="100%" xmlns="http://www.w3.org/2000/svg">'+
+    '<ellipse cx="110" cy="156" rx="52" ry="8" fill="rgba(0,0,0,.12)"/>'+sparkle+drop+
+    '<g transform="translate(110,108) scale('+scale+') translate(-110,-108)">'+
+    '<ellipse cx="110" cy="104" rx="56" ry="44" fill="'+body+'"/>'+
+    '<rect x="74" y="138" width="14" height="16" rx="6" fill="'+body+'"/><rect x="132" y="138" width="14" height="16" rx="6" fill="'+body+'"/>'+
+    '<path d="M150 70 l14 -12 -2 20Z" fill="'+body+'"/>'+
+    '<ellipse cx="150" cy="104" rx="18" ry="15" fill="#E89AB6"/><circle cx="145" cy="104" r="2.6" fill="#B5507A"/><circle cx="155" cy="104" r="2.6" fill="#B5507A"/>'+
+    '<circle cx="128" cy="88" r="3.2" fill="#5A3A48"/>'+cheek+
+    '<rect x="92" y="66" width="30" height="5" rx="2.5" fill="#C97E9C"/>'+
+    '<path d="M56 100 q-12 -4 -8 -14 q6 -6 10 2" stroke="'+body+'" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+    '</g></svg>';
+}
+var goalAddOpen=false;
+function openGoals(){ document.getElementById("s-goals").style.display="flex"; document.getElementById("nav").style.display="none"; goalAddOpen=false; goalsRender(); }
+function closeGoals(){ document.getElementById("s-goals").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function goalAddToggle(){ goalAddOpen=!goalAddOpen; goalsRender(); if(goalAddOpen){ var n=document.getElementById("gName"); n&&n.focus(); } }
+function goalCreate(){
+  var name=(document.getElementById("gName").value||"").trim();
+  var target=parseFloat((document.getElementById("gTarget").value||"").replace(/,/g,""))||0;
+  if(!name){ toast("ใส่ชื่อเป้าก่อนนะ"); return; }
+  if(target<=0){ toast("ใส่จำนวนเป้าหมาย"); return; }
+  state.goals.push({id:Date.now(), name:name, target:target, saved:0});
+  save(); goalAddOpen=false; toast("เพิ่มเป้าแล้ว ✓"); goalsRender();
+}
+function goalDelete(id){ if(confirm("ลบเป้านี้?")){ state.goals=state.goals.filter(g=>g.id!==id); save(); goalsRender(); } }
+function goalTopup(id){
+  var el=document.getElementById("gtop"+id); var amt=parseFloat((el.value||"").replace(/,/g,""))||0;
+  if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
+  var g=state.goals.find(x=>x.id===id); if(!g) return;
+  var was=g.saved>=g.target;
+  g.saved=Math.max(0, g.saved+amt); save();
+  if(!was && g.saved>=g.target) toast("🎉 เก็บครบเป้าแล้ว!"); else toast("เติม "+money(amt)+" ✓");
+  goalsRender();
+}
+function goalsRender(){
+  var box=document.getElementById("goalsBody");
+  var addForm = goalAddOpen ?
+    '<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 15px Anuphan;margin-bottom:10px">เป้าใหม่</div>'+
+      '<input class="f" id="gName" placeholder="ชื่อเป้า เช่น iPhone 16" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="gTarget" inputmode="decimal" placeholder="จำนวนเป้าหมาย (บาท) เช่น 40000" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="goalAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="goalCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึกเป้า</button></div>'+
+    '</div>' : '';
+  var cards="";
+  if(state.goals.length===0 && !goalAddOpen){
+    cards='<div style="text-align:center;padding:50px 20px" class="gray">'+piggySVGmini()+'<div style="font:600 15px Anuphan;margin-top:10px">ยังไม่มีเป้าหมาย</div><div style="font:500 13px Anuphan;margin-top:2px">กดปุ่ม "+ เพิ่มเป้า" มุมบนเพื่อเริ่มเก็บเงิน</div></div>';
+  } else {
+    cards=state.goals.map(function(g){
+      var p=g.target>0? Math.min(1,g.saved/g.target):0, pct=Math.round(p*100), done=g.saved>=g.target;
+      return '<div class="card" style="padding:16px;margin-bottom:14px">'+
+        '<div style="display:flex;gap:14px;align-items:center">'+
+          '<div style="width:88px;flex:none">'+piggySVG(p)+'</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="display:flex;align-items:center"><span style="font:700 16px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(g.name)+'</span>'+(done?'<span style="margin-left:6px;font:700 12px Anuphan;color:var(--accent-ink)">🎉 สำเร็จ</span>':'')+'<button onclick="goalDelete('+g.id+')" style="margin-left:auto;flex:none;width:30px;height:30px;border:none;border-radius:8px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">×</button></div>'+
+            '<div style="font:700 18px Anuphan;margin-top:3px">'+money(g.saved)+' <span class="gray" style="font:500 13px Anuphan">/ '+money(g.target)+'</span></div>'+
+            '<div style="height:9px;border-radius:99px;background:var(--track);overflow:hidden;margin-top:8px"><div style="height:100%;border-radius:99px;background:var(--accent);width:'+pct+'%;transition:width .5s cubic-bezier(.22,1,.36,1)"></div></div>'+
+            '<div class="gray" style="font:600 12px Anuphan;margin-top:4px">'+pct+'%'+(done?'':' · เหลืออีก '+money(g.target-g.saved))+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;margin-top:12px">'+
+          '<input class="f" id="gtop'+g.id+'" inputmode="decimal" placeholder="จำนวนเงินที่เติม" style="flex:1;box-shadow:none;background:var(--surface2);padding:11px 14px">'+
+          '<button onclick="goalTopup('+g.id+')" style="flex:none;padding:0 20px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">เติม</button>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+  }
+  box.innerHTML = addForm + cards;
+}
+function piggySVGmini(){ return '<div style="width:110px;margin:0 auto;opacity:.5">'+piggySVG(0.35)+'</div>'; }
 
 /* ---------- SPLIT BILL ---------- */
 var splitState = {mode:"equal", people:2, vat:7, service:10, items:[{name:"คนที่ 1",amt:""},{name:"คนที่ 2",amt:""}]};
