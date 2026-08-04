@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v27</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v28</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -148,6 +148,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         <button onclick="saveSettings()" style="height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึกการตั้งค่า</button>
       </div>
       <div class="card" style="padding:6px 16px">
+        <div class="row" onclick="openCats()" style="cursor:pointer"><span style="font-size:19px">🏷️</span><span style="flex:1;font:500 15px Anuphan">จัดการหมวด</span><span class="gray">›</span></div>
         <div class="row" style="border:none" onclick="openRecur()" style="cursor:pointer"><span style="font-size:19px">🔁</span><span style="flex:1;font:500 15px Anuphan">รายการประจำ</span><span id="recurCount" class="gray" style="font:500 13px Anuphan"></span><span class="gray" style="margin-left:6px">›</span></div>
       </div>
       <div class="card" style="padding:6px 16px">
@@ -185,6 +186,15 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
       <div class="kb" id="keypad"></div>
     </div>
+  </div>
+
+  <!-- CATEGORIES (overlay) -->
+  <div id="s-cats" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeCats()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">จัดการหมวด 🏷️</div>
+    </div>
+    <div id="catsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
   </div>
 
   <!-- RECURRING (overlay) -->
@@ -231,19 +241,21 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
 
 <script>
 const DB="cwallet.v1";
-const CATS_OUT=[["อาหาร","🍜"],["เดินทาง","🚌"],["ช้อปปิ้ง","🛍️"],["บิล/ค่าบ้าน","🧾"],["บันเทิง","🎬"],["สุขภาพ","💊"],["อื่นๆ","📦"]];
-const CATS_IN=[["เงินเดือน","💰"],["โบนัส","🎁"],["ขายของ","🏷️"],["ดอกเบี้ย","🏦"],["อื่นๆ","📦"]];
+const DEFAULT_CATS={out:[["อาหาร","🍜"],["เดินทาง","🚌"],["ช้อปปิ้ง","🛍️"],["บิล/ค่าบ้าน","🧾"],["บันเทิง","🎬"],["สุขภาพ","💊"],["อื่นๆ","📦"]],in:[["เงินเดือน","💰"],["โบนัส","🎁"],["ขายของ","🏷️"],["ดอกเบี้ย","🏦"],["อื่นๆ","📦"]]};
+let CATS_OUT=DEFAULT_CATS.out.map(a=>a.slice()), CATS_IN=DEFAULT_CATS.in.map(a=>a.slice());
+function syncCats(){ CATS_OUT=state.cats.out; CATS_IN=state.cats.in; }
 const THMONTH=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
 let state = load();
+syncCats();
 let view = new Date();           // month being viewed
 var histFilterCat = "all";
 function histSetCat(c){ histFilterCat = c; render(); }
 let draft = "0", kind="out", cat=CATS_OUT[0][0];
 
 function load(){
-  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; return s; } }catch(e){}
-  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[], recurring:[]};
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return s; } }catch(e){}
+  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[], recurring:[], cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}};
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
 
@@ -482,6 +494,77 @@ function mascotSVG(st){
     ${face}
     ${st===4?'<path d="M92 120 l6 -4 M120 116 l6 4" stroke="#7B8494" stroke-width="2" stroke-linecap="round"/>':''}
   </svg>`;
+}
+
+/* ---------- CATEGORY MANAGER ---------- */
+var catForm = {open:false, kind:"out", editing:null, emoji:"", name:""};
+function openCats(){ document.getElementById("s-cats").style.display="flex"; document.getElementById("nav").style.display="none"; catForm.open=false; catsRender(); }
+function closeCats(){ document.getElementById("s-cats").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function catFormOpen(kind, editName){
+  catForm.open=true; catForm.kind=kind; catForm.editing=editName||null;
+  if(editName){ var arr=state.cats[kind], f=arr.find(x=>x[0]===editName); catForm.name=f?f[0]:""; catForm.emoji=f?f[1]:""; }
+  else { catForm.name=""; catForm.emoji=""; }
+  catsRender();
+  var n=document.getElementById("catName"); n&&n.focus();
+}
+function catFormCancel(){ catForm.open=false; catsRender(); }
+function catFormSave(){
+  var name=(document.getElementById("catName").value||"").trim();
+  var emoji=(document.getElementById("catEmoji").value||"").trim()||"📦";
+  emoji=Array.from(emoji)[0]||"📦";   // first glyph only
+  var kind=catForm.kind, arr=state.cats[kind];
+  if(!name){ toast("ใส่ชื่อหมวดก่อน"); return; }
+  // duplicate check (except the one being edited)
+  if(arr.some(x=>x[0]===name && x[0]!==catForm.editing)){ toast("มีหมวดชื่อนี้แล้ว"); return; }
+  if(catForm.editing){
+    var old=catForm.editing, item=arr.find(x=>x[0]===old);
+    if(item){ item[0]=name; item[1]=emoji; }
+    // propagate rename/emoji to existing tx + recurring
+    if(old!==name || true){
+      state.tx.forEach(t=>{ if(t.cat===old){ t.cat=name; t.emoji=emoji; } });
+      state.recurring.forEach(r=>{ if(r.cat===old){ r.cat=name; r.emoji=emoji; } });
+    }
+    toast("แก้ไขหมวดแล้ว ✓");
+  } else {
+    arr.push([name,emoji]); toast("เพิ่มหมวดแล้ว ✓");
+  }
+  save(); syncCats(); catForm.open=false; catsRender();
+}
+function catDelete(kind, name){
+  if(state.cats[kind].length<=1){ toast("ต้องเหลืออย่างน้อย 1 หมวด"); return; }
+  if(!confirm('ลบหมวด "'+name+'"? รายการเก่าที่ใช้หมวดนี้ยังอยู่ครบ')) return;
+  state.cats[kind]=state.cats[kind].filter(x=>x[0]!==name);
+  save(); syncCats(); catsRender();
+}
+function catsRender(){
+  var box=document.getElementById("catsBody");
+  var form="";
+  if(catForm.open){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 15px Anuphan;margin-bottom:10px">'+(catForm.editing?"แก้ไขหมวด":"หมวดใหม่")+' ('+(catForm.kind==="out"?"รายจ่าย":"รายรับ")+')</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:12px">'+
+        '<input class="f" id="catEmoji" value="'+esc(catForm.emoji)+'" placeholder="🙂" maxlength="4" style="width:64px;text-align:center;font-size:22px;box-shadow:none;background:var(--surface2)">'+
+        '<input class="f" id="catName" value="'+esc(catForm.name)+'" placeholder="ชื่อหมวด เช่น กาแฟ" style="flex:1;box-shadow:none;background:var(--surface2)">'+
+      '</div>'+
+      '<div class="gray" style="font:400 11.5px Anuphan;margin-bottom:12px">* ช่องซ้ายพิมพ์/วางอิโมจิ 1 ตัว · แก้ชื่อแล้วรายการเก่าจะเปลี่ยนตาม</div>'+
+      '<div style="display:flex;gap:8px"><button onclick="catFormCancel()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="catFormSave()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  function section(title,kind){
+    var rows=state.cats[kind].map(function(c){
+      return '<div class="row" style="border-bottom:1px solid var(--line)">'+
+        '<div class="em" style="width:40px;height:40px;border-radius:13px;background:var(--surface2);display:grid;place-items:center;font-size:19px;flex:none">'+c[1]+'</div>'+
+        '<span style="flex:1;font:500 15px Anuphan">'+esc(c[0])+'</span>'+
+        '<button onclick="catFormOpen(\''+kind+'\',\''+c[0].replace(/'/g,"\\'")+'\')" style="width:34px;height:34px;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
+        '<button onclick="catDelete(\''+kind+'\',\''+c[0].replace(/'/g,"\\'")+'\')" style="width:34px;height:34px;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
+      '</div>';
+    }).join("");
+    return '<div style="font:700 14px Anuphan;margin:6px 2px 8px">'+title+'</div>'+
+      '<div class="card" style="padding:2px 14px;margin-bottom:8px">'+rows+'</div>'+
+      '<button onclick="catFormOpen(\''+kind+'\')" style="width:100%;padding:11px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--accent-ink);font:600 13.5px Anuphan;cursor:pointer;margin-bottom:18px">+ เพิ่มหมวด'+(kind==="out"?"รายจ่าย":"รายรับ")+'</button>';
+  }
+  box.innerHTML = form + section("หมวดรายจ่าย","out") + section("หมวดรายรับ","in");
 }
 
 /* ---------- RECURRING ---------- */
@@ -744,6 +827,8 @@ function restoreData(input){
       state = Object.assign({name:"ฉัน",wallet:"กระเป๋าหลัก",budget:0,theme:"light",tx:[],goals:[],recurring:[]}, d);
       if(!Array.isArray(state.goals)) state.goals=[];
       if(!Array.isArray(state.recurring)) state.recurring=[];
+      if(!state.cats||!state.cats.out||!state.cats.in) state.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())};
+      syncCats();
       save();
       document.getElementById("setName").value=state.name;
       document.getElementById("setWallet").value=state.wallet;
