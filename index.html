@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v23</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v24</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -146,6 +146,9 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         <button onclick="saveSettings()" style="height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึกการตั้งค่า</button>
       </div>
       <div class="card" style="padding:6px 16px">
+        <div class="row" style="border:none" onclick="openRecur()" style="cursor:pointer"><span style="font-size:19px">🔁</span><span style="flex:1;font:500 15px Anuphan">รายการประจำ</span><span id="recurCount" class="gray" style="font:500 13px Anuphan"></span><span class="gray" style="margin-left:6px">›</span></div>
+      </div>
+      <div class="card" style="padding:6px 16px">
         <div class="row" style="border:none" onclick="toggleTheme()" style="cursor:pointer"><span style="font-size:19px">🌗</span><span style="flex:1;font:500 15px Anuphan">โหมดมืด / สว่าง</span><span id="themeLbl" class="gray" style="font:500 13px Anuphan"></span></div>
       </div>
       <div class="card" style="padding:6px 16px">
@@ -177,6 +180,17 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
       <div class="kb" id="keypad"></div>
     </div>
+  </div>
+
+  <!-- RECURRING (overlay) -->
+  <div id="s-recur" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeRecur()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">รายการประจำ 🔁</div>
+      <button onclick="recurAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div class="gray" style="padding:6px 20px 0;font:400 11.5px Anuphan">* พอถึงวันที่กำหนดของแต่ละเดือน ระบบจะบันทึกให้อัตโนมัติเมื่อเปิดแอป</div>
+    <div id="recurBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
   </div>
 
   <!-- GOALS (overlay) -->
@@ -221,8 +235,8 @@ let view = new Date();           // month being viewed
 let draft = "0", kind="out", cat=CATS_OUT[0][0];
 
 function load(){
-  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; return s; } }catch(e){}
-  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[]};
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; return s; } }catch(e){}
+  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[], recurring:[]};
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
 
@@ -451,6 +465,76 @@ function mascotSVG(st){
   </svg>`;
 }
 
+/* ---------- RECURRING ---------- */
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function runRecurring(){
+  const now=new Date(), ym=now.getFullYear()+"-"+now.getMonth();
+  let posted=0;
+  (state.recurring||[]).forEach(r=>{
+    if(r.lastPosted===ym) return;
+    if(now.getDate() >= r.day){
+      const dd=Math.min(r.day, daysInMonth(now.getFullYear(), now.getMonth()));
+      const d=new Date(now.getFullYear(), now.getMonth(), dd, 9, 0, 0);
+      state.tx.push({id:Date.now()+posted*13, kind:r.kind, amt:r.amt, cat:r.cat, emoji:r.emoji, note:r.name+" (ประจำ)", date:d.toISOString(), recur:true});
+      r.lastPosted=ym; posted++;
+    }
+  });
+  if(posted){ save(); }
+  return posted;
+}
+var recurAddOpen=false, recurDraft={kind:"out", cat:CATS_OUT[0][0], emoji:CATS_OUT[0][1]};
+function openRecur(){ document.getElementById("s-recur").style.display="flex"; document.getElementById("nav").style.display="none"; recurAddOpen=false; recurRender(); }
+function closeRecur(){ document.getElementById("s-recur").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function recurAddToggle(){ recurAddOpen=!recurAddOpen; recurDraft={kind:"out",cat:CATS_OUT[0][0],emoji:CATS_OUT[0][1]}; recurRender(); }
+function recurPickKind(k){ recurDraft.kind=k; const l=k==="in"?CATS_IN:CATS_OUT; recurDraft.cat=l[0][0]; recurDraft.emoji=l[0][1]; recurRender(); }
+function recurPickCat(c){ const l=recurDraft.kind==="in"?CATS_IN:CATS_OUT; const f=l.find(x=>x[0]===c); recurDraft.cat=c; recurDraft.emoji=f?f[1]:"📦"; recurRender(); }
+function recurCreate(){
+  const amt=parseFloat((document.getElementById("rcAmt").value||"").replace(/,/g,""))||0;
+  const name=(document.getElementById("rcName").value||"").trim()||recurDraft.cat;
+  let day=parseInt(document.getElementById("rcDay").value)||1; day=Math.max(1,Math.min(31,day));
+  if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
+  state.recurring.push({id:Date.now(), kind:recurDraft.kind, amt:amt, cat:recurDraft.cat, emoji:recurDraft.emoji, name:name, day:day, lastPosted:""});
+  save(); recurAddOpen=false;
+  const n=runRecurring();  // post immediately if already due this month
+  toast(n? "เพิ่ม + บันทึกงวดนี้แล้ว ✓" : "เพิ่มรายการประจำแล้ว ✓");
+  recurRender();
+}
+function recurDelete(id){ if(confirm("ลบรายการประจำนี้?")){ state.recurring=state.recurring.filter(r=>r.id!==id); save(); recurRender(); } }
+function recurRender(){
+  const box=document.getElementById("recurBody"), cnt=document.getElementById("recurCount");
+  if(cnt) cnt.textContent = state.recurring.length? state.recurring.length+" รายการ" : "";
+  let addForm="";
+  if(recurAddOpen){
+    const list=recurDraft.kind==="in"?CATS_IN:CATS_OUT;
+    const chips=list.map(([c,e])=>`<button class="chip ${c===recurDraft.cat?'on':''}" onclick="recurPickCat('${c}')"><span class="emo" style="font-size:16px">${e}</span><span>${c}</span></button>`).join("");
+    addForm='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div class="seg" style="margin-bottom:12px"><button class="'+(recurDraft.kind==="out"?"on":"")+'" onclick="recurPickKind(\'out\')">รายจ่าย</button><button class="'+(recurDraft.kind==="in"?"on":"")+'" onclick="recurPickKind(\'in\')">รายรับ</button></div>'+
+      '<input class="f" id="rcAmt" inputmode="decimal" placeholder="จำนวนเงิน (บาท)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="rcName" placeholder="ชื่อ เช่น ค่าเช่าห้อง / Netflix" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">หมวด</div>'+
+      '<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px" class="noscroll">'+chips+'</div>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font:500 13.5px Anuphan">ทุกวันที่</span><input class="f" id="rcDay" inputmode="numeric" value="1" style="width:70px;text-align:center;box-shadow:none;background:var(--surface2);padding:10px"><span class="gray" style="font:500 13px Anuphan">ของเดือน</span></div>'+
+      '<div style="display:flex;gap:8px"><button onclick="recurAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="recurCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  let cards="";
+  if(state.recurring.length===0 && !recurAddOpen){
+    cards='<div style="text-align:center;padding:50px 20px" class="gray"><div style="font-size:42px">🔁</div><div style="font:600 15px Anuphan;margin-top:8px">ยังไม่มีรายการประจำ</div><div style="font:500 13px Anuphan;margin-top:2px">เช่น ค่าเช่า ค่าเน็ต ค่าไฟ<br>กดปุ่ม "+ เพิ่ม" มุมบน</div></div>';
+  } else {
+    cards=state.recurring.slice().sort((a,b)=>a.day-b.day).map(r=>{
+      const col=r.kind==="in"?"var(--accent-ink)":"var(--ink)", sign=r.kind==="in"?"+":"-";
+      return '<div class="card" style="padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">'+
+        '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(r.emoji||"📦")+'</div>'+
+        '<div style="flex:1;min-width:0"><div style="font:600 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div class="gray" style="font:500 12.5px Anuphan;margin-top:1px">'+r.cat+' · ทุกวันที่ '+r.day+'</div></div>'+
+        '<div style="font:700 15px Anuphan;color:'+col+'">'+sign+money(r.amt)+'</div>'+
+        '<button onclick="recurDelete('+r.id+')" style="flex:none;width:30px;height:30px;border:none;border-radius:8px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">×</button>'+
+      '</div>';
+    }).join("");
+  }
+  box.innerHTML=addForm+cards;
+}
+
 /* ---------- GOALS (savings) ---------- */
 function piggySVG(p){
   var st = p>=1?4 : p>=.75?3 : p>=.5?2 : p>=.25?1 : 0;
@@ -531,7 +615,7 @@ function goalsRender(){
 function piggySVGmini(){ return '<div style="width:110px;margin:0 auto;opacity:.5">'+piggySVG(0.35)+'</div>'; }
 
 /* ---------- SPLIT BILL ---------- */
-var splitState = {mode:"equal", people:2, vat:7, service:10, items:[{name:"คนที่ 1",amt:""},{name:"คนที่ 2",amt:""}]};
+var splitState = {mode:"equal", people:2, vat:0, service:0, items:[{name:"คนที่ 1",amt:""},{name:"คนที่ 2",amt:""}]};
 function money(n){ return "฿"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function openSplit(){
   document.getElementById("s-split").style.display="flex";
@@ -560,8 +644,8 @@ function splitForm(){
         '<button onclick="splitPeople(1)" style="width:44px;height:44px;border:none;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font:700 22px Anuphan;color:var(--ink);cursor:pointer">+</button>'+
         '</div></div>'+
       '<div style="display:flex;gap:12px">'+
-        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"7")+'</div>'+
-        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"10")+'</div>'+
+        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"0")+'</div>'+
+        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"0")+'</div>'+
       '</div>'+
       '<div class="gray" style="font:400 11.5px Anuphan">* คิด Service ก่อน แล้ว VAT บนยอดรวม (แบบใบเสร็จร้านไทย) — ไม่คิดช่องไหนใส่ 0</div>';
   } else {
@@ -577,8 +661,8 @@ function splitForm(){
       rows+
       '<button onclick="splitAdd()" style="width:100%;padding:11px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--accent-ink);font:600 13.5px Anuphan;cursor:pointer;margin:4px 0 14px">+ เพิ่มคน</button>'+
       '<div style="display:flex;gap:12px">'+
-        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"7")+'</div>'+
-        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"10")+'</div>'+
+        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"0")+'</div>'+
+        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"0")+'</div>'+
       '</div>'+
       '<div class="gray" style="font:400 11.5px Anuphan">* VAT/Service เฉลี่ยตามสัดส่วนที่แต่ละคนสั่ง</div>';
   }
@@ -654,6 +738,7 @@ function toast(msg){
   document.getElementById("setName").value=state.name;
   document.getElementById("setWallet").value=state.wallet;
   document.getElementById("setBudget").value=state.budget;
+  runRecurring();
   render();
   document.getElementById("s-add").addEventListener("click", function(e){
     var kb=document.getElementById("kbwrap"), amt=document.getElementById("amountTap"), note=document.getElementById("noteInput");
