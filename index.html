@@ -59,7 +59,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v13</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v14</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -197,7 +197,7 @@ function load(){
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
 
-function fmt(n){ return Math.round(n).toLocaleString("en-US"); }
+function fmt(n){ return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function ym(d){ return d.getFullYear()+"-"+d.getMonth(); }
 function inView(t){ const d=new Date(t.date); return d.getFullYear()===view.getFullYear() && d.getMonth()===view.getMonth(); }
 function monthLabel(d){ let by=d.getFullYear()+543; return THMONTH[d.getMonth()]+" "+String(by).slice(2); }
