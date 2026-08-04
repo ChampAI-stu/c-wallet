@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<title>C-Wallet</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0E7A41">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="C-Wallet">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme=light]{--bg:#F2F4F1;--surface:#FFFFFF;--surface2:#F6F8F5;--ink:#0F1512;--muted:#6C7A72;--line:rgba(15,21,18,.09);--accent:#12A150;--accent-ink:#0A6E36;--accent-tint:#E4F5EA;--danger:#E0483D;--danger-tint:#FDECE9;--head:#0E7A41;--head-2:#0B6435;--head-ink:#FFFFFF;--shadow:0 8px 22px rgba(15,45,28,.08);--t1:#E4F5EA;--t2:#FBEEDA;--t3:#E3EDF9;--t4:#EEE7F8;--track:rgba(15,21,18,.07);--kb:#D2D5DB;--key:#FFFFFF;--key-ink:#0F1512}
+[data-theme=dark]{--bg:#0B120E;--surface:#141D17;--surface2:#1A241E;--ink:#E9F2EC;--muted:#8DA096;--line:rgba(233,242,236,.10);--accent:#25C46E;--accent-ink:#84E2AC;--accent-tint:#16301F;--danger:#FF6E5F;--danger-tint:#33191A;--head:#0F3A25;--head-2:#0A2B1C;--head-ink:#EAF7EF;--shadow:0 10px 26px rgba(0,0,0,.5);--t1:#16301F;--t2:#302518;--t3:#17242F;--t4:#231C33;--track:rgba(233,242,236,.10);--kb:#141A16;--key:#39433C;--key-ink:#EDF5F0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);font-family:Anuphan,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button,input{font-family:inherit}
+#app{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.screen{display:none;flex-direction:column;min-height:0}
+.screen.on{display:flex;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+@keyframes kbUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes pop{0%{opacity:0;transform:translateY(10px) scale(.94)}60%{opacity:1;transform:translateY(0) scale(1.02)}100%{opacity:1;transform:translateY(0)}}
+.head{background:var(--head);color:var(--head-ink);padding:max(56px, calc(env(safe-area-inset-top) + 14px)) 20px 26px;border-radius:0 0 26px 26px}
+.card{background:var(--surface);border-radius:22px;box-shadow:var(--shadow)}
+.qa{display:flex;flex-direction:column;align-items:center;gap:7px;border:none;background:none;cursor:pointer;color:var(--ink)}
+.qa .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:22px}
+.qa span{font:500 11.5px Anuphan}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.row .em{width:40px;height:40px;border-radius:13px;background:var(--surface2);display:grid;place-items:center;font-size:19px;flex:none}
+.nav{flex:none;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px 12px;display:flex;align-items:center;justify-content:space-between;z-index:20;box-shadow:0 -2px 12px rgba(0,0,0,.05)}
+.nav button{flex:1;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--muted);font:500 10.5px Anuphan;cursor:pointer}
+.nav button.act{color:var(--accent)}
+.fab{width:50px;height:50px;border-radius:17px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(18,161,80,.35)}
+.kbwrap{margin-top:auto;animation:kbUp .3s cubic-bezier(.22,1,.36,1);z-index:30}
+.kb{background:var(--kb);padding:10px 8px calc(env(safe-area-inset-bottom) + 22px);display:grid;grid-template-columns:repeat(3,1fr);gap:9px 8px}
+.key{height:58px;border:none;border-radius:14px;background:var(--key);color:var(--key-ink);font:600 22px Anuphan;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12)}
+.key.act{background:var(--accent);color:#fff}
+.chip{padding:9px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 13.5px Anuphan;cursor:pointer;white-space:nowrap;flex:none;display:inline-flex;gap:6px;align-items:center}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.seg{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:4px}
+.seg button{flex:1;border:none;border-radius:99px;padding:10px;font:600 14px Anuphan;background:none;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+input.f{width:100%;border:none;outline:none;background:var(--surface);border-radius:14px;padding:14px 16px;font:500 15px Anuphan;color:var(--ink);box-shadow:var(--shadow)}
+.noscroll::-webkit-scrollbar{display:none}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--accent);color:#fff;border-radius:99px;padding:11px 20px;font:600 14px Anuphan;animation:pop .35s ease-out;z-index:50;box-shadow:var(--shadow)}
+.gray{color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HOME -->
+  <div class="screen on" id="s-home">
+    <div class="head">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
+        <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v11</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
+        <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.16);border-radius:99px;padding:3px 4px">
+          <button onclick="shiftMonth(-1)" style="border:none;background:none;color:inherit;font:600 16px Anuphan;padding:2px 9px;cursor:pointer">‹</button>
+          <span id="monthLbl" style="font:600 13px Anuphan;min-width:64px;text-align:center"></span>
+          <button onclick="shiftMonth(1)" style="border:none;background:none;color:inherit;font:600 16px Anuphan;padding:2px 9px;cursor:pointer">›</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:4px;margin-top:2px"><span style="font:600 24px Anuphan">฿</span><span id="balance" style="font:700 42px Anuphan;letter-spacing:-.025em"></span></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <div style="flex:1;background:rgba(255,255,255,.13);border-radius:16px;padding:11px 14px"><div style="font:400 12px Anuphan;opacity:.8">รายรับ</div><div id="incomeTop" style="font:700 17px Anuphan;margin-top:2px"></div></div>
+        <div style="flex:1;background:rgba(255,255,255,.13);border-radius:16px;padding:11px 14px"><div style="font:400 12px Anuphan;opacity:.8">รายจ่าย</div><div id="expenseTop" style="font:700 17px Anuphan;margin-top:2px"></div></div>
+      </div>
+    </div>
+    <div style="padding:14px 16px 8px;display:flex;flex-direction:column;gap:11px">
+      <div class="card" style="padding:14px 12px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+          <button class="qa" onclick="openAdd('out')"><div class="ic" style="background:var(--t1)">➖</div><span>จ่ายเงิน</span></button>
+          <button class="qa" onclick="openAdd('in')"><div class="ic" style="background:var(--t2)">➕</div><span>รับเงิน</span></button>
+          <button class="qa" onclick="go('stats')"><div class="ic" style="background:var(--t4)">📊</div><span>รายงาน</span></button>
+          <button class="qa" onclick="go('settings')"><div class="ic" style="background:var(--t3)">⚙️</div><span>ตั้งค่า</span></button>
+        </div>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">งบเดือนนี้</span><span id="budgetLeft" style="margin-left:auto;font:500 13px Anuphan" class="gray"></span></div>
+        <div style="height:11px;border-radius:99px;background:var(--track);margin-top:12px;overflow:hidden"><div id="budgetFill" style="height:100%;border-radius:99px;background:var(--accent);width:0%;transition:width .3s"></div></div>
+        <div style="display:flex;margin-top:9px;font:500 13px Anuphan"><span class="gray">ใช้ไป <b id="usedLbl" style="color:var(--ink)"></b> จาก <span id="budgetTotalLbl"></span></span><span id="budgetPct" style="margin-left:auto;font-weight:600;color:var(--accent-ink)"></span></div>
+      </div>
+      <div class="card" style="padding:14px 16px 12px">
+        <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">รายการล่าสุด</span><button onclick="go('history')" style="margin-left:auto;border:none;background:none;color:var(--accent-ink);font:600 13px Anuphan;cursor:pointer">ดูทั้งหมด ›</button></div>
+        <div id="recentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="screen" id="s-stats">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 8px"><div style="font:700 24px Anuphan;letter-spacing:-.01em">สถิติ</div><div id="statsMonth" class="gray" style="font:500 14px Anuphan;margin-top:2px"></div></div>
+    <div style="padding:8px 16px;display:flex;flex-direction:column;gap:11px">
+      <div class="card" style="padding:16px">
+        <div style="display:flex;gap:10px">
+          <div style="flex:1"><div class="gray" style="font:500 12.5px Anuphan">รายรับ</div><div id="statIn" style="font:700 20px Anuphan;color:var(--accent-ink);margin-top:2px"></div></div>
+          <div style="flex:1"><div class="gray" style="font:500 12.5px Anuphan">รายจ่าย</div><div id="statOut" style="font:700 20px Anuphan;color:var(--danger);margin-top:2px"></div></div>
+          <div style="flex:1"><div class="gray" style="font:500 12.5px Anuphan">คงเหลือสุทธิ</div><div id="statNet" style="font:700 20px Anuphan;margin-top:2px"></div></div>
+        </div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div style="font:600 15px Anuphan;margin-bottom:6px">รายจ่ายตามหมวด</div>
+        <div id="catBreak"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen" id="s-history">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 8px;display:flex;align-items:center">
+      <div style="font:700 24px Anuphan;letter-spacing:-.01em">ประวัติ</div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:3px 4px">
+        <button onclick="shiftMonth(-1)" style="border:none;background:none;color:var(--ink);font:600 16px Anuphan;padding:2px 9px;cursor:pointer">‹</button>
+        <span id="monthLbl2" style="font:600 13px Anuphan;min-width:64px;text-align:center"></span>
+        <button onclick="shiftMonth(1)" style="border:none;background:none;color:var(--ink);font:600 16px Anuphan;padding:2px 9px;cursor:pointer">›</button>
+      </div>
+    </div>
+    <div id="historyList" style="padding:6px 16px;overflow-y:auto" class="noscroll"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="s-settings">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 8px"><div style="font:700 24px Anuphan;letter-spacing:-.01em">ตั้งค่า</div></div>
+    <div style="padding:8px 16px;display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อคุณ</div><input class="f" id="setName" style="box-shadow:none;background:var(--surface2)"></div>
+        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อกระเป๋า</div><input class="f" id="setWallet" style="box-shadow:none;background:var(--surface2)"></div>
+        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">งบต่อเดือน (฿)</div><input class="f" id="setBudget" inputmode="numeric" style="box-shadow:none;background:var(--surface2)"></div>
+        <button onclick="saveSettings()" style="height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึกการตั้งค่า</button>
+      </div>
+      <div class="card" style="padding:6px 16px">
+        <div class="row" style="border:none" onclick="toggleTheme()" style="cursor:pointer"><span style="font-size:19px">🌗</span><span style="flex:1;font:500 15px Anuphan">โหมดมืด / สว่าง</span><span id="themeLbl" class="gray" style="font:500 13px Anuphan"></span></div>
+      </div>
+      <div class="card" style="padding:6px 16px">
+        <div class="row" onclick="exportCSV()" style="cursor:pointer"><span style="font-size:19px">📤</span><span style="flex:1;font:500 15px Anuphan">ส่งออกข้อมูล CSV</span><span class="gray">›</span></div>
+        <div class="row" style="border:none" onclick="clearAll()" style="cursor:pointer"><span style="font-size:19px">🗑️</span><span style="flex:1;font:500 15px Anuphan;color:var(--danger)">ล้างข้อมูลทั้งหมด</span></div>
+      </div>
+      <div class="gray" style="text-align:center;font:400 12px Anuphan;padding:4px">C-Wallet · ข้อมูลเก็บในเครื่องนี้เท่านั้น</div>
+    </div>
+  </div>
+
+  <!-- ADD (overlay) -->
+  <div class="screen" id="s-add" style="position:fixed;inset:0;background:var(--bg);z-index:40;padding:0">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeAdd()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:600 17px Anuphan">บันทึกรายการ</div>
+      <div id="addDate" class="gray" style="margin-left:auto;font:500 14px Anuphan"></div>
+    </div>
+    <div style="padding:16px 20px 0"><div class="seg"><button id="tabOut" class="on" onclick="setKind('out')">รายจ่าย</button><button id="tabIn" onclick="setKind('in')">รายรับ</button></div></div>
+    <div style="padding:24px 20px 8px;text-align:center">
+      <div class="gray" style="font:500 13px Anuphan">จำนวนเงิน</div>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px"><span id="draftSign" style="font:600 26px Anuphan;color:var(--danger)">-฿</span><span id="draft" style="font:700 46px Anuphan;letter-spacing:-.02em">0</span></div>
+    </div>
+    <div style="padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto" class="noscroll" id="catRow"></div>
+    <div style="padding:14px 20px 0"><input class="f" id="noteInput" placeholder="โน้ต เช่น ข้าวมันไก่หน้าออฟฟิศ"></div>
+    <div class="kbwrap">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--line)">
+        <span class="gray" style="font:500 13px Anuphan">แตะตัวเลขเพื่อคีย์</span>
+        <button onclick="saveTx()" style="margin-left:auto;padding:11px 26px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึก</button>
+      </div>
+      <div class="kb" id="keypad"></div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav" id="nav">
+    <button data-nav="home" class="act" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20a1 1 0 0 1-1 1h-4.5v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg><span>หน้าแรก</span></button>
+    <button data-nav="stats" onclick="go('stats')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 20V11M10 20V5M16 20v-6M21.5 20h-19"/></svg><span>สถิติ</span></button>
+    <button onclick="openAdd('out')" style="flex:0 0 auto"><div class="fab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div></button>
+    <button data-nav="history" onclick="go('history')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>ประวัติ</span></button>
+    <button data-nav="settings" onclick="go('settings')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.2v2M12 18.8v2M4.8 7.6l1.8 1M17.4 15.4l1.8 1M4.8 16.4l1.8-1M17.4 8.6l1.8-1"/></svg><span>ตั้งค่า</span></button>
+  </div>
+</div>
+
+<script>
+const DB="cwallet.v1";
+const CATS_OUT=[["อาหาร","🍜"],["เดินทาง","🚌"],["ช้อปปิ้ง","🛍️"],["บิล/ค่าบ้าน","🧾"],["บันเทิง","🎬"],["สุขภาพ","💊"],["อื่นๆ","📦"]];
+const CATS_IN=[["เงินเดือน","💰"],["โบนัส","🎁"],["ขายของ","🏷️"],["ดอกเบี้ย","🏦"],["อื่นๆ","📦"]];
+const THMONTH=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+
+let state = load();
+let view = new Date();           // month being viewed
+let draft = "0", kind="out", cat=CATS_OUT[0][0];
+
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx) return s;}catch(e){}
+  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[]};
+}
+function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
+
+function fmt(n){ return Math.round(n).toLocaleString("en-US"); }
+function ym(d){ return d.getFullYear()+"-"+d.getMonth(); }
+function inView(t){ const d=new Date(t.date); return d.getFullYear()===view.getFullYear() && d.getMonth()===view.getMonth(); }
+function monthLabel(d){ let by=d.getFullYear()+543; return THMONTH[d.getMonth()]+" "+String(by).slice(2); }
+
+function totals(){
+  let inc=0,exp=0;
+  state.tx.filter(inView).forEach(t=> t.kind==="in"? inc+=t.amt : exp+=t.amt);
+  return {inc,exp};
+}
+
+function go(s){
+  document.querySelectorAll(".screen").forEach(e=>e.classList.remove("on"));
+  document.getElementById("s-"+s).classList.add("on");
+  document.querySelectorAll("#nav [data-nav]").forEach(b=>b.classList.toggle("act", b.dataset.nav===s));
+  document.getElementById("nav").style.display = "flex";
+  window.scrollTo(0,0);
+  render();
+}
+
+/* ---------- ADD ---------- */
+function openAdd(k){
+  draft="0"; kind=k||"out"; cat = (k==="in"?CATS_IN:CATS_OUT)[0][0];
+  document.getElementById("noteInput").value="";
+  document.getElementById("addDate").textContent = new Date().toLocaleDateString("th-TH",{day:"numeric",month:"short"});
+  setKind(kind);
+  document.getElementById("s-add").classList.add("on");
+  document.getElementById("nav").style.display="none";
+}
+function closeAdd(){ document.getElementById("s-add").classList.remove("on"); document.getElementById("nav").style.display="flex"; }
+function setKind(k){
+  kind=k;
+  document.getElementById("tabOut").classList.toggle("on",k==="out");
+  document.getElementById("tabIn").classList.toggle("on",k==="in");
+  document.getElementById("draftSign").textContent = k==="out"?"-฿":"+฿";
+  document.getElementById("draftSign").style.color = k==="out"?"var(--danger)":"var(--accent-ink)";
+  cat = (k==="in"?CATS_IN:CATS_OUT)[0][0];
+  renderCats();
+  updateDraft();
+}
+function renderCats(){
+  const list = kind==="in"?CATS_IN:CATS_OUT;
+  document.getElementById("catRow").innerHTML = list.map(([c,e])=>
+    `<button class="chip ${c===cat?'on':''}" onclick="pickCat('${c}')"><span style="font-size:15px">${e}</span>${c}</button>`).join("");
+}
+function pickCat(c){ cat=c; renderCats(); }
+function keyPress(v){
+  if(v==="del"){ draft = draft.length>1? draft.slice(0,-1) : "0"; }
+  else if(v==="."){ if(!draft.includes(".")) draft+="."; }
+  else { if(draft==="0"&&v!=="."){draft=v;} else if(draft.replace(".","").length<9){ draft+=v; } }
+  updateDraft();
+}
+function updateDraft(){
+  let d=draft;
+  if(!d.includes(".")){ d = Number(d).toLocaleString("en-US"); }
+  else { let [a,b]=draft.split("."); d = Number(a||0).toLocaleString("en-US")+"."+b.slice(0,2); }
+  document.getElementById("draft").textContent = d;
+}
+function saveTx(){
+  const amt = parseFloat(draft)||0;
+  if(amt<=0){ toast("ใส่จำนวนเงินก่อนนะ"); return; }
+  const note = document.getElementById("noteInput").value.trim() || cat;
+  const emoji = ((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["", "📦"])[1];
+  state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:new Date().toISOString()});
+  save();
+  closeAdd();
+  toast(kind==="out"?"บันทึกรายจ่ายแล้ว ✓":"บันทึกรายรับแล้ว ✓");
+  go("home");
+}
+
+function delTx(id){
+  if(!confirm("ลบรายการนี้?")) return;
+  state.tx = state.tx.filter(t=>t.id!==id); save(); render();
+}
+
+function shiftMonth(n){ view.setMonth(view.getMonth()+n); render(); }
+
+/* ---------- RENDER ---------- */
+function render(){
+  document.documentElement.setAttribute("data-theme", state.theme);
+  const {inc,exp}=totals();
+  const remain = state.budget - exp;
+  // home head
+  const h=new Date().getHours();
+  document.getElementById("greet").textContent = h<12?"สวัสดีตอนเช้า":h<17?"สวัสดีตอนบ่าย":"สวัสดีตอนเย็น";
+  document.getElementById("avatar").textContent = (state.name||"C").slice(0,1);
+  document.getElementById("whoWallet").textContent = state.name+" · "+state.wallet;
+  document.getElementById("monthLbl").textContent = monthLabel(view);
+  document.getElementById("monthLbl2").textContent = monthLabel(view);
+  document.getElementById("balance").textContent = fmt(remain);
+  document.getElementById("incomeTop").textContent = "฿"+fmt(inc);
+  document.getElementById("expenseTop").textContent = "฿"+fmt(exp);
+  // budget
+  const pct = state.budget>0? Math.min(100, exp/state.budget*100):0;
+  document.getElementById("budgetFill").style.width = pct+"%";
+  document.getElementById("budgetFill").style.background = pct>=90?"var(--danger)":"var(--accent)";
+  document.getElementById("usedLbl").textContent = "฿"+fmt(exp);
+  document.getElementById("budgetTotalLbl").textContent = "฿"+fmt(state.budget);
+  document.getElementById("budgetPct").textContent = Math.round(pct)+"%";
+  document.getElementById("budgetLeft").textContent = remain>=0? "เหลือ ฿"+fmt(remain) : "เกินงบ ฿"+fmt(-remain);
+  // recent
+  const recent = state.tx.filter(inView).sort((a,b)=>b.id-a.id).slice(0,4);
+  document.getElementById("recentList").innerHTML = recent.length? recent.map(rowHTML).join("")
+    : `<div class="gray" style="text-align:center;padding:22px 0;font:500 14px Anuphan">ยังไม่มีรายการเดือนนี้<br>แตะปุ่ม + เพื่อเริ่มบันทึก</div>`;
+  // history
+  const all = state.tx.filter(inView).sort((a,b)=>b.id-a.id);
+  document.getElementById("historyList").innerHTML = all.length? all.map(t=>rowHTML(t,true)).join("")
+    : `<div class="gray" style="text-align:center;padding:40px 0;font:500 14px Anuphan">ไม่มีรายการในเดือนนี้</div>`;
+  // stats
+  document.getElementById("statsMonth").textContent = monthLabel(view);
+  document.getElementById("statIn").textContent = "฿"+fmt(inc);
+  document.getElementById("statOut").textContent = "฿"+fmt(exp);
+  document.getElementById("statNet").textContent = "฿"+fmt(inc-exp);
+  const byCat={};
+  state.tx.filter(inView).filter(t=>t.kind==="out").forEach(t=> byCat[t.cat]=(byCat[t.cat]||0)+t.amt);
+  const entries=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max=entries.length?entries[0][1]:1;
+  document.getElementById("catBreak").innerHTML = entries.length? entries.map(([c,v])=>{
+    const em=(CATS_OUT.find(x=>x[0]===c)||["","📦"])[1];
+    return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${c}</span><span style="margin-left:auto;font-weight:600">฿${fmt(v)}</span></div>
+    <div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(6,v/max*100)}%;background:var(--accent);border-radius:99px"></div></div></div>`;
+  }).join("") : `<div class="gray" style="padding:16px 0;font:500 13.5px Anuphan">ยังไม่มีรายจ่ายเดือนนี้</div>`;
+  // settings labels
+  document.getElementById("themeLbl").textContent = state.theme==="dark"?"มืด":"สว่าง";
+}
+function rowHTML(t, del){
+  const sign = t.kind==="in"?"+":"-";
+  const col = t.kind==="in"?"var(--accent-ink)":"var(--ink)";
+  const d=new Date(t.date);
+  const meta = t.cat+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+  return `<div class="row" ${del?`onclick="delTx(${t.id})"`:""}>
+    <div class="em">${t.emoji||"📦"}</div>
+    <div style="flex:1;min-width:0"><div style="font:600 14.5px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</div><div class="gray" style="font:400 12.5px Anuphan;margin-top:1px">${meta}</div></div>
+    <div style="font:700 15px Anuphan;color:${col}">${sign}฿${fmt(t.amt)}</div>
+  </div>`;
+}
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+/* ---------- SETTINGS ---------- */
+function saveSettings(){
+  state.name = document.getElementById("setName").value.trim()||"ฉัน";
+  state.wallet = document.getElementById("setWallet").value.trim()||"กระเป๋าหลัก";
+  state.budget = parseFloat(document.getElementById("setBudget").value.replace(/,/g,""))||0;
+  save(); toast("บันทึกแล้ว ✓"); render();
+}
+function toggleTheme(){ state.theme = state.theme==="dark"?"light":"dark"; save(); render(); }
+function exportCSV(){
+  const rows=[["วันที่","ประเภท","หมวด","โน้ต","จำนวนเงิน"]];
+  state.tx.slice().sort((a,b)=>a.id-b.id).forEach(t=> rows.push([new Date(t.date).toLocaleString("th-TH"), t.kind==="in"?"รายรับ":"รายจ่าย", t.cat, t.note, t.amt]));
+  const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="cwallet-"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+}
+function clearAll(){ if(confirm("ล้างรายการทั้งหมด? กู้คืนไม่ได้")){ state.tx=[]; save(); toast("ล้างข้อมูลแล้ว"); render(); } }
+
+/* ---------- toast ---------- */
+let toTimer;
+function toast(msg){
+  clearTimeout(toTimer);
+  let el=document.getElementById("toastEl");
+  if(!el){ el=document.createElement("div"); el.id="toastEl"; el.className="toast"; document.body.appendChild(el); }
+  el.textContent=msg; el.style.display="block";
+  toTimer=setTimeout(()=>el.style.display="none",1600);
+}
+
+/* ---------- init ---------- */
+(function(){
+  // keypad
+  const keys=["1","2","3","4","5","6","7","8","9",".","0","del"];
+  document.getElementById("keypad").innerHTML = keys.map(k=>
+    `<button class="key ${k==='del'?'act':''}" onclick="keyPress('${k}')">${k==='del'?'⌫':k}</button>`).join("");
+  // settings fields
+  document.getElementById("setName").value=state.name;
+  document.getElementById("setWallet").value=state.wallet;
+  document.getElementById("setBudget").value=state.budget;
+  render();
+  if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}); }
+  if(window.caches){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
+})();
+</script>
+</body>
+</html>
