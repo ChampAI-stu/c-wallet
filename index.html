@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v21</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v22</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -83,7 +83,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
           <button class="qa" onclick="openAdd('out')"><div class="ic" style="background:var(--t1)">➖</div><span>จ่ายเงิน</span></button>
           <button class="qa" onclick="openAdd('in')"><div class="ic" style="background:var(--t2)">➕</div><span>รับเงิน</span></button>
-          <button class="qa" onclick="go('stats')"><div class="ic" style="background:var(--t4)">📊</div><span>รายงาน</span></button>
+          <button class="qa" onclick="openSplit()"><div class="ic" style="background:var(--t4)">🧮</div><span>หารบิล</span></button>
           <button class="qa" onclick="go('settings')"><div class="ic" style="background:var(--t3)">⚙️</div><span>ตั้งค่า</span></button>
         </div>
       </div>
@@ -177,6 +177,17 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
       <div class="kb" id="keypad"></div>
     </div>
+  </div>
+
+  <!-- SPLIT BILL (overlay) -->
+  <div id="s-split" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeSplit()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">หารค่าอาหาร</div>
+    </div>
+    <div style="padding:14px 20px 0"><div class="seg"><button id="spTabEq" class="on" onclick="splitMode('equal')">หารเท่ากัน</button><button id="spTabIt" onclick="splitMode('items')">จ่ายตามที่สั่ง</button></div></div>
+    <div id="splitForm" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 20px 12px"></div>
+    <div id="splitResult" style="padding:14px 20px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--line);background:var(--surface)"></div>
   </div>
 
   <!-- NAV -->
@@ -428,6 +439,90 @@ function mascotSVG(st){
     ${face}
     ${st===4?'<path d="M92 120 l6 -4 M120 116 l6 4" stroke="#7B8494" stroke-width="2" stroke-linecap="round"/>':''}
   </svg>`;
+}
+
+/* ---------- SPLIT BILL ---------- */
+var splitState = {mode:"equal", people:2, vat:7, service:10, items:[{name:"คนที่ 1",amt:""},{name:"คนที่ 2",amt:""}]};
+function money(n){ return "฿"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function openSplit(){
+  document.getElementById("s-split").style.display="flex";
+  document.getElementById("nav").style.display="none";
+  splitForm(); splitCalc();
+}
+function closeSplit(){ document.getElementById("s-split").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function splitMode(m){
+  splitState.mode=m;
+  document.getElementById("spTabEq").classList.toggle("on",m==="equal");
+  document.getElementById("spTabIt").classList.toggle("on",m==="items");
+  splitForm(); splitCalc();
+}
+function fld(label,id,val,ph){
+  return '<div style="margin-bottom:12px"><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">'+label+'</div><input class="f" id="'+id+'" inputmode="decimal" value="'+(val==null?"":val)+'" placeholder="'+(ph||"")+'" style="box-shadow:none;background:var(--surface)" oninput="splitCalc()"></div>';
+}
+function splitForm(){
+  var box=document.getElementById("splitForm"), s=splitState;
+  if(s.mode==="equal"){
+    box.innerHTML =
+      fld("ยอดรวมค่าอาหาร (ก่อน VAT)","spSub",s.sub,"เช่น 1200")+
+      '<div style="margin-bottom:12px"><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">จำนวนคน</div>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+        '<button onclick="splitPeople(-1)" style="width:44px;height:44px;border:none;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font:700 22px Anuphan;color:var(--ink);cursor:pointer">−</button>'+
+        '<span id="spPplLbl" style="font:700 20px Anuphan;min-width:40px;text-align:center">'+s.people+'</span>'+
+        '<button onclick="splitPeople(1)" style="width:44px;height:44px;border:none;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font:700 22px Anuphan;color:var(--ink);cursor:pointer">+</button>'+
+        '</div></div>'+
+      '<div style="display:flex;gap:12px">'+
+        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"7")+'</div>'+
+        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"10")+'</div>'+
+      '</div>'+
+      '<div class="gray" style="font:400 11.5px Anuphan">* คิด Service ก่อน แล้ว VAT บนยอดรวม (แบบใบเสร็จร้านไทย) — ไม่คิดช่องไหนใส่ 0</div>';
+  } else {
+    var rows = s.items.map(function(it,i){
+      return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">'+
+        '<input class="f" value="'+esc(it.name)+'" oninput="splitState.items['+i+'].name=this.value" style="flex:1;box-shadow:none;background:var(--surface);padding:11px 12px">'+
+        '<input class="f" inputmode="decimal" value="'+(it.amt||"")+'" placeholder="0" oninput="splitState.items['+i+'].amt=this.value;splitCalc()" style="width:96px;box-shadow:none;background:var(--surface);padding:11px 12px;text-align:right">'+
+        (s.items.length>1?'<button onclick="splitDel('+i+')" style="width:36px;height:36px;flex:none;border:none;border-radius:10px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>':'<span style="width:36px"></span>')+
+      '</div>';
+    }).join("");
+    box.innerHTML =
+      '<div class="gray" style="font:500 12.5px Anuphan;margin-bottom:8px">แต่ละคน + เมนูที่สั่ง (ยอดก่อน VAT)</div>'+
+      rows+
+      '<button onclick="splitAdd()" style="width:100%;padding:11px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--accent-ink);font:600 13.5px Anuphan;cursor:pointer;margin:4px 0 14px">+ เพิ่มคน</button>'+
+      '<div style="display:flex;gap:12px">'+
+        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"7")+'</div>'+
+        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"10")+'</div>'+
+      '</div>'+
+      '<div class="gray" style="font:400 11.5px Anuphan">* VAT/Service เฉลี่ยตามสัดส่วนที่แต่ละคนสั่ง</div>';
+  }
+}
+function splitPeople(d){ splitState.people=Math.max(1,Math.min(50,splitState.people+d)); document.getElementById("spPplLbl").textContent=splitState.people; splitCalc(); }
+function splitAdd(){ splitState.items.push({name:"คนที่ "+(splitState.items.length+1),amt:""}); splitForm(); splitCalc(); }
+function splitDel(i){ splitState.items.splice(i,1); splitForm(); splitCalc(); }
+function factorOf(){
+  var vat=parseFloat((document.getElementById("spVat")||{}).value)||0;
+  var svc=parseFloat((document.getElementById("spSvc")||{}).value)||0;
+  splitState.vat=vat; splitState.service=svc;
+  return {f:(1+svc/100)*(1+vat/100), vat:vat, svc:svc};
+}
+function splitCalc(){
+  var res=document.getElementById("splitResult"), s=splitState, F=factorOf();
+  if(s.mode==="equal"){
+    var sub=parseFloat((document.getElementById("spSub")||{}).value)||0; s.sub=(document.getElementById("spSub")||{}).value;
+    var svcAmt=sub*F.svc/100, vatAmt=(sub+svcAmt)*F.vat/100, grand=sub+svcAmt+vatAmt, per=grand/Math.max(1,s.people);
+    res.innerHTML =
+      '<div style="display:flex;font:500 13px Anuphan;color:var(--muted);margin-bottom:3px"><span>ยอดอาหาร</span><span style="margin-left:auto;color:var(--ink)">'+money(sub)+'</span></div>'+
+      '<div style="display:flex;font:500 13px Anuphan;color:var(--muted);margin-bottom:3px"><span>Service '+F.svc+'%</span><span style="margin-left:auto;color:var(--ink)">'+money(svcAmt)+'</span></div>'+
+      '<div style="display:flex;font:500 13px Anuphan;color:var(--muted);margin-bottom:6px"><span>VAT '+F.vat+'%</span><span style="margin-left:auto;color:var(--ink)">'+money(vatAmt)+'</span></div>'+
+      '<div style="display:flex;font:700 15px Anuphan;padding-top:8px;border-top:1px solid var(--line)"><span>รวมทั้งบิล</span><span style="margin-left:auto">'+money(grand)+'</span></div>'+
+      '<div style="display:flex;align-items:baseline;margin-top:8px"><span style="font:600 14px Anuphan">หาร '+s.people+' คน</span><span style="margin-left:auto;font:700 24px Anuphan;color:var(--accent-ink)">คนละ '+money(per)+'</span></div>';
+  } else {
+    var lines="", grand=0;
+    s.items.forEach(function(it){
+      var a=parseFloat(it.amt)||0, g=a*F.f; grand+=g;
+      lines+='<div style="display:flex;font:600 14px Anuphan;margin-bottom:4px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%">'+esc(it.name||"—")+'</span><span style="margin-left:auto;color:var(--accent-ink)">'+money(g)+'</span></div>';
+    });
+    res.innerHTML = lines +
+      '<div style="display:flex;font:700 15px Anuphan;padding-top:8px;margin-top:4px;border-top:1px solid var(--line)"><span>รวมทั้งบิล (VAT '+F.vat+'% · Service '+F.svc+'%)</span><span style="margin-left:auto">'+money(grand)+'</span></div>';
+  }
 }
 
 /* ---------- SETTINGS ---------- */
