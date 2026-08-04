@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v20</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v21</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -89,8 +89,13 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
       <div class="card" style="padding:14px 16px">
         <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">งบเดือนนี้</span><span id="budgetLeft" style="margin-left:auto;font:500 13px Anuphan" class="gray"></span></div>
-        <div id="wealthBox" style="margin-top:10px;display:flex;flex-direction:column;align-items:center"></div>
-        <div style="display:flex;margin-top:9px;font:500 13px Anuphan"><span class="gray">ใช้ไป <b id="usedLbl" style="color:var(--ink)"></b> จาก <span id="budgetTotalLbl"></span></span><span id="budgetPct" style="margin-left:auto;font-weight:600;color:var(--accent-ink)"></span></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-top:11px">
+          <div id="wealthBadge" style="flex:none;width:42px;height:42px"></div>
+          <div style="flex:1;min-width:0">
+            <div style="height:10px;border-radius:99px;background:var(--track);overflow:hidden"><div id="budgetFill" style="height:100%;border-radius:99px;background:var(--accent);width:0%;transition:width .6s cubic-bezier(.22,1,.36,1)"></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;margin-top:9px;font:500 13px Anuphan"><span class="gray">ใช้ไป <b id="usedLbl" style="color:var(--ink)"></b> จาก <span id="budgetTotalLbl"></span></span><span id="wealthName" style="margin:0 8px;font:600 12.5px Anuphan"></span><span id="budgetPct" style="margin-left:auto;font-weight:600;color:var(--accent-ink)"></span></div>
       </div>
       <div class="card" style="padding:14px 16px 12px">
         <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">รายการล่าสุด</span><button onclick="go('history')" style="margin-left:auto;border:none;background:none;color:var(--accent-ink);font:600 13px Anuphan;cursor:pointer">ดูทั้งหมด ›</button></div>
@@ -348,6 +353,32 @@ function wealthStage(pctSpent){
   if(pctSpent < 85) return {s:3,name:"เริ่มฝืด",sub:"ระวัง ใกล้หมดงบ",col:"#E0883D"};
   return {s:4,name:"ถังแตก!",sub:"รัดเข็มขัดด่วน",col:"#E0483D"};
 }
+function mascotBadge(st){
+  const face=[
+    '<circle cx="26" cy="30" r="1.8" fill="#3A2A18"/><circle cx="38" cy="30" r="1.8" fill="#3A2A18"/><path d="M25 35 Q32 42 39 35" stroke="#3A2A18" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="21" cy="34" r="2.2" fill="#FF9AA0" opacity=".6"/><circle cx="43" cy="34" r="2.2" fill="#FF9AA0" opacity=".6"/>',
+    '<circle cx="26" cy="30" r="1.7" fill="#3A2A18"/><circle cx="38" cy="30" r="1.7" fill="#3A2A18"/><path d="M26 35 Q32 40 38 35" stroke="#3A2A18" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+    '<circle cx="26" cy="31" r="1.7" fill="#3A2A18"/><circle cx="38" cy="31" r="1.7" fill="#3A2A18"/><path d="M27 36 Q32 39 37 36" stroke="#3A2A18" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    '<circle cx="26" cy="31" r="1.7" fill="#3A2A18"/><circle cx="38" cy="31" r="1.7" fill="#3A2A18"/><path d="M27 38 Q32 34 37 38" stroke="#3A2A18" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M45 27 q2 4 0 6 q-2 -2 0 -6" fill="#5CC8F5"/>',
+    '<path d="M23 30 l5 0 M36 30 l5 0" stroke="#3A2A18" stroke-width="1.8" stroke-linecap="round"/><path d="M27 39 Q32 35 37 39" stroke="#3A2A18" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M27 33 q1.8 4 0 6 q-1.8 -2 0 -6" fill="#5CC8F5"/>'
+  ][st];
+  const hat=[
+    '<path d="M18 18 L22 8 L28 15 L32 6 L36 15 L42 8 L46 18 Z" fill="#F2C14E" stroke="#D9A93C" stroke-width="1" stroke-linejoin="round"/><circle cx="32" cy="7" r="1.6" fill="#E0483D"/>',
+    '<rect x="22" y="6" width="20" height="11" rx="2" fill="#22314D"/><rect x="17" y="15" width="30" height="3.5" rx="2" fill="#22314D"/><rect x="22" y="12" width="20" height="2.5" fill="#2563EB"/>',
+    '','',
+    '<path d="M18 17 q14 -10 28 0 Z" fill="#8A94A3"/>'
+  ][st];
+  return `<svg viewBox="0 0 64 60" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="33" r="15" fill="#FFE0C2"/>${hat}${face}</svg>`;
+}
+function renderWealth(pctSpent){
+  const w=wealthStage(pctSpent);
+  const badge=document.getElementById("wealthBadge");
+  badge.innerHTML=mascotBadge(w.s); badge.style.animation="pop .45s ease-out";
+  document.getElementById("wealthName").textContent="· "+w.name;
+  document.getElementById("wealthName").style.color=w.col;
+  const bar=document.getElementById("budgetFill");
+  bar.style.background = pctSpent>=90?"var(--danger)":"var(--accent)";
+  requestAnimationFrame(()=>{ bar.style.width=Math.min(100,pctSpent)+"%"; });
+}
 function mascotSVG(st){
   // shared face center ~ (110,64), head r22
   const face=[
@@ -397,12 +428,6 @@ function mascotSVG(st){
     ${face}
     ${st===4?'<path d="M92 120 l6 -4 M120 116 l6 4" stroke="#7B8494" stroke-width="2" stroke-linecap="round"/>':''}
   </svg>`;
-}
-function renderWealth(pctSpent){
-  const w=wealthStage(pctSpent), box=document.getElementById("wealthBox");
-  box.innerHTML = mascotSVG(w.s) +
-    `<div style="text-align:center;margin-top:2px"><div style="font:700 15px Anuphan;color:${w.col}">${w.name}</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">${w.sub}</div></div>`;
-  box.firstChild && (box.firstChild.style.animation="pop .5s ease-out");
 }
 
 /* ---------- SETTINGS ---------- */
