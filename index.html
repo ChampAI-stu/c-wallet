@@ -373,7 +373,8 @@ function toast(msg){
   document.getElementById("setWallet").value=state.wallet;
   document.getElementById("setBudget").value=state.budget;
   render();
-  if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+  if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())); }
+  if(window.caches){ caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))); }
 })();
 </script>
 </body>
