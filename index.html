@@ -36,7 +36,8 @@ button,input{font-family:inherit}
 .nav button{flex:1;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--muted);font:500 10.5px Anuphan;cursor:pointer}
 .nav button.act{color:var(--accent)}
 .fab{width:50px;height:50px;border-radius:17px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(37,99,235,.35)}
-.kbwrap{margin-top:auto;animation:kbUp .3s cubic-bezier(.22,1,.36,1);z-index:30}
+.kbwrap{margin-top:auto;animation:kbUp .3s cubic-bezier(.22,1,.36,1);z-index:30;transition:transform .28s cubic-bezier(.22,1,.36,1)}
+.kbwrap.down{transform:translateY(115%)}
 .kb{background:var(--kb);padding:10px 8px calc(env(safe-area-inset-bottom) + 22px);display:grid;grid-template-columns:repeat(3,1fr);gap:9px 8px}
 .key{height:58px;border:none;border-radius:14px;background:var(--key);color:var(--key-ink);font:600 22px Anuphan;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12)}
 .key.act{background:var(--accent);color:#fff}
@@ -59,7 +60,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v14</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v15</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -158,11 +159,11 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     <div style="padding:16px 20px 0"><div class="seg"><button id="tabOut" class="on" onclick="setKind('out')">รายจ่าย</button><button id="tabIn" onclick="setKind('in')">รายรับ</button></div></div>
     <div style="padding:24px 20px 8px;text-align:center">
       <div class="gray" style="font:500 13px Anuphan">จำนวนเงิน</div>
-      <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px"><span id="draftSign" style="font:600 26px Anuphan;color:var(--danger)">-฿</span><span id="draft" style="font:700 46px Anuphan;letter-spacing:-.02em">0</span></div>
+      <div id="amountTap" onclick="showKeypad()" style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;cursor:pointer"><span id="draftSign" style="font:600 26px Anuphan;color:var(--danger)">-฿</span><span id="draft" style="font:700 46px Anuphan;letter-spacing:-.02em">0</span></div>
     </div>
     <div style="padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto" class="noscroll" id="catRow"></div>
     <div style="padding:14px 20px 0"><input class="f" id="noteInput" placeholder="โน้ต เช่น ข้าวมันไก่หน้าออฟฟิศ"></div>
-    <div class="kbwrap">
+    <div class="kbwrap" id="kbwrap">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--line)">
         <span class="gray" style="font:500 13px Anuphan">แตะตัวเลขเพื่อคีย์</span>
         <button onclick="saveTx()" style="margin-left:auto;padding:11px 26px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึก</button>
@@ -224,9 +225,12 @@ function openAdd(k){
   document.getElementById("addDate").textContent = new Date().toLocaleDateString("th-TH",{day:"numeric",month:"short"});
   setKind(kind);
   document.getElementById("s-add").classList.add("on");
+  document.getElementById("kbwrap").classList.remove("down");
   document.getElementById("nav").style.display="none";
 }
 function closeAdd(){ document.getElementById("s-add").classList.remove("on"); document.getElementById("nav").style.display="flex"; }
+function showKeypad(){ document.getElementById("noteInput").blur(); document.getElementById("kbwrap").classList.remove("down"); }
+function hideKeypad(){ document.getElementById("kbwrap").classList.add("down"); }
 function setKind(k){
   kind=k;
   document.getElementById("tabOut").classList.toggle("on",k==="out");
@@ -367,13 +371,23 @@ function toast(msg){
 (function(){
   // keypad
   const keys=["1","2","3","4","5","6","7","8","9",".","0","del"];
-  document.getElementById("keypad").innerHTML = keys.map(k=>
-    `<button class="key ${k==='del'?'act':''}" onclick="keyPress('${k}')">${k==='del'?'⌫':k}</button>`).join("");
+  document.getElementById("keypad").innerHTML = keys.map(function(k){
+    var label = k==='del' ? '⌫' : (k==='.' ? "<span style='font-size:42px;line-height:0;position:relative;top:-4px'>.</span>" : k);
+    return "<button class='key "+(k==='del'?'act':'')+"' onclick=\"keyPress('"+k+"')\">"+label+"</button>";
+  }).join("");
   // settings fields
   document.getElementById("setName").value=state.name;
   document.getElementById("setWallet").value=state.wallet;
   document.getElementById("setBudget").value=state.budget;
   render();
+  document.getElementById("s-add").addEventListener("click", function(e){
+    var kb=document.getElementById("kbwrap"), amt=document.getElementById("amountTap"), note=document.getElementById("noteInput");
+    if(kb.contains(e.target)) return;
+    if(amt.contains(e.target)) return;
+    if(note.contains(e.target)){ hideKeypad(); return; }
+    hideKeypad();
+  });
+  document.getElementById("noteInput").addEventListener("focus", hideKeypad);
   if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}); }
   if(window.caches){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
 })();
