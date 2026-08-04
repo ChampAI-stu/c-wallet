@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v24</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v25</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -132,7 +132,9 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         <button onclick="shiftMonth(1)" style="border:none;background:none;color:var(--ink);font:600 16px Anuphan;padding:2px 9px;cursor:pointer">›</button>
       </div>
     </div>
-    <div id="historyList" style="padding:6px 16px;overflow-y:auto" class="noscroll"></div>
+    <div style="padding:4px 16px 0"><input class="f" id="histSearch" placeholder="🔎 ค้นหาจากคำ/โน้ต" oninput="render()" style="box-shadow:none;background:var(--surface2);padding:11px 14px"></div>
+    <div id="histFilters" style="display:flex;gap:8px;overflow-x:auto;padding:10px 16px 4px" class="noscroll"></div>
+    <div id="historyList" style="padding:2px 16px;overflow-y:auto" class="noscroll"></div>
   </div>
 
   <!-- SETTINGS -->
@@ -232,6 +234,8 @@ const THMONTH=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","ม
 
 let state = load();
 let view = new Date();           // month being viewed
+var histFilterCat = "all";
+function histSetCat(c){ histFilterCat = c; render(); }
 let draft = "0", kind="out", cat=CATS_OUT[0][0];
 
 function load(){
@@ -346,10 +350,22 @@ function render(){
   const recent = state.tx.filter(inView).sort((a,b)=>b.id-a.id).slice(0,4);
   document.getElementById("recentList").innerHTML = recent.length? recent.map(rowHTML).join("")
     : `<div class="gray" style="text-align:center;padding:22px 0;font:500 14px Anuphan">ยังไม่มีรายการเดือนนี้<br>แตะปุ่ม + เพื่อเริ่มบันทึก</div>`;
-  // history
-  const all = state.tx.filter(inView).sort((a,b)=>b.id-a.id);
+  // history + search/filter
+  const monthTx = state.tx.filter(inView).sort((a,b)=>b.id-a.id);
+  const q = (document.getElementById("histSearch")?.value||"").trim().toLowerCase();
+  // category filter chips (categories present this month)
+  const catsPresent = [...new Set(monthTx.map(t=>t.cat))];
+  if(!catsPresent.includes(histFilterCat) && histFilterCat!=="all") histFilterCat="all";
+  const chips = ['<button class="chip '+(histFilterCat==="all"?"on":"")+'" onclick="histSetCat(\'all\')">ทั้งหมด</button>']
+    .concat(catsPresent.map(c=>{
+      const em=(CATS_OUT.concat(CATS_IN).find(x=>x[0]===c)||["","📦"])[1];
+      return '<button class="chip '+(histFilterCat===c?"on":"")+'" onclick="histSetCat(\''+c+'\')"><span class="emo" style="font-size:15px">'+em+'</span><span>'+c+'</span></button>';
+    })).join("");
+  document.getElementById("histFilters").innerHTML = chips;
+  let all = monthTx.filter(t=> histFilterCat==="all" || t.cat===histFilterCat);
+  if(q) all = all.filter(t=> (t.note||"").toLowerCase().includes(q) || (t.cat||"").toLowerCase().includes(q));
   document.getElementById("historyList").innerHTML = all.length? all.map(t=>rowHTML(t,true)).join("")
-    : `<div class="gray" style="text-align:center;padding:40px 0;font:500 14px Anuphan">ไม่มีรายการในเดือนนี้</div>`;
+    : `<div class="gray" style="text-align:center;padding:40px 0;font:500 14px Anuphan">${monthTx.length? "ไม่พบรายการที่ตรงกับที่ค้นหา" : "ไม่มีรายการในเดือนนี้"}</div>`;
   // stats
   document.getElementById("statsMonth").textContent = monthLabel(view);
   document.getElementById("statIn").textContent = "฿"+fmt(inc);
