@@ -51,9 +51,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--accent);color:#fff;border-radius:99px;padding:11px 20px;font:600 14px Anuphan;animation:pop .35s ease-out;z-index:50;box-shadow:var(--shadow)}
 .gray{color:var(--muted)}
 .emo{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif}
-.bfill{height:100%;border-radius:99px;background:var(--accent);width:0%;position:relative;overflow:hidden;transition:width .9s cubic-bezier(.22,1,.36,1)}
-.bfill::after{content:"";position:absolute;top:0;left:0;height:100%;width:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.5) 50%,transparent 100%);transform:translateX(-120%);animation:shimmer 2.4s ease-in-out infinite}
-@keyframes shimmer{0%{transform:translateX(-120%)}55%,100%{transform:translateX(260%)}}
+
 </style>
 </head>
 <body>
@@ -64,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v19</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v20</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -91,7 +89,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
       <div class="card" style="padding:14px 16px">
         <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">งบเดือนนี้</span><span id="budgetLeft" style="margin-left:auto;font:500 13px Anuphan" class="gray"></span></div>
-        <div style="height:11px;border-radius:99px;background:var(--track);margin-top:12px;overflow:hidden"><div id="budgetFill" class="bfill" style="width:0%"></div></div>
+        <div id="wealthBox" style="margin-top:10px;display:flex;flex-direction:column;align-items:center"></div>
         <div style="display:flex;margin-top:9px;font:500 13px Anuphan"><span class="gray">ใช้ไป <b id="usedLbl" style="color:var(--ink)"></b> จาก <span id="budgetTotalLbl"></span></span><span id="budgetPct" style="margin-left:auto;font-weight:600;color:var(--accent-ink)"></span></div>
       </div>
       <div class="card" style="padding:14px 16px 12px">
@@ -299,21 +297,10 @@ function render(){
   document.getElementById("expenseTop").textContent = "฿"+fmt(exp);
   // budget
   const pct = state.budget>0? Math.min(100, exp/state.budget*100):0;
-  document.getElementById("budgetFill").style.background = pct>=90?"var(--danger)":"var(--accent)";
-  (function(){
-    const bar=document.getElementById("budgetFill"), lbl=document.getElementById("budgetPct");
-    bar.style.width="0%";                 // reset then grow (CSS transition animates it)
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{ bar.style.width=pct+"%"; }));
-    const target=Math.round(pct), t0=performance.now(), dur=900;
-    function tick(now){
-      const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);   // easeOutCubic
-      lbl.textContent=Math.round(target*e)+"%";
-      if(p<1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  })();
+  renderWealth(pct);
   document.getElementById("usedLbl").textContent = "฿"+fmt(exp);
   document.getElementById("budgetTotalLbl").textContent = "฿"+fmt(state.budget);
+  document.getElementById("budgetPct").textContent = Math.round(pct)+"%";
   document.getElementById("budgetLeft").textContent = remain>=0? "เหลือ ฿"+fmt(remain) : "เกินงบ ฿"+fmt(-remain);
   // recent
   const recent = state.tx.filter(inView).sort((a,b)=>b.id-a.id).slice(0,4);
@@ -352,6 +339,71 @@ function rowHTML(t, del){
   </div>`;
 }
 function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+/* ---------- WEALTH MASCOT (custom SVG graphic set) ---------- */
+function wealthStage(pctSpent){
+  if(pctSpent < 20) return {s:0,name:"เศรษฐีเต็มขั้น",sub:"งบยังแน่นกระเป๋า",col:"#E1A83B"};
+  if(pctSpent < 40) return {s:1,name:"กระเป๋าหนัก",sub:"สบายๆ เหลือเยอะ",col:"#2563EB"};
+  if(pctSpent < 60) return {s:2,name:"พอมีพอใช้",sub:"กำลังดี มีสติ",col:"#4D8BF5"};
+  if(pctSpent < 85) return {s:3,name:"เริ่มฝืด",sub:"ระวัง ใกล้หมดงบ",col:"#E0883D"};
+  return {s:4,name:"ถังแตก!",sub:"รัดเข็มขัดด่วน",col:"#E0483D"};
+}
+function mascotSVG(st){
+  // shared face center ~ (110,64), head r22
+  const face=[
+    // 0 huge grin + rosy
+    '<circle cx="102" cy="60" r="2.6" fill="#3A2A18"/><circle cx="118" cy="60" r="2.6" fill="#3A2A18"/><path d="M100 68 Q110 80 120 68" stroke="#3A2A18" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="95" cy="66" r="3" fill="#FF9AA0" opacity=".6"/><circle cx="125" cy="66" r="3" fill="#FF9AA0" opacity=".6"/>',
+    // 1 happy
+    '<circle cx="102" cy="60" r="2.5" fill="#3A2A18"/><circle cx="118" cy="60" r="2.5" fill="#3A2A18"/><path d="M101 68 Q110 76 119 68" stroke="#3A2A18" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+    // 2 content
+    '<circle cx="102" cy="61" r="2.4" fill="#3A2A18"/><circle cx="118" cy="61" r="2.4" fill="#3A2A18"/><path d="M102 69 Q110 73 118 69" stroke="#3A2A18" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+    // 3 worried + sweat
+    '<circle cx="102" cy="61" r="2.4" fill="#3A2A18"/><circle cx="118" cy="61" r="2.4" fill="#3A2A18"/><path d="M103 72 Q110 67 117 72" stroke="#3A2A18" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M128 54 q3 6 0 9 q-3 -3 0 -9" fill="#5CC8F5"/>',
+    // 4 sad + tear
+    '<path d="M99 60 l6 0 M115 60 l6 0" stroke="#3A2A18" stroke-width="2.4" stroke-linecap="round"/><path d="M103 73 Q110 68 117 73" stroke="#3A2A18" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M104 64 q2.4 5 0 8 q-2.4 -3 0 -8" fill="#5CC8F5"/>'
+  ][st];
+  const hat=[
+    // crown gold
+    '<path d="M86 42 L92 26 L102 38 L110 22 L118 38 L128 26 L134 42 Z" fill="#F2C14E" stroke="#D9A93C" stroke-width="1.5" stroke-linejoin="round"/><circle cx="110" cy="24" r="2.6" fill="#E0483D"/><circle cx="92" cy="27" r="2" fill="#2563EB"/><circle cx="128" cy="27" r="2" fill="#2563EB"/>',
+    // top hat
+    '<rect x="90" y="20" width="40" height="20" rx="3" fill="#22314D"/><rect x="82" y="38" width="56" height="6" rx="3" fill="#22314D"/><rect x="90" y="33" width="40" height="4" fill="#2563EB"/>',
+    '', 
+    '',
+    // poor flat cap
+    '<path d="M86 40 q24 -16 48 0 Z" fill="#8A94A3"/><path d="M84 40 q6 4 14 3 l-12 0 Z" fill="#6E7887"/>'
+  ][st];
+  const shirt=["#E1A83B","#2563EB","#4D8BF5","#7C8AA3","#9AA3AD"][st];
+  // side props
+  const props=[
+    // 0 coin stacks + sparkles + floating $
+    '<g><rect x="18" y="96" width="26" height="7" rx="3.5" fill="#F2C14E"/><rect x="18" y="88" width="26" height="7" rx="3.5" fill="#F5CE6E"/><rect x="18" y="80" width="26" height="7" rx="3.5" fill="#F2C14E"/><rect x="176" y="92" width="26" height="7" rx="3.5" fill="#F5CE6E"/><rect x="176" y="84" width="26" height="7" rx="3.5" fill="#F2C14E"/><text x="31" y="72" font-size="12" fill="#E1A83B" text-anchor="middle">฿</text><text x="189" y="74" font-size="12" fill="#E1A83B" text-anchor="middle">฿</text><path d="M60 30 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z" fill="#F5CE6E"/><path d="M158 34 l1.5 4 l4 1.5 l-4 1.5 l-1.5 4 l-1.5 -4 l-4 -1.5 l4 -1.5 Z" fill="#F5CE6E"/></g>',
+    // 1 money bag
+    '<g transform="translate(170,78)"><path d="M6 8 q10 -8 20 0 q10 10 6 24 q-2 8 -16 8 q-14 0 -16 -8 q-4 -14 6 -24Z" fill="#2E7D46"/><rect x="8" y="2" width="16" height="6" rx="2" fill="#215C33"/><text x="16" y="30" font-size="13" fill="#CFEBD8" text-anchor="middle">฿</text></g>',
+    // 2 single coin
+    '<g transform="translate(178,86)"><circle cx="12" cy="12" r="12" fill="#F2C14E"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="#D9A93C" stroke-width="1.5"/><text x="12" y="16" font-size="11" fill="#B8862B" text-anchor="middle">฿</text></g>',
+    // 3 near-empty wallet
+    '<g transform="translate(172,86)"><rect x="0" y="4" width="30" height="20" rx="4" fill="#7C5A3A"/><rect x="0" y="4" width="30" height="7" rx="4" fill="#8E6A46"/><circle cx="23" cy="15" r="2.5" fill="#F2C14E"/></g>',
+    // 4 empty pocket turned out + moth
+    '<g transform="translate(172,88)"><path d="M4 2 q11 -3 22 0 l-3 14 q-8 4 -16 0 Z" fill="#C9CED6"/><path d="M9 16 q4 6 8 0" fill="#B4BAC4"/></g><g transform="translate(150,40)"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#B0A98F" opacity=".9"/><ellipse cx="8" cy="0" rx="6" ry="4" fill="#B0A98F" opacity=".9"/><rect x="3" y="-1.5" width="2" height="8" rx="1" fill="#6E6A57"/></g>'
+  ][st];
+  return `<svg viewBox="0 0 220 150" width="100%" style="max-width:300px" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="110" cy="138" rx="46" ry="7" fill="rgba(0,0,0,.12)"/>
+    ${props}
+    <path d="M84 132 q-6 -34 26 -34 q32 0 26 34 Z" fill="${shirt}"/>
+    <rect x="96" y="126" width="28" height="10" rx="4" fill="${shirt}"/>
+    <circle cx="110" cy="64" r="24" fill="#FFE0C2"/>
+    <path d="M88 60 q22 -12 44 0" stroke="#EBC6A0" stroke-width="1" fill="none" opacity=".6"/>
+    ${hat}
+    ${face}
+    ${st===4?'<path d="M92 120 l6 -4 M120 116 l6 4" stroke="#7B8494" stroke-width="2" stroke-linecap="round"/>':''}
+  </svg>`;
+}
+function renderWealth(pctSpent){
+  const w=wealthStage(pctSpent), box=document.getElementById("wealthBox");
+  box.innerHTML = mascotSVG(w.s) +
+    `<div style="text-align:center;margin-top:2px"><div style="font:700 15px Anuphan;color:${w.col}">${w.name}</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">${w.sub}</div></div>`;
+  box.firstChild && (box.firstChild.style.animation="pop .5s ease-out");
+}
 
 /* ---------- SETTINGS ---------- */
 function saveSettings(){
