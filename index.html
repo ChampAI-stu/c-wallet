@@ -51,6 +51,9 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--accent);color:#fff;border-radius:99px;padding:11px 20px;font:600 14px Anuphan;animation:pop .35s ease-out;z-index:50;box-shadow:var(--shadow)}
 .gray{color:var(--muted)}
 .emo{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif}
+.bfill{height:100%;border-radius:99px;background:var(--accent);width:0%;position:relative;overflow:hidden;transition:width .9s cubic-bezier(.22,1,.36,1)}
+.bfill::after{content:"";position:absolute;top:0;left:0;height:100%;width:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.5) 50%,transparent 100%);transform:translateX(-120%);animation:shimmer 2.4s ease-in-out infinite}
+@keyframes shimmer{0%{transform:translateX(-120%)}55%,100%{transform:translateX(260%)}}
 </style>
 </head>
 <body>
@@ -61,7 +64,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v18</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v19</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -88,7 +91,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
       <div class="card" style="padding:14px 16px">
         <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">งบเดือนนี้</span><span id="budgetLeft" style="margin-left:auto;font:500 13px Anuphan" class="gray"></span></div>
-        <div style="height:11px;border-radius:99px;background:var(--track);margin-top:12px;overflow:hidden"><div id="budgetFill" style="height:100%;border-radius:99px;background:var(--accent);width:0%;transition:width .3s"></div></div>
+        <div style="height:11px;border-radius:99px;background:var(--track);margin-top:12px;overflow:hidden"><div id="budgetFill" class="bfill" style="width:0%"></div></div>
         <div style="display:flex;margin-top:9px;font:500 13px Anuphan"><span class="gray">ใช้ไป <b id="usedLbl" style="color:var(--ink)"></b> จาก <span id="budgetTotalLbl"></span></span><span id="budgetPct" style="margin-left:auto;font-weight:600;color:var(--accent-ink)"></span></div>
       </div>
       <div class="card" style="padding:14px 16px 12px">
@@ -296,11 +299,21 @@ function render(){
   document.getElementById("expenseTop").textContent = "฿"+fmt(exp);
   // budget
   const pct = state.budget>0? Math.min(100, exp/state.budget*100):0;
-  document.getElementById("budgetFill").style.width = pct+"%";
   document.getElementById("budgetFill").style.background = pct>=90?"var(--danger)":"var(--accent)";
+  (function(){
+    const bar=document.getElementById("budgetFill"), lbl=document.getElementById("budgetPct");
+    bar.style.width="0%";                 // reset then grow (CSS transition animates it)
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ bar.style.width=pct+"%"; }));
+    const target=Math.round(pct), t0=performance.now(), dur=900;
+    function tick(now){
+      const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);   // easeOutCubic
+      lbl.textContent=Math.round(target*e)+"%";
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
   document.getElementById("usedLbl").textContent = "฿"+fmt(exp);
   document.getElementById("budgetTotalLbl").textContent = "฿"+fmt(state.budget);
-  document.getElementById("budgetPct").textContent = Math.round(pct)+"%";
   document.getElementById("budgetLeft").textContent = remain>=0? "เหลือ ฿"+fmt(remain) : "เกินงบ ฿"+fmt(-remain);
   // recent
   const recent = state.tx.filter(inView).sort((a,b)=>b.id-a.id).slice(0,4);
