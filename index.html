@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v30</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v31</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -133,6 +133,10 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       </div>
     </div>
     <div style="padding:4px 16px 0"><input class="f" id="histSearch" placeholder="🔎 ค้นหาจากคำ/โน้ต" oninput="render()" style="box-shadow:none;background:var(--surface2);padding:11px 14px"></div>
+    <div style="padding:10px 16px 0;display:flex;gap:8px">
+      <div class="seg" style="flex:1"><button id="hsMonth" class="on" onclick="histSetScope(false)">เดือนนี้</button><button id="hsAll" onclick="histSetScope(true)">ทุกเดือน</button></div>
+      <div class="seg" style="flex:1.35"><button id="hkAll" class="on" onclick="histSetKind('all')">ทั้งหมด</button><button id="hkIn" onclick="histSetKind('in')">รับ</button><button id="hkOut" onclick="histSetKind('out')">จ่าย</button></div>
+    </div>
     <div id="histFilters" style="display:flex;gap:8px;overflow-x:auto;padding:10px 16px 4px" class="noscroll"></div>
     <div id="historyList" style="padding:2px 16px;overflow-y:auto" class="noscroll"></div>
   </div>
@@ -167,7 +171,8 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         <div class="row" onclick="backupData()" style="cursor:pointer"><span style="font-size:19px">💾</span><span style="flex:1;font:500 15px Anuphan">สำรองข้อมูล (ไฟล์ backup)</span><span class="gray">›</span></div>
         <div class="row" onclick="document.getElementById('restoreFile').click()" style="cursor:pointer"><span style="font-size:19px">📥</span><span style="flex:1;font:500 15px Anuphan">กู้คืนข้อมูลจากไฟล์</span><span class="gray">›</span></div>
         <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreData(this)">
-        <div class="row" onclick="exportCSV()" style="cursor:pointer"><span style="font-size:19px">📤</span><span style="flex:1;font:500 15px Anuphan">ส่งออก CSV (เปิดใน Excel)</span><span class="gray">›</span></div>
+        <div class="row" onclick="exportXLS()" style="cursor:pointer"><span style="font-size:19px">📊</span><span style="flex:1;font:500 15px Anuphan">ส่งออก Excel (.xls)</span><span class="gray">›</span></div>
+        <div class="row" onclick="exportCSV()" style="cursor:pointer"><span style="font-size:19px">📤</span><span style="flex:1;font:500 15px Anuphan">ส่งออก CSV</span><span class="gray">›</span></div>
         <div class="row" style="border:none" onclick="clearAll()" style="cursor:pointer"><span style="font-size:19px">🗑️</span><span style="flex:1;font:500 15px Anuphan;color:var(--danger)">ล้างข้อมูลทั้งหมด</span></div>
       </div>
       <div class="gray" style="text-align:center;font:400 12px Anuphan;padding:4px">C-Wallet · ข้อมูลเก็บในเครื่องนี้เท่านั้น</div>
@@ -178,8 +183,9 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
   <div class="screen" id="s-add" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:40;padding:0;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
     <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
       <button onclick="closeAdd()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
-      <div style="font:600 17px Anuphan">บันทึกรายการ</div>
-      <div id="addDate" class="gray" style="margin-left:auto;font:500 14px Anuphan"></div>
+      <div id="addTitle" style="font:600 17px Anuphan">บันทึกรายการ</div>
+      <button id="addDate" onclick="pickAddDate()" style="margin-left:auto;font:600 13.5px Anuphan;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 14px;cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:6px">📅 <span id="addDateLbl"></span></button>
+      <input type="date" id="addDateInput" onchange="onAddDate(this.value)" style="position:absolute;top:0;right:0;width:1px;height:1px;opacity:0;pointer-events:none">
     </div>
     <div style="padding:16px 20px 0"><div class="seg"><button id="tabOut" class="on" onclick="setKind('out')">รายจ่าย</button><button id="tabIn" onclick="setKind('in')">รายรับ</button></div></div>
     <div style="padding:24px 20px 8px;text-align:center">
@@ -188,6 +194,10 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     </div>
     <div style="padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto" class="noscroll" id="catRow"></div>
     <div style="padding:14px 20px 0"><input class="f" id="noteInput" placeholder="โน้ต เช่น ข้าวมันไก่หน้าออฟฟิศ"></div>
+    <div id="editActions" style="display:none;padding:12px 20px 0;gap:8px">
+      <button onclick="duplicateTx()" style="flex:1;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:600 13.5px Anuphan;cursor:pointer">🔁 ทำซ้ำเป็นวันนี้</button>
+      <button onclick="deleteEditingTx()" style="flex:1;height:44px;border:none;border-radius:12px;background:var(--danger-tint);color:var(--danger);font:700 13.5px Anuphan;cursor:pointer">🗑️ ลบรายการนี้</button>
+    </div>
     <div class="kbwrap" id="kbwrap">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--line)">
         <span class="gray" style="font:500 13px Anuphan">แตะตัวเลขเพื่อคีย์</span>
@@ -222,7 +232,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="font:700 18px Anuphan">รายการประจำ 🔁</div>
       <button onclick="recurAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
     </div>
-    <div class="gray" style="padding:6px 20px 0;font:400 11.5px Anuphan">* พอถึงวันที่กำหนดของแต่ละเดือน ระบบจะบันทึกให้อัตโนมัติเมื่อเปิดแอป</div>
+    <div class="gray" style="padding:6px 20px 0;font:400 11.5px Anuphan">* พอถึงวันที่กำหนดของแต่ละเดือน ระบบจะบันทึกให้อัตโนมัติเมื่อเปิดแอป (ถ้าไม่ได้เปิดข้ามเดือน จะเก็บงวดที่ตกหล่นให้ครบ)</div>
     <div id="recurBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
   </div>
 
@@ -268,12 +278,18 @@ let state = load();
 syncCats();
 let view = new Date();           // month being viewed
 var histFilterCat = "all";
+var histScopeAll = false;        // false = this month, true = all months
+var histKind = "all";            // all | in | out
 function histSetCat(c){ histFilterCat = c; render(); }
+function histSetScope(all){ histScopeAll = !!all; render(); }
+function histSetKind(k){ histKind = k; render(); }
 let draft = "0", kind="out", cat=CATS_OUT[0][0];
+let editingTxId = null;          // null = adding new; otherwise editing this tx id
+let addDateVal = new Date();     // date chosen for the current add/edit
 
 function load(){
-  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return s; } }catch(e){}
-  return {name:"อาริน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[], recurring:[], cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}};
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.catBudgets) s.catBudgets={}; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return s; } }catch(e){}
+  return {name:"ฉัน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[], recurring:[], catBudgets:{}, cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}};
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
 
@@ -298,11 +314,38 @@ function go(s){
 }
 
 /* ---------- ADD ---------- */
+function pad2(n){ return (n<10?"0":"")+n; }
+function toDateInput(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function renderAddDate(){
+  const today=new Date(); const same = addDateVal.toDateString()===today.toDateString();
+  document.getElementById("addDateLbl").textContent = same? "วันนี้" : addDateVal.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});
+  document.getElementById("addDateInput").value = toDateInput(addDateVal);
+}
+function pickAddDate(){ const el=document.getElementById("addDateInput"); if(el.showPicker){ try{el.showPicker();return;}catch(e){} } el.click(); }
+function onAddDate(v){ if(!v) return; const p=v.split("-"); addDateVal=new Date(+p[0], +p[1]-1, +p[2], 12,0,0); renderAddDate(); }
 function openAdd(k){
+  editingTxId=null; addDateVal=new Date();
   draft="0"; kind=k||"out"; cat = (k==="in"?CATS_IN:CATS_OUT)[0][0];
   document.getElementById("noteInput").value="";
-  document.getElementById("addDate").textContent = new Date().toLocaleDateString("th-TH",{day:"numeric",month:"short"});
+  document.getElementById("addTitle").textContent="บันทึกรายการ";
+  document.getElementById("editActions").style.display="none";
+  renderAddDate();
   setKind(kind);
+  document.getElementById("s-add").classList.add("on");
+  document.getElementById("kbwrap").classList.remove("down");
+  document.getElementById("nav").style.display="none";
+}
+function openEdit(id){
+  const t=state.tx.find(x=>x.id===id); if(!t) return;
+  editingTxId=id; addDateVal=new Date(t.date);
+  kind=t.kind; cat=t.cat; draft=String(t.amt);
+  document.getElementById("noteInput").value = (t.note && t.note!==t.cat)? t.note : "";
+  document.getElementById("addTitle").textContent="แก้ไขรายการ";
+  document.getElementById("editActions").style.display="flex";
+  renderAddDate();
+  setKind(kind);
+  // keep chosen category after setKind reset it to first
+  cat=t.cat; renderCats(); updateDraft();
   document.getElementById("s-add").classList.add("on");
   document.getElementById("kbwrap").classList.remove("down");
   document.getElementById("nav").style.display="none";
@@ -343,11 +386,29 @@ function saveTx(){
   if(amt<=0){ toast("ใส่จำนวนเงินก่อนนะ"); return; }
   const note = document.getElementById("noteInput").value.trim() || cat;
   const emoji = ((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["", "📦"])[1];
-  state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:new Date().toISOString()});
-  save();
-  closeAdd();
-  toast(kind==="out"?"บันทึกรายจ่ายแล้ว ✓":"บันทึกรายรับแล้ว ✓");
+  const iso = addDateVal.toISOString();
+  if(editingTxId!=null){
+    const t=state.tx.find(x=>x.id===editingTxId);
+    if(t){ t.kind=kind; t.amt=amt; t.cat=cat; t.emoji=emoji; t.note=note; t.date=iso; }
+    save(); closeAdd(); toast("แก้ไขรายการแล้ว ✓");
+  } else {
+    state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:iso});
+    save(); closeAdd(); toast(kind==="out"?"บันทึกรายจ่ายแล้ว ✓":"บันทึกรายรับแล้ว ✓");
+  }
+  view=new Date(addDateVal.getFullYear(), addDateVal.getMonth(), 1); // jump to that month
   go("home");
+}
+function duplicateTx(){
+  const amt=parseFloat(draft)||0; if(amt<=0){ toast("ใส่จำนวนเงินก่อนนะ"); return; }
+  const note=document.getElementById("noteInput").value.trim()||cat;
+  const emoji=((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["","📦"])[1];
+  state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:new Date().toISOString()});
+  save(); closeAdd(); toast("ทำซ้ำเป็นวันนี้แล้ว ✓"); view=new Date(); go("home");
+}
+function deleteEditingTx(){
+  if(editingTxId==null) return;
+  if(!confirm("ลบรายการนี้?")) return;
+  state.tx=state.tx.filter(t=>t.id!==editingTxId); save(); closeAdd(); toast("ลบแล้ว"); go("home");
 }
 
 function delTx(id){
@@ -385,11 +446,17 @@ function render(){
   const recent = state.tx.filter(inView).sort((a,b)=>b.id-a.id).slice(0,4);
   document.getElementById("recentList").innerHTML = recent.length? recent.map(rowHTML).join("")
     : `<div class="gray" style="text-align:center;padding:22px 0;font:500 14px Anuphan">ยังไม่มีรายการเดือนนี้<br>แตะปุ่ม + เพื่อเริ่มบันทึก</div>`;
-  // history + search/filter
-  const monthTx = state.tx.filter(inView).sort((a,b)=>b.id-a.id);
+  // history + search/filter (scope: this month / all, and kind: all/in/out)
+  document.getElementById("hsMonth").classList.toggle("on", !histScopeAll);
+  document.getElementById("hsAll").classList.toggle("on", histScopeAll);
+  document.getElementById("hkAll").classList.toggle("on", histKind==="all");
+  document.getElementById("hkIn").classList.toggle("on", histKind==="in");
+  document.getElementById("hkOut").classList.toggle("on", histKind==="out");
+  let baseTx = (histScopeAll ? state.tx.slice() : state.tx.filter(inView)).sort((a,b)=>b.id-a.id);
+  if(histKind!=="all") baseTx = baseTx.filter(t=>t.kind===histKind);
   const q = (document.getElementById("histSearch")?.value||"").trim().toLowerCase();
-  // category filter chips (categories present this month)
-  const catsPresent = [...new Set(monthTx.map(t=>t.cat))];
+  // category filter chips (categories present in current scope+kind)
+  const catsPresent = [...new Set(baseTx.map(t=>t.cat))];
   if(!catsPresent.includes(histFilterCat) && histFilterCat!=="all") histFilterCat="all";
   const chips = ['<button class="chip '+(histFilterCat==="all"?"on":"")+'" onclick="histSetCat(\'all\')">ทั้งหมด</button>']
     .concat(catsPresent.map(c=>{
@@ -397,10 +464,10 @@ function render(){
       return '<button class="chip '+(histFilterCat===c?"on":"")+'" onclick="histSetCat(\''+esa(c)+'\')"><span class="emo" style="font-size:15px">'+em+'</span><span>'+esc(c)+'</span></button>';
     })).join("");
   document.getElementById("histFilters").innerHTML = chips;
-  let all = monthTx.filter(t=> histFilterCat==="all" || t.cat===histFilterCat);
+  let all = baseTx.filter(t=> histFilterCat==="all" || t.cat===histFilterCat);
   if(q) all = all.filter(t=> (t.note||"").toLowerCase().includes(q) || (t.cat||"").toLowerCase().includes(q));
   document.getElementById("historyList").innerHTML = all.length? all.map(t=>rowHTML(t,true)).join("")
-    : `<div class="gray" style="text-align:center;padding:40px 0;font:500 14px Anuphan">${monthTx.length? "ไม่พบรายการที่ตรงกับที่ค้นหา" : "ไม่มีรายการในเดือนนี้"}</div>`;
+    : `<div class="gray" style="text-align:center;padding:40px 0;font:500 14px Anuphan">${baseTx.length? "ไม่พบรายการที่ตรงกับที่ค้นหา" : "ไม่มีรายการ"}</div>`;
   // stats
   document.getElementById("statsMonth").textContent = monthLabel(view);
   document.getElementById("statIn").textContent = "฿"+fmt(inc);
@@ -412,6 +479,13 @@ function render(){
   const max=entries.length?entries[0][1]:1;
   document.getElementById("catBreak").innerHTML = entries.length? entries.map(([c,v])=>{
     const em=(CATS_OUT.find(x=>x[0]===c)||["","📦"])[1];
+    const b=(state.catBudgets||{})[c]||0;
+    if(b>0){
+      const cp=Math.min(100, v/b*100), over=v>b;
+      return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${esc(c)}</span><span style="margin-left:auto;font-weight:600;color:${over?'var(--danger)':'var(--ink)'}">฿${fmt(v)} <span class="gray" style="font-weight:500">/ ฿${fmt(b)}</span></span></div>
+      <div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(4,cp)}%;background:${over?'var(--danger)':'var(--accent)'};border-radius:99px"></div></div>
+      <div class="gray" style="font:600 11px Anuphan;margin-top:3px">${Math.round(v/b*100)}%${over?' · เกินงบ ฿'+fmt(v-b):' · เหลือ ฿'+fmt(b-v)}</div></div>`;
+    }
     return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${esc(c)}</span><span style="margin-left:auto;font-weight:600">฿${fmt(v)}</span></div>
     <div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(6,v/max*100)}%;background:var(--accent);border-radius:99px"></div></div></div>`;
   }).join("") : `<div class="gray" style="padding:16px 0;font:500 13.5px Anuphan">ยังไม่มีรายจ่ายเดือนนี้</div>`;
@@ -422,8 +496,8 @@ function rowHTML(t, del){
   const sign = t.kind==="in"?"+":"-";
   const col = t.kind==="in"?"var(--accent-ink)":"var(--ink)";
   const d=new Date(t.date);
-  const meta = esc(t.cat)+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
-  return `<div class="row" ${del?`onclick="delTx(${t.id})"`:""}>
+  const meta = esc(t.cat)+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+  return `<div class="row" onclick="openEdit(${t.id})" style="cursor:pointer">
     <div class="em">${t.emoji||"📦"}</div>
     <div style="flex:1;min-width:0"><div style="font:600 14.5px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</div><div class="gray" style="font:400 12.5px Anuphan;margin-top:1px">${meta}</div></div>
     <div style="font:700 15px Anuphan;color:${col}">${sign}฿${fmt(t.amt)}</div>
@@ -553,15 +627,18 @@ function summaryRender(){
   const box=document.getElementById("summaryBody");
   const months=lastMonths(6);
   const data=months.map(o=>({o:o, t:monthTotals(o.y,o.m)}));
-  const maxExp=Math.max(1, ...data.map(d=>d.t.exp));
-  // bar chart
+  const maxV=Math.max(1, ...data.map(d=>Math.max(d.t.inc,d.t.exp)));
+  const kfmt=n=> n>=1000? (n/1000).toFixed(n>=10000?0:1)+"k" : Math.round(n);
+  // grouped bar chart (income = accent, expense = danger)
   const bars=data.map(d=>{
     const sel=summarySel && d.o.y===summarySel.y && d.o.m===summarySel.m;
-    const h=Math.round(d.t.exp/maxExp*100);
-    const kk = d.t.exp>=1000? (d.t.exp/1000).toFixed(d.t.exp>=10000?0:1)+"k" : Math.round(d.t.exp);
+    const hi=Math.max(3,Math.round(d.t.inc/maxV*100)), ho=Math.max(3,Math.round(d.t.exp/maxV*100));
+    const dim=sel?"1":".5";
     return '<div onclick="setSummaryMonth('+d.o.y+','+d.o.m+')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;gap:5px">'+
-      '<div style="font:600 10px Anuphan;color:'+(sel?"var(--accent-ink)":"var(--muted)")+'">'+(d.t.exp>0?"฿"+kk:"")+'</div>'+
-      '<div style="width:66%;min-height:3px;height:'+Math.max(3,h)+'%;border-radius:7px 7px 3px 3px;background:'+(sel?"var(--accent)":"var(--track)")+';transition:height .4s cubic-bezier(.22,1,.36,1)"></div>'+
+      '<div style="display:flex;align-items:flex-end;gap:3px;height:100%;width:100%;justify-content:center">'+
+        '<div title="รายรับ" style="width:38%;min-height:3px;height:'+hi+'%;border-radius:6px 6px 2px 2px;background:var(--accent);opacity:'+dim+';transition:height .4s cubic-bezier(.22,1,.36,1)"></div>'+
+        '<div title="รายจ่าย" style="width:38%;min-height:3px;height:'+ho+'%;border-radius:6px 6px 2px 2px;background:var(--danger);opacity:'+dim+';transition:height .4s cubic-bezier(.22,1,.36,1)"></div>'+
+      '</div>'+
       '<div style="font:'+(sel?"700":"500")+' 11px Anuphan;color:'+(sel?"var(--ink)":"var(--muted)")+'">'+THMONTH[d.o.m]+'</div>'+
     '</div>';
   }).join("");
@@ -579,7 +656,8 @@ function summaryRender(){
 
   box.innerHTML =
     '<div class="card" style="padding:16px 16px 12px;margin-bottom:14px">'+
-      '<div style="font:600 14px Anuphan;margin-bottom:12px">รายจ่าย 6 เดือนล่าสุด</div>'+
+      '<div style="display:flex;align-items:center;margin-bottom:12px"><span style="font:600 14px Anuphan">รายรับ–รายจ่าย 6 เดือน</span>'+
+      '<span style="margin-left:auto;display:flex;gap:12px;font:600 11px Anuphan"><span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:var(--accent);display:inline-block"></span>รับ</span><span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:var(--danger);display:inline-block"></span>จ่าย</span></span></div>'+
       '<div style="display:flex;align-items:flex-end;gap:6px;height:130px">'+bars+'</div>'+
       '<div class="gray" style="font:400 11px Anuphan;text-align:center;margin-top:10px">แตะแท่งเพื่อดูรายละเอียดเดือนนั้น</div>'+
     '</div>'+
@@ -597,13 +675,13 @@ function summaryRender(){
 }
 
 /* ---------- CATEGORY MANAGER ---------- */
-var catForm = {open:false, kind:"out", editing:null, emoji:"", name:""};
+var catForm = {open:false, kind:"out", editing:null, emoji:"", name:"", budget:""};
 function openCats(){ document.getElementById("s-cats").style.display="flex"; document.getElementById("nav").style.display="none"; catForm.open=false; catsRender(); }
 function closeCats(){ document.getElementById("s-cats").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
 function catFormOpen(kind, editName){
   catForm.open=true; catForm.kind=kind; catForm.editing=editName||null;
-  if(editName){ var arr=state.cats[kind], f=arr.find(x=>x[0]===editName); catForm.name=f?f[0]:""; catForm.emoji=f?f[1]:""; }
-  else { catForm.name=""; catForm.emoji=""; }
+  if(editName){ var arr=state.cats[kind], f=arr.find(x=>x[0]===editName); catForm.name=f?f[0]:""; catForm.emoji=f?f[1]:""; catForm.budget=((state.catBudgets||{})[editName]||"")+""; }
+  else { catForm.name=""; catForm.emoji=""; catForm.budget=""; }
   catsRender();
   var n=document.getElementById("catName"); n&&n.focus();
 }
@@ -616,17 +694,21 @@ function catFormSave(){
   if(!name){ toast("ใส่ชื่อหมวดก่อน"); return; }
   // duplicate check (except the one being edited)
   if(arr.some(x=>x[0]===name && x[0]!==catForm.editing)){ toast("มีหมวดชื่อนี้แล้ว"); return; }
+  if(!state.catBudgets) state.catBudgets={};
+  var budEl=document.getElementById("catBudget");
+  var bud = budEl ? (parseFloat((budEl.value||"").replace(/,/g,""))||0) : 0;
   if(catForm.editing){
     var old=catForm.editing, item=arr.find(x=>x[0]===old);
     if(item){ item[0]=name; item[1]=emoji; }
     // propagate rename/emoji to existing tx + recurring
-    if(old!==name || true){
-      state.tx.forEach(t=>{ if(t.cat===old){ t.cat=name; t.emoji=emoji; } });
-      state.recurring.forEach(r=>{ if(r.cat===old){ r.cat=name; r.emoji=emoji; } });
-    }
+    state.tx.forEach(t=>{ if(t.cat===old){ t.cat=name; t.emoji=emoji; } });
+    state.recurring.forEach(r=>{ if(r.cat===old){ r.cat=name; r.emoji=emoji; } });
+    if(kind==="out"){ delete state.catBudgets[old]; if(bud>0) state.catBudgets[name]=bud; }
     toast("แก้ไขหมวดแล้ว ✓");
   } else {
-    arr.push([name,emoji]); toast("เพิ่มหมวดแล้ว ✓");
+    arr.push([name,emoji]);
+    if(kind==="out" && bud>0) state.catBudgets[name]=bud;
+    toast("เพิ่มหมวดแล้ว ✓");
   }
   save(); syncCats(); catForm.open=false; catsRender();
 }
@@ -634,6 +716,7 @@ function catDelete(kind, name){
   if(state.cats[kind].length<=1){ toast("ต้องเหลืออย่างน้อย 1 หมวด"); return; }
   if(!confirm('ลบหมวด "'+name+'"? รายการเก่าที่ใช้หมวดนี้ยังอยู่ครบ')) return;
   state.cats[kind]=state.cats[kind].filter(x=>x[0]!==name);
+  if(state.catBudgets) delete state.catBudgets[name];
   save(); syncCats(); catsRender();
 }
 function catsRender(){
@@ -647,15 +730,18 @@ function catsRender(){
         '<input class="f" id="catName" value="'+esc(catForm.name)+'" placeholder="ชื่อหมวด เช่น กาแฟ" style="flex:1;box-shadow:none;background:var(--surface2)">'+
       '</div>'+
       '<div class="gray" style="font:400 11.5px Anuphan;margin-bottom:12px">* ช่องซ้ายพิมพ์/วางอิโมจิ 1 ตัว · แก้ชื่อแล้วรายการเก่าจะเปลี่ยนตาม</div>'+
+      (catForm.kind==="out" ? '<div style="margin-bottom:12px"><div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">งบต่อเดือนของหมวดนี้ (ไม่บังคับ)</div><input class="f" id="catBudget" inputmode="decimal" value="'+esc(catForm.budget)+'" placeholder="เช่น 8000 · เว้นว่าง = ไม่จำกัด" style="box-shadow:none;background:var(--surface2)"></div>' : '')+
       '<div style="display:flex;gap:8px"><button onclick="catFormCancel()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
       '<button onclick="catFormSave()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
     '</div>';
   }
   function section(title,kind){
     var rows=state.cats[kind].map(function(c){
+      var bud=(kind==="out" && state.catBudgets)? (state.catBudgets[c[0]]||0):0;
+      var sub = bud>0? '<div class="gray" style="font:600 11px Anuphan;margin-top:1px">งบ ฿'+fmt(bud)+'/เดือน</div>' : '';
       return '<div class="row" style="border-bottom:1px solid var(--line)">'+
         '<div class="em" style="width:40px;height:40px;border-radius:13px;background:var(--surface2);display:grid;place-items:center;font-size:19px;flex:none">'+c[1]+'</div>'+
-        '<span style="flex:1;font:500 15px Anuphan">'+esc(c[0])+'</span>'+
+        '<div style="flex:1;min-width:0"><span style="font:500 15px Anuphan">'+esc(c[0])+'</span>'+sub+'</div>'+
         '<button onclick="catFormOpen(\''+kind+'\',\''+esa(c[0])+'\')" style="width:34px;height:34px;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
         '<button onclick="catDelete(\''+kind+'\',\''+esa(c[0])+'\')" style="width:34px;height:34px;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
       '</div>';
@@ -669,16 +755,27 @@ function catsRender(){
 
 /* ---------- RECURRING ---------- */
 function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function ymKey(y,m){ return y+"-"+m; }
 function runRecurring(){
-  const now=new Date(), ym=now.getFullYear()+"-"+now.getMonth();
+  const now=new Date(), cy=now.getFullYear(), cm=now.getMonth();
   let posted=0;
   (state.recurring||[]).forEach(r=>{
-    if(r.lastPosted===ym) return;
-    if(now.getDate() >= r.day){
-      const dd=Math.min(r.day, daysInMonth(now.getFullYear(), now.getMonth()));
-      const d=new Date(now.getFullYear(), now.getMonth(), dd, 9, 0, 0);
-      state.tx.push({id:Date.now()+posted*13, kind:r.kind, amt:r.amt, cat:r.cat, emoji:r.emoji, note:r.name+" (ประจำ)", date:d.toISOString(), recur:true});
-      r.lastPosted=ym; posted++;
+    // migrate older records
+    if(!r.postedMonths) r.postedMonths = r.lastPosted? [r.lastPosted] : [];
+    if(r.since===undefined) r.since = ymKey(cy,cm); // don't back-fill months before this feature existed
+    const sp=String(r.since).split("-"); let Y=+sp[0], M=+sp[1];
+    let guard=0;
+    while(guard++<120 && (Y<cy || (Y===cy && M<=cm))){
+      const key=ymKey(Y,M);
+      const isCurrent = (Y===cy && M===cm);
+      const due = isCurrent ? (now.getDate() >= r.day) : true;
+      if(due && r.postedMonths.indexOf(key)===-1){
+        const dd=Math.min(r.day, daysInMonth(Y,M));
+        const d=new Date(Y, M, dd, 9, 0, 0);
+        state.tx.push({id:Date.now()+posted*13, kind:r.kind, amt:r.amt, cat:r.cat, emoji:r.emoji, note:r.name+" (ประจำ)", date:d.toISOString(), recur:true});
+        r.postedMonths.push(key); r.lastPosted=key; posted++;
+      }
+      M++; if(M>11){ M=0; Y++; }
     }
   });
   if(posted){ save(); }
@@ -695,7 +792,8 @@ function recurCreate(){
   const name=(document.getElementById("rcName").value||"").trim()||recurDraft.cat;
   let day=parseInt(document.getElementById("rcDay").value)||1; day=Math.max(1,Math.min(31,day));
   if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
-  state.recurring.push({id:Date.now(), kind:recurDraft.kind, amt:amt, cat:recurDraft.cat, emoji:recurDraft.emoji, name:name, day:day, lastPosted:""});
+  const now=new Date();
+  state.recurring.push({id:Date.now(), kind:recurDraft.kind, amt:amt, cat:recurDraft.cat, emoji:recurDraft.emoji, name:name, day:day, since:ymKey(now.getFullYear(),now.getMonth()), postedMonths:[], lastPosted:""});
   save(); recurAddOpen=false;
   const n=runRecurring();  // post immediately if already due this month
   toast(n? "เพิ่ม + บันทึกงวดนี้แล้ว ✓" : "เพิ่มรายการประจำแล้ว ✓");
@@ -924,9 +1022,10 @@ function restoreData(input){
       const d=obj && obj.data ? obj.data : obj;   // accept wrapped or raw
       if(!d || !Array.isArray(d.tx)) throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
       if(!confirm("กู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ยืนยันไหม?")){ input.value=""; return; }
-      state = Object.assign({name:"ฉัน",wallet:"กระเป๋าหลัก",budget:0,theme:"light",tx:[],goals:[],recurring:[]}, d);
+      state = Object.assign({name:"ฉัน",wallet:"กระเป๋าหลัก",budget:0,theme:"light",tx:[],goals:[],recurring:[],catBudgets:{}}, d);
       if(!Array.isArray(state.goals)) state.goals=[];
       if(!Array.isArray(state.recurring)) state.recurring=[];
+      if(!state.catBudgets || typeof state.catBudgets!=="object") state.catBudgets={};
       if(!state.cats||!state.cats.out||!state.cats.in) state.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())};
       syncCats();
       save();
@@ -949,6 +1048,32 @@ function exportCSV(){
   a.download="cwallet-"+new Date().toISOString().slice(0,10)+".csv"; a.click();
 }
 function clearAll(){ if(confirm("ล้างรายการทั้งหมด? กู้คืนไม่ได้")){ state.tx=[]; save(); toast("ล้างข้อมูลแล้ว"); render(); } }
+function exportXLS(){
+  const rows=state.tx.slice().sort((a,b)=>a.id-b.id);
+  let inc=0,exp=0; rows.forEach(t=> t.kind==="in"? inc+=t.amt : exp+=t.amt);
+  const cell=v=>'<td style="border:1px solid #C9D3E0;padding:6px 10px;font-family:Sarabun,Arial">'+String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</td>';
+  const num=v=>'<td style="border:1px solid #C9D3E0;padding:6px 10px;text-align:right;mso-number-format:\'#,##0.00\'">'+Number(v||0).toFixed(2)+'</td>';
+  let body="";
+  rows.forEach(t=>{
+    const d=new Date(t.date);
+    body+='<tr>'+cell(d.toLocaleDateString("th-TH"))+cell(d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}))+
+      '<td style="border:1px solid #C9D3E0;padding:6px 10px;color:'+(t.kind==="in"?"#1E4FC4":"#C0392B")+'">'+(t.kind==="in"?"รายรับ":"รายจ่าย")+'</td>'+
+      cell(t.cat)+cell(t.note)+num(t.amt)+'</tr>';
+  });
+  const th='style="border:1px solid #1B4DB3;padding:8px 10px;background:#1B4DB3;color:#fff;font-weight:bold;font-family:Sarabun,Arial"';
+  const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body>'+
+    '<table style="border-collapse:collapse">'+
+    '<tr><th '+th+'>วันที่</th><th '+th+'>เวลา</th><th '+th+'>ประเภท</th><th '+th+'>หมวด</th><th '+th+'>โน้ต</th><th '+th+'>จำนวนเงิน (฿)</th></tr>'+
+    body+
+    '<tr><td colspan="5" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายรับ</td>'+num(inc)+'</tr>'+
+    '<tr><td colspan="5" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายจ่าย</td>'+num(exp)+'</tr>'+
+    '<tr><td colspan="5" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">คงเหลือสุทธิ</td>'+num(inc-exp)+'</tr>'+
+    '</table></body></html>';
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+html],{type:"application/vnd.ms-excel"}));
+  a.download="cwallet-"+new Date().toISOString().slice(0,10)+".xls"; a.click();
+  toast("ส่งออก Excel แล้ว 📊");
+}
 
 /* ---------- toast ---------- */
 let toTimer;
