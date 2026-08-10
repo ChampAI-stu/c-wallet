@@ -1,7 +1,7 @@
 // C-Wallet service worker — NETWORK-FIRST
 // Online: always fetch fresh (updates show immediately, no stale cache).
 // Offline: fall back to the last cached version so the app still opens.
-const C = "cwallet-nf-1";
+const C = "cwallet-nf-2";
 const ASSETS = ["./","./index.html","./manifest.webmanifest","./icon-180.png","./icon-192.png","./icon-512.png"];
 
 self.addEventListener("install", e => {
