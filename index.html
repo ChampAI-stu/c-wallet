@@ -61,8 +61,8 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     <div class="head">
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
-        <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" style="font:600 16px Anuphan"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v31</div>
+        <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" onclick="openWallets()" style="font:600 16px Anuphan;cursor:pointer"></div></div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v32</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -156,11 +156,10 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
           <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="pickAvatar(this)">
         </div>
         <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อคุณ</div><input class="f" id="setName" style="box-shadow:none;background:var(--surface2)"></div>
-        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อกระเป๋า</div><input class="f" id="setWallet" style="box-shadow:none;background:var(--surface2)"></div>
-        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">งบต่อเดือน (฿)</div><input class="f" id="setBudget" inputmode="decimal" style="box-shadow:none;background:var(--surface2)"></div>
         <button onclick="saveSettings()" style="height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึกการตั้งค่า</button>
       </div>
       <div class="card" style="padding:6px 16px">
+        <div class="row" onclick="openWallets()" style="cursor:pointer"><span style="font-size:19px">👛</span><span style="flex:1;font:500 15px Anuphan">กระเป๋า / บัญชี (งบต่อกระเป๋า)</span><span id="walletCount" class="gray" style="font:500 13px Anuphan"></span><span class="gray" style="margin-left:6px">›</span></div>
         <div class="row" onclick="openCats()" style="cursor:pointer"><span style="font-size:19px">🏷️</span><span style="flex:1;font:500 15px Anuphan">จัดการหมวด</span><span class="gray">›</span></div>
         <div class="row" style="border:none" onclick="openRecur()" style="cursor:pointer"><span style="font-size:19px">🔁</span><span style="flex:1;font:500 15px Anuphan">รายการประจำ</span><span id="recurCount" class="gray" style="font:500 13px Anuphan"></span><span class="gray" style="margin-left:6px">›</span></div>
       </div>
@@ -192,6 +191,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div class="gray" style="font:500 13px Anuphan">จำนวนเงิน</div>
       <div id="amountTap" onclick="showKeypad()" style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;cursor:pointer"><span id="draftSign" style="font:600 26px Anuphan;color:var(--danger)">-฿</span><span id="draft" style="font:700 46px Anuphan;letter-spacing:-.02em">0</span></div>
     </div>
+    <div style="padding:6px 20px 0;text-align:center"><button id="addWalletChip" onclick="cycleAddWallet()" style="display:none;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font:600 12.5px Anuphan;color:var(--ink);cursor:pointer"></button></div>
     <div style="padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto" class="noscroll" id="catRow"></div>
     <div style="padding:14px 20px 0"><input class="f" id="noteInput" placeholder="โน้ต เช่น ข้าวมันไก่หน้าออฟฟิศ"></div>
     <div id="editActions" style="display:none;padding:12px 20px 0;gap:8px">
@@ -257,6 +257,16 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     <div id="splitResult" style="padding:14px 20px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--line);background:var(--surface)"></div>
   </div>
 
+  <!-- WALLETS (overlay) -->
+  <div id="s-wallets" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeWallets()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">กระเป๋า / บัญชี 👛</div>
+      <button onclick="wFormOpen()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div id="walletsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
   <!-- NAV -->
   <div class="nav" id="nav">
     <button data-nav="home" class="act" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20a1 1 0 0 1-1 1h-4.5v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg><span>หน้าแรก</span></button>
@@ -286,12 +296,38 @@ function histSetKind(k){ histKind = k; render(); }
 let draft = "0", kind="out", cat=CATS_OUT[0][0];
 let editingTxId = null;          // null = adding new; otherwise editing this tx id
 let addDateVal = new Date();     // date chosen for the current add/edit
+let addWallet = null;            // wallet id the current add/edit will be saved to
 
+function migrateWallets(s){
+  if(!Array.isArray(s.tx)) s.tx=[];
+  if(!Array.isArray(s.recurring)) s.recurring=[];
+  if(!Array.isArray(s.wallets) || !s.wallets.length){
+    s.wallets=[{id:"w1", name:s.wallet||"กระเป๋าหลัก", emoji:"👛", budget:(+s.budget||0)}];
+    s.tx.forEach(t=>{ if(!t.w) t.w="w1"; });
+    s.recurring.forEach(r=>{ if(!r.w) r.w="w1"; });
+  } else {
+    const first=s.wallets[0].id;
+    s.tx.forEach(t=>{ if(!t.w || !s.wallets.some(w=>w.id===t.w)) t.w=first; });
+    s.recurring.forEach(r=>{ if(!r.w || !s.wallets.some(w=>w.id===r.w)) r.w=first; });
+  }
+  if(!s.activeWallet || (s.activeWallet!=="all" && !s.wallets.some(w=>w.id===s.activeWallet))) s.activeWallet=s.wallets[0].id;
+  return s;
+}
 function load(){
-  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.catBudgets) s.catBudgets={}; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return s; } }catch(e){}
-  return {name:"ฉัน", wallet:"กระเป๋าหลัก", budget:25000, theme:"light", tx:[], goals:[], recurring:[], catBudgets:{}, cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}};
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.catBudgets) s.catBudgets={}; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return migrateWallets(s); } }catch(e){}
+  return migrateWallets({name:"ฉัน", theme:"light", tx:[], goals:[], recurring:[], catBudgets:{}, wallets:[{id:"w1",name:"กระเป๋าหลัก",emoji:"👛",budget:25000}], activeWallet:"w1", cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}});
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
+
+/* ---------- WALLET HELPERS ---------- */
+function isAllWallets(){ return state.activeWallet==="all"; }
+function activeWallet(){ return state.wallets.find(w=>w.id===state.activeWallet) || state.wallets[0]; }
+function walletById(id){ return state.wallets.find(w=>w.id===id); }
+function walletName(id){ const w=walletById(id); return w? w.name : "—"; }
+function walletEmoji(id){ const w=walletById(id); return w? (w.emoji||"👛") : "👛"; }
+function walletMatch(t){ return isAllWallets() || t.w===state.activeWallet; }
+function curBudget(){ return isAllWallets()? state.wallets.reduce((s,w)=>s+(+w.budget||0),0) : (+activeWallet().budget||0); }
+function inScope(t){ return inView(t) && walletMatch(t); }
 
 function fmt(n){ return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function ym(d){ return d.getFullYear()+"-"+d.getMonth(); }
@@ -300,7 +336,7 @@ function monthLabel(d){ let by=d.getFullYear()+543; return THMONTH[d.getMonth()]
 
 function totals(){
   let inc=0,exp=0;
-  state.tx.filter(inView).forEach(t=> t.kind==="in"? inc+=t.amt : exp+=t.amt);
+  state.tx.filter(inScope).forEach(t=> t.kind==="in"? inc+=t.amt : exp+=t.amt);
   return {inc,exp};
 }
 
@@ -325,11 +361,12 @@ function pickAddDate(){ const el=document.getElementById("addDateInput"); if(el.
 function onAddDate(v){ if(!v) return; const p=v.split("-"); addDateVal=new Date(+p[0], +p[1]-1, +p[2], 12,0,0); renderAddDate(); }
 function openAdd(k){
   editingTxId=null; addDateVal=new Date();
+  addWallet = isAllWallets()? state.wallets[0].id : state.activeWallet;
   draft="0"; kind=k||"out"; cat = (k==="in"?CATS_IN:CATS_OUT)[0][0];
   document.getElementById("noteInput").value="";
   document.getElementById("addTitle").textContent="บันทึกรายการ";
   document.getElementById("editActions").style.display="none";
-  renderAddDate();
+  renderAddDate(); renderAddWallet();
   setKind(kind);
   document.getElementById("s-add").classList.add("on");
   document.getElementById("kbwrap").classList.remove("down");
@@ -337,18 +374,29 @@ function openAdd(k){
 }
 function openEdit(id){
   const t=state.tx.find(x=>x.id===id); if(!t) return;
-  editingTxId=id; addDateVal=new Date(t.date);
+  editingTxId=id; addDateVal=new Date(t.date); addWallet = t.w || state.wallets[0].id;
   kind=t.kind; cat=t.cat; draft=String(t.amt);
   document.getElementById("noteInput").value = (t.note && t.note!==t.cat)? t.note : "";
   document.getElementById("addTitle").textContent="แก้ไขรายการ";
   document.getElementById("editActions").style.display="flex";
-  renderAddDate();
+  renderAddDate(); renderAddWallet();
   setKind(kind);
   // keep chosen category after setKind reset it to first
   cat=t.cat; renderCats(); updateDraft();
   document.getElementById("s-add").classList.add("on");
   document.getElementById("kbwrap").classList.remove("down");
   document.getElementById("nav").style.display="none";
+}
+function renderAddWallet(){
+  const el=document.getElementById("addWalletChip"); if(!el) return;
+  if(state.wallets.length<=1){ el.style.display="none"; return; }
+  el.style.display="inline-flex";
+  el.innerHTML = walletEmoji(addWallet)+" "+esc(walletName(addWallet))+' <span style="opacity:.6">▾</span>';
+}
+function cycleAddWallet(){
+  const i=state.wallets.findIndex(w=>w.id===addWallet);
+  addWallet = state.wallets[(i+1)%state.wallets.length].id;
+  renderAddWallet();
 }
 function closeAdd(){ document.getElementById("s-add").classList.remove("on"); document.getElementById("nav").style.display="flex"; }
 function showKeypad(){ document.getElementById("noteInput").blur(); document.getElementById("kbwrap").classList.remove("down"); }
@@ -387,14 +435,16 @@ function saveTx(){
   const note = document.getElementById("noteInput").value.trim() || cat;
   const emoji = ((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["", "📦"])[1];
   const iso = addDateVal.toISOString();
+  const w = addWallet || (state.wallets[0] && state.wallets[0].id);
   if(editingTxId!=null){
     const t=state.tx.find(x=>x.id===editingTxId);
-    if(t){ t.kind=kind; t.amt=amt; t.cat=cat; t.emoji=emoji; t.note=note; t.date=iso; }
+    if(t){ t.kind=kind; t.amt=amt; t.cat=cat; t.emoji=emoji; t.note=note; t.date=iso; t.w=w; }
     save(); closeAdd(); toast("แก้ไขรายการแล้ว ✓");
   } else {
-    state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:iso});
+    state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:iso, w});
     save(); closeAdd(); toast(kind==="out"?"บันทึกรายจ่ายแล้ว ✓":"บันทึกรายรับแล้ว ✓");
   }
+  if(!isAllWallets() && w) state.activeWallet=w; // follow the tx into its wallet
   view=new Date(addDateVal.getFullYear(), addDateVal.getMonth(), 1); // jump to that month
   go("home");
 }
@@ -402,7 +452,8 @@ function duplicateTx(){
   const amt=parseFloat(draft)||0; if(amt<=0){ toast("ใส่จำนวนเงินก่อนนะ"); return; }
   const note=document.getElementById("noteInput").value.trim()||cat;
   const emoji=((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["","📦"])[1];
-  state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:new Date().toISOString()});
+  const w = addWallet || (state.wallets[0] && state.wallets[0].id);
+  state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:new Date().toISOString(), w});
   save(); closeAdd(); toast("ทำซ้ำเป็นวันนี้แล้ว ✓"); view=new Date(); go("home");
 }
 function deleteEditingTx(){
@@ -422,29 +473,31 @@ function shiftMonth(n){ view = new Date(view.getFullYear(), view.getMonth()+n, 1
 function render(){
   document.documentElement.setAttribute("data-theme", state.theme);
   const {inc,exp}=totals();
-  const remain = state.budget - exp;
+  const remain = curBudget() - exp;
   // home head
   const h=new Date().getHours();
   document.getElementById("greet").textContent = h<12?"สวัสดีตอนเช้า":h<17?"สวัสดีตอนบ่าย":"สวัสดีตอนเย็น";
   var av=document.getElementById("avatar");
   if(state.avatar){ av.style.backgroundImage="url("+state.avatar+")"; av.style.backgroundSize="cover"; av.style.backgroundPosition="center"; av.textContent=""; }
   else { av.style.backgroundImage="none"; av.textContent=(state.name||"C").slice(0,1); }
-  document.getElementById("whoWallet").textContent = state.name+" · "+state.wallet;
+  const aw=activeWallet();
+  document.getElementById("whoWallet").innerHTML = esc(state.name)+" · "+(isAllWallets()? "รวมทุกกระเป๋า" : walletEmoji(state.activeWallet)+" "+esc(aw.name))+' <span style="opacity:.7">▾</span>';
   document.getElementById("monthLbl").textContent = monthLabel(view);
   document.getElementById("monthLbl2").textContent = monthLabel(view);
   document.getElementById("balance").textContent = fmt(remain);
   document.getElementById("incomeTop").textContent = "฿"+fmt(inc);
   document.getElementById("expenseTop").textContent = "฿"+fmt(exp);
-  // budget
-  const pct = state.budget>0? Math.min(100, exp/state.budget*100):0;
+  // budget (per active wallet, or summed across all)
+  const bud=curBudget();
+  const pct = bud>0? Math.min(100, exp/bud*100):0;
   renderWealth(pct);
   document.getElementById("usedLbl").textContent = "฿"+fmt(exp);
-  document.getElementById("budgetTotalLbl").textContent = "฿"+fmt(state.budget);
+  document.getElementById("budgetTotalLbl").textContent = "฿"+fmt(bud);
   document.getElementById("budgetPct").textContent = Math.round(pct)+"%";
-  document.getElementById("budgetLeft").textContent = remain>=0? "เหลือ ฿"+fmt(remain) : "เกินงบ ฿"+fmt(-remain);
+  document.getElementById("budgetLeft").textContent = (bud-exp)>=0? "เหลือ ฿"+fmt(bud-exp) : "เกินงบ ฿"+fmt(exp-bud);
   // recent
-  const recent = state.tx.filter(inView).sort((a,b)=>b.id-a.id).slice(0,4);
-  document.getElementById("recentList").innerHTML = recent.length? recent.map(rowHTML).join("")
+  const recent = state.tx.filter(inScope).sort((a,b)=>b.id-a.id).slice(0,4);
+  document.getElementById("recentList").innerHTML = recent.length? recent.map(t=>rowHTML(t)).join("")
     : `<div class="gray" style="text-align:center;padding:22px 0;font:500 14px Anuphan">ยังไม่มีรายการเดือนนี้<br>แตะปุ่ม + เพื่อเริ่มบันทึก</div>`;
   // history + search/filter (scope: this month / all, and kind: all/in/out)
   document.getElementById("hsMonth").classList.toggle("on", !histScopeAll);
@@ -452,7 +505,7 @@ function render(){
   document.getElementById("hkAll").classList.toggle("on", histKind==="all");
   document.getElementById("hkIn").classList.toggle("on", histKind==="in");
   document.getElementById("hkOut").classList.toggle("on", histKind==="out");
-  let baseTx = (histScopeAll ? state.tx.slice() : state.tx.filter(inView)).sort((a,b)=>b.id-a.id);
+  let baseTx = (histScopeAll ? state.tx.filter(walletMatch) : state.tx.filter(inScope)).sort((a,b)=>b.id-a.id);
   if(histKind!=="all") baseTx = baseTx.filter(t=>t.kind===histKind);
   const q = (document.getElementById("histSearch")?.value||"").trim().toLowerCase();
   // category filter chips (categories present in current scope+kind)
@@ -474,7 +527,7 @@ function render(){
   document.getElementById("statOut").textContent = "฿"+fmt(exp);
   document.getElementById("statNet").textContent = "฿"+fmt(inc-exp);
   const byCat={};
-  state.tx.filter(inView).filter(t=>t.kind==="out").forEach(t=> byCat[t.cat]=(byCat[t.cat]||0)+t.amt);
+  state.tx.filter(inScope).filter(t=>t.kind==="out").forEach(t=> byCat[t.cat]=(byCat[t.cat]||0)+t.amt);
   const entries=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   const max=entries.length?entries[0][1]:1;
   document.getElementById("catBreak").innerHTML = entries.length? entries.map(([c,v])=>{
@@ -491,19 +544,21 @@ function render(){
   }).join("") : `<div class="gray" style="padding:16px 0;font:500 13.5px Anuphan">ยังไม่มีรายจ่ายเดือนนี้</div>`;
   // settings labels
   document.getElementById("themeLbl").textContent = state.theme==="dark"?"มืด":"สว่าง";
+  { const wc=document.getElementById("walletCount"); if(wc) wc.textContent = state.wallets.length>1? state.wallets.length+" กระเป๋า" : ""; }
 }
 function rowHTML(t, del){
   const sign = t.kind==="in"?"+":"-";
   const col = t.kind==="in"?"var(--accent-ink)":"var(--ink)";
   const d=new Date(t.date);
-  const meta = esc(t.cat)+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+  const wtag = (isAllWallets() && t.w)? walletEmoji(t.w)+" " : "";
+  const meta = wtag+esc(t.cat)+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
   return `<div class="row" onclick="openEdit(${t.id})" style="cursor:pointer">
     <div class="em">${t.emoji||"📦"}</div>
     <div style="flex:1;min-width:0"><div style="font:600 14.5px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</div><div class="gray" style="font:400 12.5px Anuphan;margin-top:1px">${meta}</div></div>
     <div style="font:700 15px Anuphan;color:${col}">${sign}฿${fmt(t.amt)}</div>
   </div>`;
 }
-function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 /* escape a value used as a single-quoted JS arg inside a double-quoted onclick attribute */
 function esa(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,"&quot;"); }
 
@@ -618,7 +673,7 @@ function removeAvatar(){ state.avatar=null; save(); refreshSetAvatar(); render()
 
 /* ---------- MONTHLY SUMMARY ---------- */
 var summarySel=null;
-function monthTotals(y,m){ let inc=0,exp=0; state.tx.forEach(t=>{const d=new Date(t.date); if(d.getFullYear()===y&&d.getMonth()===m){ t.kind==="in"?inc+=t.amt:exp+=t.amt; }}); return {inc,exp}; }
+function monthTotals(y,m){ let inc=0,exp=0; state.tx.forEach(t=>{const d=new Date(t.date); if(d.getFullYear()===y&&d.getMonth()===m&&walletMatch(t)){ t.kind==="in"?inc+=t.amt:exp+=t.amt; }}); return {inc,exp}; }
 function lastMonths(n){ const arr=[], now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); arr.push({y:d.getFullYear(),m:d.getMonth()}); } return arr; }
 function openSummary(){ const now=new Date(); if(!summarySel) summarySel={y:now.getFullYear(),m:now.getMonth()}; document.getElementById("s-summary").style.display="flex"; document.getElementById("nav").style.display="none"; summaryRender(); }
 function closeSummary(){ document.getElementById("s-summary").style.display="none"; document.getElementById("nav").style.display="flex"; }
@@ -644,7 +699,7 @@ function summaryRender(){
   }).join("");
   // selected month
   const s=summarySel, tot=monthTotals(s.y,s.m), net=tot.inc-tot.exp;
-  const byCat={}; state.tx.forEach(t=>{const d=new Date(t.date); if(d.getFullYear()===s.y&&d.getMonth()===s.m&&t.kind==="out") byCat[t.cat]=(byCat[t.cat]||0)+t.amt;});
+  const byCat={}; state.tx.forEach(t=>{const d=new Date(t.date); if(d.getFullYear()===s.y&&d.getMonth()===s.m&&t.kind==="out"&&walletMatch(t)) byCat[t.cat]=(byCat[t.cat]||0)+t.amt;});
   const entries=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   const catMax=entries.length?entries[0][1]:1;
   const catRows = entries.length? entries.map(([c,v])=>{
@@ -753,6 +808,75 @@ function catsRender(){
   box.innerHTML = form + section("หมวดรายจ่าย","out") + section("หมวดรายรับ","in");
 }
 
+/* ---------- WALLETS ---------- */
+var wForm={open:false, editing:null, emoji:"👛", name:"", budget:""};
+function openWallets(){ document.getElementById("s-wallets").style.display="flex"; document.getElementById("nav").style.display="none"; wForm.open=false; walletsRender(); }
+function closeWallets(){ document.getElementById("s-wallets").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function switchWallet(id){ state.activeWallet=id; save(); closeWallets(); }
+function wFormOpen(editId){
+  wForm.open=true; wForm.editing=editId||null;
+  if(editId){ var w=walletById(editId); wForm.emoji=w?(w.emoji||"👛"):"👛"; wForm.name=w?w.name:""; wForm.budget=w?((+w.budget||0)?w.budget+"":""):""; }
+  else { wForm.emoji="👛"; wForm.name=""; wForm.budget=""; }
+  walletsRender(); var n=document.getElementById("wName"); n&&n.focus();
+}
+function wFormCancel(){ wForm.open=false; walletsRender(); }
+function wFormSave(){
+  var name=(document.getElementById("wName").value||"").trim();
+  var emoji=(document.getElementById("wEmoji").value||"").trim()||"👛"; emoji=Array.from(emoji)[0]||"👛";
+  var budget=parseFloat((document.getElementById("wBudget").value||"").replace(/,/g,""))||0;
+  if(!name){ toast("ใส่ชื่อกระเป๋าก่อน"); return; }
+  if(wForm.editing){ var w=walletById(wForm.editing); if(w){ w.name=name; w.emoji=emoji; w.budget=budget; } toast("แก้ไขกระเป๋าแล้ว ✓"); }
+  else { var id="w"+Date.now(); state.wallets.push({id:id, name:name, emoji:emoji, budget:budget}); toast("เพิ่มกระเป๋าแล้ว ✓"); }
+  save(); wForm.open=false; walletsRender();
+}
+function wDelete(id){
+  if(state.wallets.length<=1){ toast("ต้องเหลืออย่างน้อย 1 กระเป๋า"); return; }
+  var w=walletById(id); var n=state.tx.filter(t=>t.w===id).length;
+  if(!confirm('ลบกระเป๋า "'+(w?w.name:"")+'"?'+(n?(' รายการ '+n+' รายการจะย้ายไปกระเป๋าแรก'):''))) return;
+  state.wallets=state.wallets.filter(x=>x.id!==id);
+  var first=state.wallets[0].id;
+  state.tx.forEach(t=>{ if(t.w===id) t.w=first; });
+  state.recurring.forEach(r=>{ if(r.w===id) r.w=first; });
+  if(state.activeWallet===id) state.activeWallet=first;
+  save(); walletsRender();
+}
+function walletsRender(){
+  var box=document.getElementById("walletsBody");
+  var form="";
+  if(wForm.open){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 15px Anuphan;margin-bottom:10px">'+(wForm.editing?"แก้ไขกระเป๋า":"กระเป๋าใหม่")+'</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+        '<input class="f" id="wEmoji" value="'+esc(wForm.emoji)+'" maxlength="4" style="width:64px;text-align:center;font-size:22px;box-shadow:none;background:var(--surface2)">'+
+        '<input class="f" id="wName" value="'+esc(wForm.name)+'" placeholder="ชื่อ เช่น เงินสด/ธนาคาร/บัตร" style="flex:1;box-shadow:none;background:var(--surface2)">'+
+      '</div>'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">งบต่อเดือน (ไม่บังคับ)</div>'+
+      '<input class="f" id="wBudget" inputmode="decimal" value="'+esc(wForm.budget)+'" placeholder="เช่น 25000 · เว้นว่าง = ไม่จำกัด" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="wFormCancel()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="wFormSave()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  var allSel = isAllWallets();
+  var allRow='<div onclick="switchWallet(\'all\')" class="card" style="padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid '+(allSel?"var(--accent)":"transparent")+'">'+
+    '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">🗂️</div>'+
+    '<div style="flex:1"><div style="font:700 15px Anuphan">รวมทุกกระเป๋า'+(allSel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">ดูยอดรวมทุกบัญชี</div></div>'+
+  '</div>';
+  var rows=state.wallets.map(function(w){
+    var sel = !allSel && state.activeWallet===w.id;
+    var bud = (+w.budget||0)? 'งบ ฿'+fmt(w.budget)+'/เดือน' : 'ไม่จำกัดงบ';
+    var cnt = state.tx.filter(t=>t.w===w.id).length;
+    return '<div class="card" style="padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:2px solid '+(sel?"var(--accent)":"transparent")+'">'+
+      '<div onclick="switchWallet(\''+w.id+'\')" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer">'+
+        '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(w.emoji||"👛")+'</div>'+
+        '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(w.name)+(sel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">'+bud+' · '+cnt+' รายการ</div></div>'+
+      '</div>'+
+      '<button onclick="wFormOpen(\''+w.id+'\')" style="width:34px;height:34px;flex:none;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
+      '<button onclick="wDelete(\''+w.id+'\')" style="width:34px;height:34px;flex:none;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
+    '</div>';
+  }).join("");
+  box.innerHTML = form + allRow + rows;
+}
+
 /* ---------- RECURRING ---------- */
 function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
 function ymKey(y,m){ return y+"-"+m; }
@@ -772,7 +896,7 @@ function runRecurring(){
       if(due && r.postedMonths.indexOf(key)===-1){
         const dd=Math.min(r.day, daysInMonth(Y,M));
         const d=new Date(Y, M, dd, 9, 0, 0);
-        state.tx.push({id:Date.now()+posted*13, kind:r.kind, amt:r.amt, cat:r.cat, emoji:r.emoji, note:r.name+" (ประจำ)", date:d.toISOString(), recur:true});
+        state.tx.push({id:Date.now()+posted*13, kind:r.kind, amt:r.amt, cat:r.cat, emoji:r.emoji, note:r.name+" (ประจำ)", date:d.toISOString(), recur:true, w:(r.w||(state.wallets[0]&&state.wallets[0].id))});
         r.postedMonths.push(key); r.lastPosted=key; posted++;
       }
       M++; if(M>11){ M=0; Y++; }
@@ -793,7 +917,8 @@ function recurCreate(){
   let day=parseInt(document.getElementById("rcDay").value)||1; day=Math.max(1,Math.min(31,day));
   if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
   const now=new Date();
-  state.recurring.push({id:Date.now(), kind:recurDraft.kind, amt:amt, cat:recurDraft.cat, emoji:recurDraft.emoji, name:name, day:day, since:ymKey(now.getFullYear(),now.getMonth()), postedMonths:[], lastPosted:""});
+  const rw = isAllWallets()? state.wallets[0].id : state.activeWallet;
+  state.recurring.push({id:Date.now(), kind:recurDraft.kind, amt:amt, cat:recurDraft.cat, emoji:recurDraft.emoji, name:name, day:day, w:rw, since:ymKey(now.getFullYear(),now.getMonth()), postedMonths:[], lastPosted:""});
   save(); recurAddOpen=false;
   const n=runRecurring();  // post immediately if already due this month
   toast(n? "เพิ่ม + บันทึกงวดนี้แล้ว ✓" : "เพิ่มรายการประจำแล้ว ✓");
@@ -819,14 +944,17 @@ function recurRender(){
     '</div>';
   }
   let cards="";
-  if(state.recurring.length===0 && !recurAddOpen){
+  const rlist=state.recurring.filter(r=> isAllWallets() || r.w===state.activeWallet);
+  if(cnt) cnt.textContent = rlist.length? rlist.length+" รายการ" : "";
+  if(rlist.length===0 && !recurAddOpen){
     cards='<div style="text-align:center;padding:50px 20px" class="gray"><div style="font-size:42px">🔁</div><div style="font:600 15px Anuphan;margin-top:8px">ยังไม่มีรายการประจำ</div><div style="font:500 13px Anuphan;margin-top:2px">เช่น ค่าเช่า ค่าเน็ต ค่าไฟ<br>กดปุ่ม "+ เพิ่ม" มุมบน</div></div>';
   } else {
-    cards=state.recurring.slice().sort((a,b)=>a.day-b.day).map(r=>{
+    cards=rlist.slice().sort((a,b)=>a.day-b.day).map(r=>{
       const col=r.kind==="in"?"var(--accent-ink)":"var(--ink)", sign=r.kind==="in"?"+":"-";
+      const wtag = isAllWallets()? " · "+walletEmoji(r.w)+" "+esc(walletName(r.w)) : "";
       return '<div class="card" style="padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">'+
         '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(r.emoji||"📦")+'</div>'+
-        '<div style="flex:1;min-width:0"><div style="font:600 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div class="gray" style="font:500 12.5px Anuphan;margin-top:1px">'+esc(r.cat)+' · ทุกวันที่ '+r.day+'</div></div>'+
+        '<div style="flex:1;min-width:0"><div style="font:600 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div class="gray" style="font:500 12.5px Anuphan;margin-top:1px">'+esc(r.cat)+' · ทุกวันที่ '+r.day+wtag+'</div></div>'+
         '<div style="font:700 15px Anuphan;color:'+col+'">'+sign+money(r.amt)+'</div>'+
         '<button onclick="recurDelete('+r.id+')" style="flex:none;width:30px;height:30px;border:none;border-radius:8px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">×</button>'+
       '</div>';
@@ -1001,8 +1129,6 @@ function splitCalc(){
 /* ---------- SETTINGS ---------- */
 function saveSettings(){
   state.name = document.getElementById("setName").value.trim()||"ฉัน";
-  state.wallet = document.getElementById("setWallet").value.trim()||"กระเป๋าหลัก";
-  state.budget = parseFloat(document.getElementById("setBudget").value.replace(/,/g,""))||0;
   save(); toast("บันทึกแล้ว ✓"); render(); refreshSetAvatar();
 }
 function toggleTheme(){ state.theme = state.theme==="dark"?"light":"dark"; save(); render(); }
@@ -1022,16 +1148,15 @@ function restoreData(input){
       const d=obj && obj.data ? obj.data : obj;   // accept wrapped or raw
       if(!d || !Array.isArray(d.tx)) throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
       if(!confirm("กู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ยืนยันไหม?")){ input.value=""; return; }
-      state = Object.assign({name:"ฉัน",wallet:"กระเป๋าหลัก",budget:0,theme:"light",tx:[],goals:[],recurring:[],catBudgets:{}}, d);
+      state = Object.assign({name:"ฉัน",theme:"light",tx:[],goals:[],recurring:[],catBudgets:{}}, d);
       if(!Array.isArray(state.goals)) state.goals=[];
       if(!Array.isArray(state.recurring)) state.recurring=[];
       if(!state.catBudgets || typeof state.catBudgets!=="object") state.catBudgets={};
       if(!state.cats||!state.cats.out||!state.cats.in) state.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())};
+      migrateWallets(state);
       syncCats();
       save();
       document.getElementById("setName").value=state.name;
-      document.getElementById("setWallet").value=state.wallet;
-      document.getElementById("setBudget").value=state.budget;
       render(); refreshSetAvatar();
       toast("กู้คืนข้อมูลสำเร็จ ✓");
     }catch(e){ toast("ไฟล์ไม่ถูกต้อง กู้คืนไม่ได้"); }
@@ -1040,8 +1165,8 @@ function restoreData(input){
   reader.readAsText(file);
 }
 function exportCSV(){
-  const rows=[["วันที่","ประเภท","หมวด","โน้ต","จำนวนเงิน"]];
-  state.tx.slice().sort((a,b)=>a.id-b.id).forEach(t=> rows.push([new Date(t.date).toLocaleString("th-TH"), t.kind==="in"?"รายรับ":"รายจ่าย", t.cat, t.note, t.amt]));
+  const rows=[["วันที่","กระเป๋า","ประเภท","หมวด","โน้ต","จำนวนเงิน"]];
+  state.tx.slice().sort((a,b)=>a.id-b.id).forEach(t=> rows.push([new Date(t.date).toLocaleString("th-TH"), walletName(t.w), t.kind==="in"?"รายรับ":"รายจ่าย", t.cat, t.note, t.amt]));
   const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
@@ -1056,18 +1181,18 @@ function exportXLS(){
   let body="";
   rows.forEach(t=>{
     const d=new Date(t.date);
-    body+='<tr>'+cell(d.toLocaleDateString("th-TH"))+cell(d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}))+
+    body+='<tr>'+cell(d.toLocaleDateString("th-TH"))+cell(d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}))+cell(walletName(t.w))+
       '<td style="border:1px solid #C9D3E0;padding:6px 10px;color:'+(t.kind==="in"?"#1E4FC4":"#C0392B")+'">'+(t.kind==="in"?"รายรับ":"รายจ่าย")+'</td>'+
       cell(t.cat)+cell(t.note)+num(t.amt)+'</tr>';
   });
   const th='style="border:1px solid #1B4DB3;padding:8px 10px;background:#1B4DB3;color:#fff;font-weight:bold;font-family:Sarabun,Arial"';
   const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body>'+
     '<table style="border-collapse:collapse">'+
-    '<tr><th '+th+'>วันที่</th><th '+th+'>เวลา</th><th '+th+'>ประเภท</th><th '+th+'>หมวด</th><th '+th+'>โน้ต</th><th '+th+'>จำนวนเงิน (฿)</th></tr>'+
+    '<tr><th '+th+'>วันที่</th><th '+th+'>เวลา</th><th '+th+'>กระเป๋า</th><th '+th+'>ประเภท</th><th '+th+'>หมวด</th><th '+th+'>โน้ต</th><th '+th+'>จำนวนเงิน (฿)</th></tr>'+
     body+
-    '<tr><td colspan="5" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายรับ</td>'+num(inc)+'</tr>'+
-    '<tr><td colspan="5" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายจ่าย</td>'+num(exp)+'</tr>'+
-    '<tr><td colspan="5" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">คงเหลือสุทธิ</td>'+num(inc-exp)+'</tr>'+
+    '<tr><td colspan="6" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายรับ</td>'+num(inc)+'</tr>'+
+    '<tr><td colspan="6" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายจ่าย</td>'+num(exp)+'</tr>'+
+    '<tr><td colspan="6" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">คงเหลือสุทธิ</td>'+num(inc-exp)+'</tr>'+
     '</table></body></html>';
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob(["\uFEFF"+html],{type:"application/vnd.ms-excel"}));
@@ -1095,8 +1220,6 @@ function toast(msg){
   }).join("");
   // settings fields
   document.getElementById("setName").value=state.name;
-  document.getElementById("setWallet").value=state.wallet;
-  document.getElementById("setBudget").value=state.budget;
   runRecurring();
   refreshSetAvatar();
   render();
