@@ -39,7 +39,7 @@ button,input{font-family:inherit}
 .kbwrap{margin-top:auto;animation:kbUp .3s cubic-bezier(.22,1,.36,1);z-index:30;transition:transform .28s cubic-bezier(.22,1,.36,1)}
 .kbwrap.down{transform:translateY(115%)}
 .kb{background:var(--kb);padding:10px 8px calc(env(safe-area-inset-bottom) + 22px);display:grid;grid-template-columns:repeat(3,1fr);gap:9px 8px}
-.key{height:58px;border:none;border-radius:14px;background:var(--key);color:var(--key-ink);font:600 22px Anuphan;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12)}
+.key{height:58px;border:none;border-radius:14px;background:var(--key);color:var(--key-ink);font:600 22px Anuphan;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
 .key.act{background:var(--accent);color:#fff}
 .chip{padding:9px 14px;min-height:38px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:500;font-size:13.5px;font-family:Anuphan,"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;cursor:pointer;white-space:nowrap;flex:none;display:inline-flex;gap:6px;align-items:center}
 .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -153,7 +153,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
         </div>
         <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อคุณ</div><input class="f" id="setName" style="box-shadow:none;background:var(--surface2)"></div>
         <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อกระเป๋า</div><input class="f" id="setWallet" style="box-shadow:none;background:var(--surface2)"></div>
-        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">งบต่อเดือน (฿)</div><input class="f" id="setBudget" inputmode="numeric" style="box-shadow:none;background:var(--surface2)"></div>
+        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">งบต่อเดือน (฿)</div><input class="f" id="setBudget" inputmode="decimal" style="box-shadow:none;background:var(--surface2)"></div>
         <button onclick="saveSettings()" style="height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึกการตั้งค่า</button>
       </div>
       <div class="card" style="padding:6px 16px">
@@ -323,7 +323,7 @@ function setKind(k){
 function renderCats(){
   const list = kind==="in"?CATS_IN:CATS_OUT;
   document.getElementById("catRow").innerHTML = list.map(([c,e])=>
-    `<button class="chip ${c===cat?'on':''}" onclick="pickCat('${c}')"><span class="emo" style="font-size:16px">${e}</span><span>${c}</span></button>`).join("");
+    `<button class="chip ${c===cat?'on':''}" onclick="pickCat('${esa(c)}')"><span class="emo" style="font-size:16px">${e}</span><span>${esc(c)}</span></button>`).join("");
 }
 function pickCat(c){ cat=c; renderCats(); }
 function keyPress(v){
@@ -355,7 +355,7 @@ function delTx(id){
   state.tx = state.tx.filter(t=>t.id!==id); save(); render();
 }
 
-function shiftMonth(n){ view.setMonth(view.getMonth()+n); render(); }
+function shiftMonth(n){ view = new Date(view.getFullYear(), view.getMonth()+n, 1); render(); }
 
 /* ---------- RENDER ---------- */
 function render(){
@@ -394,7 +394,7 @@ function render(){
   const chips = ['<button class="chip '+(histFilterCat==="all"?"on":"")+'" onclick="histSetCat(\'all\')">ทั้งหมด</button>']
     .concat(catsPresent.map(c=>{
       const em=(CATS_OUT.concat(CATS_IN).find(x=>x[0]===c)||["","📦"])[1];
-      return '<button class="chip '+(histFilterCat===c?"on":"")+'" onclick="histSetCat(\''+c+'\')"><span class="emo" style="font-size:15px">'+em+'</span><span>'+c+'</span></button>';
+      return '<button class="chip '+(histFilterCat===c?"on":"")+'" onclick="histSetCat(\''+esa(c)+'\')"><span class="emo" style="font-size:15px">'+em+'</span><span>'+esc(c)+'</span></button>';
     })).join("");
   document.getElementById("histFilters").innerHTML = chips;
   let all = monthTx.filter(t=> histFilterCat==="all" || t.cat===histFilterCat);
@@ -412,7 +412,7 @@ function render(){
   const max=entries.length?entries[0][1]:1;
   document.getElementById("catBreak").innerHTML = entries.length? entries.map(([c,v])=>{
     const em=(CATS_OUT.find(x=>x[0]===c)||["","📦"])[1];
-    return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${c}</span><span style="margin-left:auto;font-weight:600">฿${fmt(v)}</span></div>
+    return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${esc(c)}</span><span style="margin-left:auto;font-weight:600">฿${fmt(v)}</span></div>
     <div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(6,v/max*100)}%;background:var(--accent);border-radius:99px"></div></div></div>`;
   }).join("") : `<div class="gray" style="padding:16px 0;font:500 13.5px Anuphan">ยังไม่มีรายจ่ายเดือนนี้</div>`;
   // settings labels
@@ -422,7 +422,7 @@ function rowHTML(t, del){
   const sign = t.kind==="in"?"+":"-";
   const col = t.kind==="in"?"var(--accent-ink)":"var(--ink)";
   const d=new Date(t.date);
-  const meta = t.cat+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+  const meta = esc(t.cat)+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
   return `<div class="row" ${del?`onclick="delTx(${t.id})"`:""}>
     <div class="em">${t.emoji||"📦"}</div>
     <div style="flex:1;min-width:0"><div style="font:600 14.5px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</div><div class="gray" style="font:400 12.5px Anuphan;margin-top:1px">${meta}</div></div>
@@ -430,6 +430,8 @@ function rowHTML(t, del){
   </div>`;
 }
 function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+/* escape a value used as a single-quoted JS arg inside a double-quoted onclick attribute */
+function esa(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,"&quot;"); }
 
 /* ---------- WEALTH MASCOT (custom SVG graphic set) ---------- */
 function wealthStage(pctSpent){
@@ -654,8 +656,8 @@ function catsRender(){
       return '<div class="row" style="border-bottom:1px solid var(--line)">'+
         '<div class="em" style="width:40px;height:40px;border-radius:13px;background:var(--surface2);display:grid;place-items:center;font-size:19px;flex:none">'+c[1]+'</div>'+
         '<span style="flex:1;font:500 15px Anuphan">'+esc(c[0])+'</span>'+
-        '<button onclick="catFormOpen(\''+kind+'\',\''+c[0].replace(/'/g,"\\'")+'\')" style="width:34px;height:34px;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
-        '<button onclick="catDelete(\''+kind+'\',\''+c[0].replace(/'/g,"\\'")+'\')" style="width:34px;height:34px;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
+        '<button onclick="catFormOpen(\''+kind+'\',\''+esa(c[0])+'\')" style="width:34px;height:34px;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
+        '<button onclick="catDelete(\''+kind+'\',\''+esa(c[0])+'\')" style="width:34px;height:34px;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
       '</div>';
     }).join("");
     return '<div style="font:700 14px Anuphan;margin:6px 2px 8px">'+title+'</div>'+
@@ -706,7 +708,7 @@ function recurRender(){
   let addForm="";
   if(recurAddOpen){
     const list=recurDraft.kind==="in"?CATS_IN:CATS_OUT;
-    const chips=list.map(([c,e])=>`<button class="chip ${c===recurDraft.cat?'on':''}" onclick="recurPickCat('${c}')"><span class="emo" style="font-size:16px">${e}</span><span>${c}</span></button>`).join("");
+    const chips=list.map(([c,e])=>`<button class="chip ${c===recurDraft.cat?'on':''}" onclick="recurPickCat('${esa(c)}')"><span class="emo" style="font-size:16px">${e}</span><span>${esc(c)}</span></button>`).join("");
     addForm='<div class="card" style="padding:16px;margin-bottom:14px">'+
       '<div class="seg" style="margin-bottom:12px"><button class="'+(recurDraft.kind==="out"?"on":"")+'" onclick="recurPickKind(\'out\')">รายจ่าย</button><button class="'+(recurDraft.kind==="in"?"on":"")+'" onclick="recurPickKind(\'in\')">รายรับ</button></div>'+
       '<input class="f" id="rcAmt" inputmode="decimal" placeholder="จำนวนเงิน (บาท)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
@@ -726,7 +728,7 @@ function recurRender(){
       const col=r.kind==="in"?"var(--accent-ink)":"var(--ink)", sign=r.kind==="in"?"+":"-";
       return '<div class="card" style="padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">'+
         '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(r.emoji||"📦")+'</div>'+
-        '<div style="flex:1;min-width:0"><div style="font:600 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div class="gray" style="font:500 12.5px Anuphan;margin-top:1px">'+r.cat+' · ทุกวันที่ '+r.day+'</div></div>'+
+        '<div style="flex:1;min-width:0"><div style="font:600 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div class="gray" style="font:500 12.5px Anuphan;margin-top:1px">'+esc(r.cat)+' · ทุกวันที่ '+r.day+'</div></div>'+
         '<div style="font:700 15px Anuphan;color:'+col+'">'+sign+money(r.amt)+'</div>'+
         '<button onclick="recurDelete('+r.id+')" style="flex:none;width:30px;height:30px;border:none;border-radius:8px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">×</button>'+
       '</div>';
@@ -963,7 +965,7 @@ function toast(msg){
   // keypad
   const keys=["1","2","3","4","5","6","7","8","9",".","0","del"];
   document.getElementById("keypad").innerHTML = keys.map(function(k){
-    var label = k==='del' ? '⌫' : (k==='.' ? "<span style='font-size:42px;line-height:0;position:relative;top:-4px'>.</span>" : k);
+    var label = k==='del' ? '⌫' : (k==='.' ? "<span style='font-size:30px;transform:translateY(-3px)'>.</span>" : k);
     return "<button class='key "+(k==='del'?'act':'')+"' onclick=\"keyPress('"+k+"')\">"+label+"</button>";
   }).join("");
   // settings fields
