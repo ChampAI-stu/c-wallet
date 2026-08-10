@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
+<style> 
 :root{
   --navy:#1B2D51; --ink:#101F36; --orange:#D42027; --orange-soft:#FBE7E8;
   --bg:#EEEEEA; --panel:#FFFFFF; --line:#E3E3DC; --muted:#7A8398;
