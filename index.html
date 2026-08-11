@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" onclick="openWallets()" style="font:600 16px Anuphan;cursor:pointer"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v33</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v34</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -80,11 +80,15 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     </div>
     <div style="padding:14px 16px 8px;display:flex;flex-direction:column;gap:11px">
       <div class="card" style="padding:14px 12px">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px 4px">
           <button class="qa" onclick="openAdd('out')"><div class="ic" style="background:var(--t1)">➖</div><span>จ่ายเงิน</span></button>
           <button class="qa" onclick="openSummary()"><div class="ic" style="background:var(--t2)">📊</div><span>สรุป</span></button>
           <button class="qa" onclick="openSplit()"><div class="ic" style="background:var(--t4)">🧮</div><span>หารบิล</span></button>
           <button class="qa" onclick="openGoals()"><div class="ic" style="background:var(--t3)">🐷</div><span>เป้าหมาย</span></button>
+          <button class="qa" onclick="openDebts()"><div class="ic" style="background:var(--t2)">🤝</div><span>หนี้/ลูกหนี้</span></button>
+          <button class="qa" onclick="openInstall()"><div class="ic" style="background:var(--t1)">💳</div><span>ผ่อนชำระ</span></button>
+          <button class="qa" onclick="openHealth()"><div class="ic" style="background:var(--t3)">📈</div><span>สุขภาพเงิน</span></button>
+          <button class="qa" onclick="openRecur()"><div class="ic" style="background:var(--t4)">🔁</div><span>ประจำ</span></button>
         </div>
       </div>
       <div class="card" style="padding:14px 16px">
@@ -257,6 +261,36 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
     <div id="splitResult" style="padding:14px 20px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--line);background:var(--surface)"></div>
   </div>
 
+  <!-- DEBTS / IOU (overlay) -->
+  <div id="s-debts" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeDebts()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">หนี้ / ลูกหนี้ 🤝</div>
+      <button onclick="debtAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div id="debtsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- INSTALLMENTS (overlay) -->
+  <div id="s-install" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeInstall()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">ผ่อนชำระ / งวด 💳</div>
+      <button onclick="instAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div id="installBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- FINANCIAL HEALTH (overlay) -->
+  <div id="s-health" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeHealth()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">สุขภาพการเงิน 📈</div>
+      <div id="healthMonth" style="margin-left:auto;font:600 13px Anuphan" class="gray"></div>
+    </div>
+    <div id="healthBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
   <!-- WALLETS (overlay) -->
   <div id="s-wallets" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
     <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
@@ -314,8 +348,8 @@ function migrateWallets(s){
   return s;
 }
 function load(){
-  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.catBudgets) s.catBudgets={}; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return migrateWallets(s); } }catch(e){}
-  return migrateWallets({name:"ฉัน", theme:"light", tx:[], goals:[], recurring:[], catBudgets:{}, wallets:[{id:"w1",name:"กระเป๋าหลัก",emoji:"👛",budget:25000}], activeWallet:"w1", cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}});
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.catBudgets) s.catBudgets={}; if(!Array.isArray(s.debts)) s.debts=[]; if(!Array.isArray(s.installments)) s.installments=[]; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return migrateWallets(s); } }catch(e){}
+  return migrateWallets({name:"ฉัน", theme:"light", tx:[], goals:[], recurring:[], catBudgets:{}, debts:[], installments:[], wallets:[{id:"w1",name:"กระเป๋าหลัก",emoji:"👛",budget:25000}], activeWallet:"w1", cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}});
 }
 function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
 
@@ -808,6 +842,188 @@ function catsRender(){
   box.innerHTML = form + section("หมวดรายจ่าย","out") + section("หมวดรายรับ","in");
 }
 
+/* ---------- DEBTS / IOU ---------- */
+var debtAddOpen=false, debtDir="lend"; // lend = เขายืมเรา (ลูกหนี้), borrow = เรายืมเขา (หนี้)
+function openDebts(){ document.getElementById("s-debts").style.display="flex"; document.getElementById("nav").style.display="none"; debtAddOpen=false; debtsRender(); }
+function closeDebts(){ document.getElementById("s-debts").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function debtAddToggle(){ debtAddOpen=!debtAddOpen; debtDir="lend"; debtsRender(); if(debtAddOpen){ var n=document.getElementById("dPerson"); n&&n.focus(); } }
+function debtPickDir(d){ debtDir=d; debtsRender(); }
+function debtCreate(){
+  var person=(document.getElementById("dPerson").value||"").trim();
+  var amt=parseFloat((document.getElementById("dAmt").value||"").replace(/,/g,""))||0;
+  var note=(document.getElementById("dNote").value||"").trim();
+  var due=(document.getElementById("dDue").value||"");
+  if(!person){ toast("ใส่ชื่อคนก่อน"); return; }
+  if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
+  state.debts.push({id:Date.now(), dir:debtDir, person:person, amount:amt, paid:0, note:note, due:due, date:new Date().toISOString()});
+  save(); debtAddOpen=false; toast("เพิ่มแล้ว ✓"); debtsRender();
+}
+function debtPay(id){
+  var d=state.debts.find(x=>x.id===id); if(!d) return;
+  var rem=d.amount-d.paid;
+  var v=prompt((d.dir==="lend"?"รับคืน":"จ่าย")+"เท่าไร? (คงเหลือ ฿"+fmt(rem)+")", String(rem));
+  if(v===null) return;
+  var amt=parseFloat(String(v).replace(/,/g,""))||0;
+  if(amt<=0) return;
+  d.paid=Math.min(d.amount, d.paid+amt);
+  save(); debtsRender();
+}
+function debtClear(id){ var d=state.debts.find(x=>x.id===id); if(d){ d.paid=d.amount; save(); toast("เคลียร์แล้ว ✓"); debtsRender(); } }
+function debtDelete(id){ if(confirm("ลบรายการนี้?")){ state.debts=state.debts.filter(x=>x.id!==id); save(); debtsRender(); } }
+function debtsRender(){
+  var box=document.getElementById("debtsBody");
+  var lend=state.debts.filter(d=>d.dir==="lend"), borrow=state.debts.filter(d=>d.dir==="borrow");
+  var owedToMe=lend.reduce((s,d)=>s+(d.amount-d.paid),0);
+  var iOwe=borrow.reduce((s,d)=>s+(d.amount-d.paid),0);
+  var form="";
+  if(debtAddOpen){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div class="seg" style="margin-bottom:12px"><button class="'+(debtDir==="lend"?"on":"")+'" onclick="debtPickDir(\'lend\')">เขายืมเรา</button><button class="'+(debtDir==="borrow"?"on":"")+'" onclick="debtPickDir(\'borrow\')">เรายืมเขา</button></div>'+
+      '<input class="f" id="dPerson" placeholder="ชื่อคน เช่น พี่โจ้" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="dAmt" inputmode="decimal" placeholder="จำนวนเงิน (บาท)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="dNote" placeholder="โน้ต (ไม่บังคับ)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">ครบกำหนด (ไม่บังคับ)</div>'+
+      '<input class="f" id="dDue" type="date" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="debtAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="debtCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  var summary='<div class="card" style="padding:16px;margin-bottom:14px;display:flex;gap:10px">'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">เขายืมเรา (รับคืน)</div><div style="font:700 20px Anuphan;color:var(--accent-ink);margin-top:2px">฿'+fmt(owedToMe)+'</div></div>'+
+    '<div style="width:1px;background:var(--line)"></div>'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">เรายืมเขา (ต้องจ่าย)</div><div style="font:700 20px Anuphan;color:var(--danger);margin-top:2px">฿'+fmt(iOwe)+'</div></div>'+
+  '</div>';
+  function card(d){
+    var rem=d.amount-d.paid, done=rem<=0.001, pct=Math.min(100, d.paid/d.amount*100);
+    var col=d.dir==="lend"?"var(--accent)":"var(--danger)";
+    var dueTxt="";
+    if(d.due){ var dd=new Date(d.due+"T12:00:00"); var over=!done && dd < new Date(new Date().toDateString()); dueTxt=' · ครบ '+dd.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+(over?' ⚠️เลยกำหนด':''); }
+    return '<div class="card" style="padding:14px 16px;margin-bottom:10px;opacity:'+(done?".6":"1")+'">'+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+        '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.person)+(done?' ✓':'')+'</div>'+
+        '<div class="gray" style="font:500 12px Anuphan;margin-top:1px">'+(d.note?esc(d.note):(d.dir==="lend"?"ให้ยืม":"ยืมมา"))+dueTxt+'</div></div>'+
+        '<div style="text-align:right"><div style="font:700 16px Anuphan;color:'+col+'">฿'+fmt(rem)+'</div>'+(d.paid>0&&!done?'<div class="gray" style="font:500 11px Anuphan">แล้ว ฿'+fmt(d.paid)+'/'+fmt(d.amount)+'</div>':'')+'</div>'+
+      '</div>'+
+      (done?'':'<div style="height:7px;border-radius:99px;background:var(--track);margin-top:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:99px"></div></div>')+
+      '<div style="display:flex;gap:8px;margin-top:12px">'+
+        (done?'':'<button onclick="debtPay('+d.id+')" style="flex:1;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 13px Anuphan;cursor:pointer">'+(d.dir==="lend"?"รับคืนบางส่วน":"จ่ายบางส่วน")+'</button>'+
+        '<button onclick="debtClear('+d.id+')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--accent);color:#fff;font:700 13px Anuphan;cursor:pointer">เคลียร์ครบ</button>')+
+        '<button onclick="debtDelete('+d.id+')" style="width:44px;height:38px;flex:none;border:none;border-radius:10px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }
+  var body="";
+  if(!state.debts.length && !debtAddOpen){
+    body='<div style="text-align:center;padding:50px 20px" class="gray"><div style="font-size:42px">🤝</div><div style="font:600 15px Anuphan;margin-top:8px">ยังไม่มีรายการ</div><div style="font:500 13px Anuphan;margin-top:2px">บันทึกเงินที่ยืม/ให้ยืม<br>กดปุ่ม "+ เพิ่ม" มุมบน</div></div>';
+  } else {
+    var actL=lend.filter(d=>d.amount-d.paid>0.001), actB=borrow.filter(d=>d.amount-d.paid>0.001), cleared=state.debts.filter(d=>d.amount-d.paid<=0.001);
+    if(actL.length) body+='<div class="gray" style="font:700 13px Anuphan;margin:4px 2px 8px">💚 เขายืมเรา</div>'+actL.map(card).join("");
+    if(actB.length) body+='<div class="gray" style="font:700 13px Anuphan;margin:14px 2px 8px">❤️ เรายืมเขา</div>'+actB.map(card).join("");
+    if(cleared.length) body+='<div class="gray" style="font:700 13px Anuphan;margin:14px 2px 8px">✓ เคลียร์แล้ว</div>'+cleared.map(card).join("");
+  }
+  box.innerHTML = form + (state.debts.length||debtAddOpen? summary:"") + body;
+}
+
+/* ---------- INSTALLMENTS ---------- */
+var instAddOpen=false;
+function openInstall(){ document.getElementById("s-install").style.display="flex"; document.getElementById("nav").style.display="none"; instAddOpen=false; installRender(); }
+function closeInstall(){ document.getElementById("s-install").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function instAddToggle(){ instAddOpen=!instAddOpen; installRender(); if(instAddOpen){ var n=document.getElementById("iName"); n&&n.focus(); } }
+function instCreate(){
+  var name=(document.getElementById("iName").value||"").trim();
+  var total=parseFloat((document.getElementById("iTotal").value||"").replace(/,/g,""))||0;
+  var months=parseInt(document.getElementById("iMonths").value)||0;
+  var note=(document.getElementById("iNote").value||"").trim();
+  if(!name){ toast("ใส่ชื่อรายการ"); return; }
+  if(total<=0){ toast("ใส่ยอดรวม"); return; }
+  if(months<=0){ toast("ใส่จำนวนงวด"); return; }
+  state.installments.push({id:Date.now(), name:name, total:total, months:months, paidCount:0, note:note, date:new Date().toISOString()});
+  save(); instAddOpen=false; toast("เพิ่มแล้ว ✓"); installRender();
+}
+function instPay(id){ var it=state.installments.find(x=>x.id===id); if(it && it.paidCount<it.months){ it.paidCount++; save(); toast("จ่ายงวดที่ "+it.paidCount+" แล้ว ✓"); installRender(); } }
+function instUnpay(id){ var it=state.installments.find(x=>x.id===id); if(it && it.paidCount>0){ it.paidCount--; save(); installRender(); } }
+function instDelete(id){ if(confirm("ลบรายการผ่อนนี้?")){ state.installments=state.installments.filter(x=>x.id!==id); save(); installRender(); } }
+function installRender(){
+  var box=document.getElementById("installBody");
+  var form="";
+  if(instAddOpen){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<input class="f" id="iName" placeholder="ชื่อ เช่น iPhone 16 / ตู้เย็น" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+        '<input class="f" id="iTotal" inputmode="decimal" placeholder="ยอดรวม (บาท)" style="flex:1;box-shadow:none;background:var(--surface2)">'+
+        '<input class="f" id="iMonths" inputmode="numeric" placeholder="กี่งวด" style="width:104px;box-shadow:none;background:var(--surface2)">'+
+      '</div>'+
+      '<input class="f" id="iNote" placeholder="โน้ต (ไม่บังคับ)" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="instAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="instCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  var totalRemain=0, perMonthSum=0;
+  state.installments.forEach(it=>{ var per=it.total/it.months, remM=it.months-it.paidCount; totalRemain+=per*remM; if(remM>0) perMonthSum+=per; });
+  var summary = state.installments.length? '<div class="card" style="padding:16px;margin-bottom:14px;display:flex;gap:10px">'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">ยอดผ่อนคงเหลือ</div><div style="font:700 20px Anuphan;color:var(--danger);margin-top:2px">฿'+fmt(totalRemain)+'</div></div>'+
+    '<div style="width:1px;background:var(--line)"></div>'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">ต้องจ่าย/เดือน</div><div style="font:700 20px Anuphan;margin-top:2px">฿'+fmt(perMonthSum)+'</div></div>'+
+  '</div>' : "";
+  var cards="";
+  if(!state.installments.length && !instAddOpen){
+    cards='<div style="text-align:center;padding:50px 20px" class="gray"><div style="font-size:42px">💳</div><div style="font:600 15px Anuphan;margin-top:8px">ยังไม่มีรายการผ่อน</div><div style="font:500 13px Anuphan;margin-top:2px">เช่น มือถือ เครื่องใช้ไฟฟ้า<br>กดปุ่ม "+ เพิ่ม" มุมบน</div></div>';
+  } else {
+    cards=state.installments.slice().sort((a,b)=>((a.paidCount>=a.months?1:0)-(b.paidCount>=b.months?1:0))||(b.id-a.id)).map(it=>{
+      var per=it.total/it.months, remM=it.months-it.paidCount, remAmt=per*remM, done=remM<=0, pct=it.paidCount/it.months*100;
+      return '<div class="card" style="padding:14px 16px;margin-bottom:10px;opacity:'+(done?".6":"1")+'">'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+          '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.name)+(done?' ✓ ครบแล้ว':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">฿'+fmt(per)+'/งวด · งวด '+it.paidCount+'/'+it.months+(it.note?' · '+esc(it.note):'')+'</div></div>'+
+          '<div style="text-align:right"><div style="font:700 16px Anuphan;color:'+(done?"var(--accent-ink)":"var(--danger)")+'">฿'+fmt(remAmt)+'</div><div class="gray" style="font:500 11px Anuphan">เหลือ '+remM+' งวด</div></div>'+
+        '</div>'+
+        '<div style="height:7px;border-radius:99px;background:var(--track);margin-top:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--accent);border-radius:99px"></div></div>'+
+        '<div style="display:flex;gap:8px;margin-top:12px">'+
+          (done?'':'<button onclick="instPay('+it.id+')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--accent);color:#fff;font:700 13px Anuphan;cursor:pointer">จ่ายงวดนี้ (+1)</button>')+
+          (it.paidCount>0?'<button onclick="instUnpay('+it.id+')" style="width:44px;height:38px;flex:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:700 14px Anuphan;cursor:pointer">↩︎</button>':'')+
+          '<button onclick="instDelete('+it.id+')" style="width:44px;height:38px;flex:none;border:none;border-radius:10px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">🗑️</button>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+  }
+  box.innerHTML = form + summary + cards;
+}
+
+/* ---------- FINANCIAL HEALTH ---------- */
+function openHealth(){ document.getElementById("s-health").style.display="flex"; document.getElementById("nav").style.display="none"; healthRender(); }
+function closeHealth(){ document.getElementById("s-health").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function healthRender(){
+  document.getElementById("healthMonth").textContent = monthLabel(view)+(isAllWallets()?" · รวม":" · "+activeWallet().name);
+  var t=totals(), inc=t.inc, exp=t.exp, net=inc-exp;
+  var rate = inc>0? (net/inc*100) : 0;
+  var now=new Date();
+  var isCurrent = view.getFullYear()===now.getFullYear() && view.getMonth()===now.getMonth();
+  var dim=new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+  var daysElapsed = isCurrent? now.getDate() : dim;
+  var avgDay = daysElapsed>0? exp/daysElapsed : 0;
+  var projection = isCurrent? avgDay*dim : exp;
+  var bud=curBudget();
+  var rlabel, rcol;
+  if(inc<=0){ rlabel="ยังไม่มีรายรับในเดือนนี้"; rcol="var(--muted)"; }
+  else if(rate>=20){ rlabel="เยี่ยม ออมได้ดีมาก 🎉"; rcol="var(--accent-ink)"; }
+  else if(rate>=10){ rlabel="ดี กำลังไปได้สวย 👍"; rcol="var(--accent-ink)"; }
+  else if(rate>=0){ rlabel="พอไหว แต่ออมได้ค่อนข้างน้อย"; rcol="var(--ink)"; }
+  else { rlabel="จ่ายมากกว่ารับ ⚠️ ระวังหน่อย"; rcol="var(--danger)"; }
+  function metric(label, val, sub, col){ return '<div class="card" style="padding:16px;margin-bottom:10px"><div class="gray" style="font:500 12.5px Anuphan">'+label+'</div><div style="font:700 24px Anuphan;margin-top:3px;color:'+(col||"var(--ink)")+'">'+val+'</div>'+(sub?'<div class="gray" style="font:500 12px Anuphan;margin-top:3px">'+sub+'</div>':'')+'</div>'; }
+  var body='<div class="card" style="padding:18px 16px;margin-bottom:10px">'+
+    '<div style="display:flex;align-items:baseline"><span class="gray" style="font:500 13px Anuphan">อัตราการออมเดือนนี้</span><span style="margin-left:auto;font:700 26px Anuphan;color:'+rcol+'">'+(inc>0?Math.round(rate)+"%":"—")+'</span></div>'+
+    '<div style="height:9px;border-radius:99px;background:var(--track);margin-top:10px;overflow:hidden"><div style="height:100%;width:'+Math.max(0,Math.min(100,rate))+'%;background:var(--accent);border-radius:99px"></div></div>'+
+    '<div style="font:600 13px Anuphan;margin-top:9px;color:'+rcol+'">'+rlabel+'</div>'+
+    '<div class="gray" style="font:500 12px Anuphan;margin-top:4px">รายรับ ฿'+fmt(inc)+' · เก็บได้ ฿'+fmt(net)+'</div>'+
+  '</div>';
+  body+=metric("จ่ายเฉลี่ยต่อวัน", "฿"+fmt(avgDay), "จาก "+daysElapsed+" วันที่ผ่านมา");
+  if(isCurrent) body+=metric("คาดการณ์ยอดจ่ายสิ้นเดือน", "฿"+fmt(projection), (bud>0? (projection>bud? "⚠️ อาจเกินงบ ฿"+fmt(projection-bud) : "✓ น่าจะอยู่ในงบ (งบ ฿"+fmt(bud)+")") : "อิงค่าเฉลี่ยที่ผ่านมา"), (bud>0&&projection>bud?"var(--danger)":"var(--ink)"));
+  body+=metric("คงเหลือสุทธิ (รับ − จ่าย)", (net>=0?"+":"−")+"฿"+fmt(Math.abs(net)), null, net>=0?"var(--accent-ink)":"var(--danger)");
+  var byCat={}; state.tx.filter(inScope).filter(x=>x.kind==="out").forEach(x=>byCat[x.cat]=(byCat[x.cat]||0)+x.amt);
+  var top=Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+  if(top){ var em=(CATS_OUT.find(x=>x[0]===top[0])||["","📦"])[1]; body+=metric("หมวดที่จ่ายเยอะสุด", em+" "+esc(top[0]), "฿"+fmt(top[1])+" ("+Math.round(exp>0?top[1]/exp*100:0)+"% ของรายจ่าย)"); }
+  document.getElementById("healthBody").innerHTML = body;
+}
+
 /* ---------- WALLETS ---------- */
 var wForm={open:false, editing:null, emoji:"👛", name:"", budget:""};
 function openWallets(){ document.getElementById("s-wallets").style.display="flex"; document.getElementById("nav").style.display="none"; wForm.open=false; walletsRender(); }
@@ -1148,9 +1364,11 @@ function restoreData(input){
       const d=obj && obj.data ? obj.data : obj;   // accept wrapped or raw
       if(!d || !Array.isArray(d.tx)) throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
       if(!confirm("กู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ยืนยันไหม?")){ input.value=""; return; }
-      state = Object.assign({name:"ฉัน",theme:"light",tx:[],goals:[],recurring:[],catBudgets:{}}, d);
+      state = Object.assign({name:"ฉัน",theme:"light",tx:[],goals:[],recurring:[],catBudgets:{},debts:[],installments:[]}, d);
       if(!Array.isArray(state.goals)) state.goals=[];
       if(!Array.isArray(state.recurring)) state.recurring=[];
+      if(!Array.isArray(state.debts)) state.debts=[];
+      if(!Array.isArray(state.installments)) state.installments=[];
       if(!state.catBudgets || typeof state.catBudgets!=="object") state.catBudgets={};
       if(!state.cats||!state.cats.out||!state.cats.in) state.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())};
       migrateWallets(state);
