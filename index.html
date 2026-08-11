@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" onclick="openWallets()" style="font:600 16px Anuphan;cursor:pointer"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v32</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v33</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -473,7 +473,7 @@ function shiftMonth(n){ view = new Date(view.getFullYear(), view.getMonth()+n, 1
 function render(){
   document.documentElement.setAttribute("data-theme", state.theme);
   const {inc,exp}=totals();
-  const remain = curBudget() - exp;
+  const remain = curBudget() + inc - exp;   // เหลือใช้ = งบ + รายรับ − รายจ่าย
   // home head
   const h=new Date().getHours();
   document.getElementById("greet").textContent = h<12?"สวัสดีตอนเช้า":h<17?"สวัสดีตอนบ่าย":"สวัสดีตอนเย็น";
