@@ -62,7 +62,7 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;align-items:center;gap:12px">
         <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
         <div style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" onclick="openWallets()" style="font:600 16px Anuphan;cursor:pointer"></div></div>
-<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v34</div>
+<div style="font:600 11px Anuphan;background:rgba(255,255,255,.22);padding:3px 9px;border-radius:99px">v35</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
         <div style="font:400 13px Anuphan;opacity:.85">เหลือใช้ในเดือนนี้</div>
@@ -76,6 +76,11 @@ input.f{width:100%;border:none;outline:none;background:var(--surface);border-rad
       <div style="display:flex;gap:10px;margin-top:16px">
         <div style="flex:1;background:rgba(255,255,255,.13);border-radius:16px;padding:11px 14px"><div style="font:400 12px Anuphan;opacity:.8">รายรับ</div><div id="incomeTop" style="font:700 17px Anuphan;margin-top:2px"></div></div>
         <div style="flex:1;background:rgba(255,255,255,.13);border-radius:16px;padding:11px 14px"><div style="font:400 12px Anuphan;opacity:.8">รายจ่าย</div><div id="expenseTop" style="font:700 17px Anuphan;margin-top:2px"></div></div>
+      </div>
+      <div onclick="openWallets()" style="margin-top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.11);border-radius:14px;padding:10px 14px;cursor:pointer">
+        <span style="font-size:15px">💰</span>
+        <span style="font:400 12.5px Anuphan;opacity:.85">เงินคงเหลือจริง<span id="realBalScope" style="opacity:.7"></span></span>
+        <span id="realBalTop" style="margin-left:auto;font:700 17px Anuphan"></span>
       </div>
     </div>
     <div style="padding:14px 16px 8px;display:flex;flex-direction:column;gap:11px">
@@ -345,6 +350,7 @@ function migrateWallets(s){
     s.recurring.forEach(r=>{ if(!r.w || !s.wallets.some(w=>w.id===r.w)) r.w=first; });
   }
   if(!s.activeWallet || (s.activeWallet!=="all" && !s.wallets.some(w=>w.id===s.activeWallet))) s.activeWallet=s.wallets[0].id;
+  s.wallets.forEach(w=>{ if(typeof w.opening!=="number") w.opening=0; });
   return s;
 }
 function load(){
@@ -362,6 +368,9 @@ function walletEmoji(id){ const w=walletById(id); return w? (w.emoji||"👛") : 
 function walletMatch(t){ return isAllWallets() || t.w===state.activeWallet; }
 function curBudget(){ return isAllWallets()? state.wallets.reduce((s,w)=>s+(+w.budget||0),0) : (+activeWallet().budget||0); }
 function inScope(t){ return inView(t) && walletMatch(t); }
+// real running balance (cumulative across ALL months): opening + all income - all expense
+function walletBalance(id){ var w=walletById(id); var bal=+(w&&w.opening||0); state.tx.forEach(t=>{ if(t.w===id) bal += (t.kind==="in"? t.amt : -t.amt); }); return bal; }
+function realBalance(){ return isAllWallets()? state.wallets.reduce((s,w)=>s+walletBalance(w.id),0) : walletBalance(state.activeWallet); }
 
 function fmt(n){ return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function ym(d){ return d.getFullYear()+"-"+d.getMonth(); }
@@ -521,6 +530,8 @@ function render(){
   document.getElementById("balance").textContent = fmt(remain);
   document.getElementById("incomeTop").textContent = "฿"+fmt(inc);
   document.getElementById("expenseTop").textContent = "฿"+fmt(exp);
+  { const rb=realBalance(); document.getElementById("realBalTop").textContent=(rb<0?"−฿"+fmt(-rb):"฿"+fmt(rb));
+    document.getElementById("realBalScope").textContent = isAllWallets()? " · ทุกกระเป๋า" : ""; }
   // budget (per active wallet, or summed across all)
   const bud=curBudget();
   const pct = bud>0? Math.min(100, exp/bud*100):0;
@@ -1025,14 +1036,14 @@ function healthRender(){
 }
 
 /* ---------- WALLETS ---------- */
-var wForm={open:false, editing:null, emoji:"👛", name:"", budget:""};
+var wForm={open:false, editing:null, emoji:"👛", name:"", budget:"", opening:""};
 function openWallets(){ document.getElementById("s-wallets").style.display="flex"; document.getElementById("nav").style.display="none"; wForm.open=false; walletsRender(); }
 function closeWallets(){ document.getElementById("s-wallets").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
 function switchWallet(id){ state.activeWallet=id; save(); closeWallets(); }
 function wFormOpen(editId){
   wForm.open=true; wForm.editing=editId||null;
-  if(editId){ var w=walletById(editId); wForm.emoji=w?(w.emoji||"👛"):"👛"; wForm.name=w?w.name:""; wForm.budget=w?((+w.budget||0)?w.budget+"":""):""; }
-  else { wForm.emoji="👛"; wForm.name=""; wForm.budget=""; }
+  if(editId){ var w=walletById(editId); wForm.emoji=w?(w.emoji||"👛"):"👛"; wForm.name=w?w.name:""; wForm.budget=w?((+w.budget||0)?w.budget+"":""):""; wForm.opening=w?((+w.opening||0)?w.opening+"":""):""; }
+  else { wForm.emoji="👛"; wForm.name=""; wForm.budget=""; wForm.opening=""; }
   walletsRender(); var n=document.getElementById("wName"); n&&n.focus();
 }
 function wFormCancel(){ wForm.open=false; walletsRender(); }
@@ -1040,9 +1051,10 @@ function wFormSave(){
   var name=(document.getElementById("wName").value||"").trim();
   var emoji=(document.getElementById("wEmoji").value||"").trim()||"👛"; emoji=Array.from(emoji)[0]||"👛";
   var budget=parseFloat((document.getElementById("wBudget").value||"").replace(/,/g,""))||0;
+  var opening=parseFloat((document.getElementById("wOpening").value||"").replace(/,/g,""))||0;
   if(!name){ toast("ใส่ชื่อกระเป๋าก่อน"); return; }
-  if(wForm.editing){ var w=walletById(wForm.editing); if(w){ w.name=name; w.emoji=emoji; w.budget=budget; } toast("แก้ไขกระเป๋าแล้ว ✓"); }
-  else { var id="w"+Date.now(); state.wallets.push({id:id, name:name, emoji:emoji, budget:budget}); toast("เพิ่มกระเป๋าแล้ว ✓"); }
+  if(wForm.editing){ var w=walletById(wForm.editing); if(w){ w.name=name; w.emoji=emoji; w.budget=budget; w.opening=opening; } toast("แก้ไขกระเป๋าแล้ว ✓"); }
+  else { var id="w"+Date.now(); state.wallets.push({id:id, name:name, emoji:emoji, budget:budget, opening:opening}); toast("เพิ่มกระเป๋าแล้ว ✓"); }
   save(); wForm.open=false; walletsRender();
 }
 function wDelete(id){
@@ -1068,23 +1080,28 @@ function walletsRender(){
       '</div>'+
       '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">งบต่อเดือน (ไม่บังคับ)</div>'+
       '<input class="f" id="wBudget" inputmode="decimal" value="'+esc(wForm.budget)+'" placeholder="เช่น 25000 · เว้นว่าง = ไม่จำกัด" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">💰 ยอดตั้งต้น (เงินที่มีในกระเป๋านี้ตอนนี้)</div>'+
+      '<input class="f" id="wOpening" inputmode="decimal" value="'+esc(wForm.opening)+'" placeholder="เช่น 20000 · เว้นว่าง = 0" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
       '<div style="display:flex;gap:8px"><button onclick="wFormCancel()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
       '<button onclick="wFormSave()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
     '</div>';
   }
   var allSel = isAllWallets();
+  var allBal = state.wallets.reduce((s,w)=>s+walletBalance(w.id),0);
   var allRow='<div onclick="switchWallet(\'all\')" class="card" style="padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid '+(allSel?"var(--accent)":"transparent")+'">'+
     '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">🗂️</div>'+
-    '<div style="flex:1"><div style="font:700 15px Anuphan">รวมทุกกระเป๋า'+(allSel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">ดูยอดรวมทุกบัญชี</div></div>'+
+    '<div style="flex:1"><div style="font:700 15px Anuphan">รวมทุกกระเป๋า'+(allSel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">เงินคงเหลือจริงรวม</div></div>'+
+    '<div style="text-align:right;font:700 16px Anuphan;color:'+(allBal<0?"var(--danger)":"var(--ink)")+'">'+(allBal<0?"−฿"+fmt(-allBal):"฿"+fmt(allBal))+'</div>'+
   '</div>';
   var rows=state.wallets.map(function(w){
     var sel = !allSel && state.activeWallet===w.id;
+    var bal = walletBalance(w.id);
     var bud = (+w.budget||0)? 'งบ ฿'+fmt(w.budget)+'/เดือน' : 'ไม่จำกัดงบ';
-    var cnt = state.tx.filter(t=>t.w===w.id).length;
     return '<div class="card" style="padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:2px solid '+(sel?"var(--accent)":"transparent")+'">'+
       '<div onclick="switchWallet(\''+w.id+'\')" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer">'+
         '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(w.emoji||"👛")+'</div>'+
-        '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(w.name)+(sel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">'+bud+' · '+cnt+' รายการ</div></div>'+
+        '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(w.name)+(sel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">'+bud+'</div></div>'+
+        '<div style="text-align:right"><div style="font:700 15px Anuphan;color:'+(bal<0?"var(--danger)":"var(--ink)")+'">'+(bal<0?"−฿"+fmt(-bal):"฿"+fmt(bal))+'</div><div class="gray" style="font:500 10.5px Anuphan">คงเหลือจริง</div></div>'+
       '</div>'+
       '<button onclick="wFormOpen(\''+w.id+'\')" style="width:34px;height:34px;flex:none;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
       '<button onclick="wDelete(\''+w.id+'\')" style="width:34px;height:34px;flex:none;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
