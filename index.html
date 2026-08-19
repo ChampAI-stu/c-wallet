@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<title>C-Wallet — เงินของคุณ ชัดเจนขึ้น</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#171B4B">
+<meta name="description" content="C-Wallet — กระเป๋าเงินส่วนตัวที่สวย ชัด และเป็นส่วนตัว">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="C-Wallet">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="preload" href="./assets/hero-orbit.webp" as="image" type="image/webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme=light]{
+  color-scheme:light;
+  --bg:#F5F6FC;--surface:rgba(255,255,255,.88);--surface-solid:#FFFFFF;--surface2:#F0F2FA;
+  --ink:#171A2E;--muted:#747B92;--line:rgba(35,40,76,.09);
+  --accent:#6758E7;--accent-2:#2F8BFF;--accent-3:#24C4D9;--accent-ink:#5142D2;
+  --accent-tint:#EFEDFF;--danger:#F05B68;--danger-tint:#FFF0F2;
+  --head:#171B4B;--head-2:#4C36B4;--head-ink:#FFFFFF;
+  --shadow:0 18px 50px rgba(35,39,81,.10),0 2px 8px rgba(35,39,81,.05);
+  --shadow-soft:0 10px 28px rgba(35,39,81,.08);--ring:rgba(103,88,231,.22);
+  --t1:#EFEDFF;--t2:#FFF2E2;--t3:#EAF4FF;--t4:#E7F9F8;
+  --track:rgba(35,40,76,.07);--kb:#E7E9F1;--key:#FFFFFF;--key-ink:#171A2E;
+  --page-gradient:radial-gradient(circle at 105% -8%,rgba(103,88,231,.12),transparent 32%),linear-gradient(180deg,#F8F9FE 0%,#F3F5FB 100%);
+  --accent-gradient:linear-gradient(135deg,#7565EE 0%,#5140D5 48%,#2F8BFF 100%);
+}
+[data-theme=dark]{
+  color-scheme:dark;
+  --bg:#0B0D1B;--surface:rgba(21,24,44,.88);--surface-solid:#15182C;--surface2:#1D2038;
+  --ink:#F2F3FA;--muted:#969DB5;--line:rgba(225,229,255,.10);
+  --accent:#897BFF;--accent-2:#53A1FF;--accent-3:#42D8E8;--accent-ink:#B6ADFF;
+  --accent-tint:#282347;--danger:#FF7781;--danger-tint:#3B202A;
+  --head:#111438;--head-2:#3C2E91;--head-ink:#FFFFFF;
+  --shadow:0 20px 54px rgba(0,0,0,.34),0 2px 10px rgba(0,0,0,.22);
+  --shadow-soft:0 12px 30px rgba(0,0,0,.26);--ring:rgba(137,123,255,.28);
+  --t1:#2B2650;--t2:#3A2A22;--t3:#1E3047;--t4:#183B3F;
+  --track:rgba(225,229,255,.09);--kb:#101324;--key:#242842;--key-ink:#F2F3FA;
+  --page-gradient:radial-gradient(circle at 105% -8%,rgba(111,93,238,.16),transparent 34%),linear-gradient(180deg,#0E1021 0%,#090B17 100%);
+  --accent-gradient:linear-gradient(135deg,#8D7DFF 0%,#6854EA 48%,#357FE7 100%);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#0C1027}
+body{font-family:Anuphan,"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;background:radial-gradient(circle at 20% 10%,#263078 0,transparent 28%),radial-gradient(circle at 85% 85%,#42266B 0,transparent 30%),#090C1F}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:radial-gradient(rgba(255,255,255,.34) .6px,transparent .6px);background-size:18px 18px;mask-image:linear-gradient(to bottom,black,transparent 65%)}
+button,input{font-family:inherit}
+button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,color .18s ease,border-color .18s ease}
+button:focus-visible,input:focus-visible,[onclick]:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+#app{position:relative;max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column;background:var(--page-gradient);overflow:hidden;box-shadow:0 0 90px rgba(0,0,0,.5);border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)}
+.screen{display:none;flex-direction:column;min-height:0;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.on{display:flex;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:screenIn .34s cubic-bezier(.22,1,.36,1)}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes kbUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes pop{0%{opacity:0;transform:translateY(10px) scale(.94)}60%{opacity:1;transform:translateY(0) scale(1.02)}100%{opacity:1;transform:translateY(0)}}
+@keyframes heroGlow{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-12px,8px,0) scale(1.08)}}
+.head{position:relative;isolation:isolate;overflow:hidden;flex:none;background:linear-gradient(145deg,var(--head) 0%,#292477 48%,var(--head-2) 100%);color:var(--head-ink);padding:max(54px,calc(env(safe-area-inset-top) + 15px)) 22px 30px;border-radius:0 0 36px 36px;box-shadow:0 22px 58px rgba(38,29,112,.28)}
+.head::before{content:"";position:absolute;z-index:-2;width:310px;height:310px;right:-120px;top:-145px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(76,231,255,.75),rgba(104,87,238,.38) 38%,transparent 68%);filter:blur(1px);animation:heroGlow 10s ease-in-out infinite}
+.head::after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,transparent 18%,rgba(255,255,255,.08) 49%,transparent 71%);transform:translateX(-55%);pointer-events:none}
+.home-topbar{position:relative;z-index:1}
+#avatar{border:1px solid rgba(255,255,255,.24);box-shadow:0 8px 24px rgba(2,5,24,.22),inset 0 1px rgba(255,255,255,.24);backdrop-filter:blur(14px)}
+.profile-stack{min-width:0}
+#greet{letter-spacing:.02em}
+#whoWallet{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.build-badge{letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px rgba(255,255,255,.14);backdrop-filter:blur(10px)}
+.hero-switcher{border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px rgba(255,255,255,.10);backdrop-filter:blur(14px)}
+.balance-amount{filter:drop-shadow(0 7px 22px rgba(5,7,33,.2))}
+.balance-amount #balance{font-size:46px!important;font-weight:700!important;line-height:1.08;letter-spacing:-.045em!important}
+.hero-metrics{display:grid!important;grid-template-columns:1fr 1fr}
+.hero-metric{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px rgba(255,255,255,.09);backdrop-filter:blur(14px)}
+.hero-metric::after{content:"";position:absolute;width:62px;height:62px;right:-24px;bottom:-30px;border-radius:50%;background:rgba(255,255,255,.12)}
+.real-balance{border:1px solid rgba(255,255,255,.11);box-shadow:inset 0 1px rgba(255,255,255,.07);backdrop-filter:blur(14px)}
+.home-content{padding:18px 16px 16px!important;gap:14px!important;flex:none}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.quick-card{padding:8px 8px 10px!important;overflow:hidden}
+.quick-card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 45%);pointer-events:none}
+.quick-grid{gap:2px!important}
+.qa{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;border:none;background:none;cursor:pointer;color:var(--ink);padding:10px 2px 8px;border-radius:18px;min-width:0}
+.qa .ic{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:22px;border:1px solid rgba(255,255,255,.68);box-shadow:0 9px 20px rgba(49,45,111,.12),inset 0 1px rgba(255,255,255,.7);transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s ease}
+.qa:nth-child(1) .ic,.qa:nth-child(6) .ic{background:linear-gradient(145deg,#F2EEFF,#DCD5FF)!important}
+.qa:nth-child(2) .ic,.qa:nth-child(5) .ic{background:linear-gradient(145deg,#FFF6E7,#FFE5BB)!important}
+.qa:nth-child(3) .ic,.qa:nth-child(8) .ic{background:linear-gradient(145deg,#E9FBFA,#C9F2F0)!important}
+.qa:nth-child(4) .ic,.qa:nth-child(7) .ic{background:linear-gradient(145deg,#EAF5FF,#CEE7FF)!important}
+[data-theme=dark] .qa .ic{border-color:rgba(255,255,255,.08);box-shadow:0 10px 20px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.08)}
+[data-theme=dark] .qa:nth-child(1) .ic,[data-theme=dark] .qa:nth-child(6) .ic{background:linear-gradient(145deg,#312953,#27233F)!important}
+[data-theme=dark] .qa:nth-child(2) .ic,[data-theme=dark] .qa:nth-child(5) .ic{background:linear-gradient(145deg,#493622,#30271E)!important}
+[data-theme=dark] .qa:nth-child(3) .ic,[data-theme=dark] .qa:nth-child(8) .ic{background:linear-gradient(145deg,#1E4548,#183336)!important}
+[data-theme=dark] .qa:nth-child(4) .ic,[data-theme=dark] .qa:nth-child(7) .ic{background:linear-gradient(145deg,#243E5A,#1C2E43)!important}
+.qa span{font:600 11.5px Anuphan;line-height:1.25;white-space:nowrap}
+.budget-card{overflow:hidden}
+.budget-card::after{content:"";position:absolute;width:120px;height:120px;right:-68px;top:-72px;border-radius:50%;background:radial-gradient(circle,var(--ring),transparent 70%);pointer-events:none}
+#budgetFill{background:var(--accent-gradient)!important;box-shadow:0 0 18px rgba(103,88,231,.38)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);transition:background-color .18s ease,transform .18s ease}
+.row .em{width:42px;height:42px;border-radius:15px;background:linear-gradient(145deg,var(--surface-solid),var(--surface2));border:1px solid var(--line);display:grid;place-items:center;font-size:19px;flex:none;box-shadow:var(--shadow-soft)}
+.nav{flex:none;margin:6px 12px max(10px,env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface-solid) 86%,transparent);border:1px solid var(--line);padding:6px 7px;display:flex;align-items:center;justify-content:space-between;z-index:20;border-radius:25px;box-shadow:0 16px 42px rgba(25,26,65,.20);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.nav button{position:relative;flex:1;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--muted);font:600 10.5px Anuphan;cursor:pointer;border-radius:18px}
+.nav button[data-nav].act{color:var(--accent-ink);background:var(--accent-tint)}
+.nav button[data-nav].act::before{content:"";position:absolute;top:3px;width:18px;height:3px;border-radius:99px;background:var(--accent);box-shadow:0 3px 10px var(--ring)}
+.nav button svg{transition:transform .22s cubic-bezier(.22,1,.36,1)}
+.nav button.act svg{transform:translateY(-1px)}
+.fab{width:54px;height:54px;border-radius:19px;background:var(--accent-gradient);color:#fff;display:grid;place-items:center;box-shadow:0 11px 26px rgba(83,67,218,.38),inset 0 1px rgba(255,255,255,.25);transform:translateY(-7px)}
+.kbwrap{margin-top:auto;animation:kbUp .3s cubic-bezier(.22,1,.36,1);z-index:30;transition:transform .28s cubic-bezier(.22,1,.36,1)}
+.kbwrap.down{transform:translateY(115%)}
+.kb{background:var(--kb);padding:10px 8px calc(env(safe-area-inset-bottom) + 22px);display:grid;grid-template-columns:repeat(3,1fr);gap:9px 8px}
+.key{height:58px;border:1px solid var(--line);border-radius:16px;background:var(--key);color:var(--key-ink);font:600 22px Anuphan;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.09);display:flex;align-items:center;justify-content:center}
+.key.act{background:var(--accent-gradient);color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(83,67,218,.25)}
+.chip{padding:9px 14px;min-height:40px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px;font-family:Anuphan,"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;cursor:pointer;white-space:nowrap;flex:none;display:inline-flex;gap:6px;align-items:center;box-shadow:0 5px 14px rgba(35,39,81,.04);backdrop-filter:blur(15px)}
+.chip.on{background:var(--accent-gradient);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(83,67,218,.23)}
+.seg{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--line);border-radius:18px;padding:4px}
+.seg button{flex:1;border:none;border-radius:14px;padding:10px;font:600 13.5px Anuphan;background:none;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--surface-solid);color:var(--ink);box-shadow:0 5px 14px rgba(35,39,81,.09)}
+input.f{width:100%;border:1px solid transparent;outline:none;background:var(--surface);border-radius:16px;padding:14px 16px;font:500 15px Anuphan;color:var(--ink);box-shadow:var(--shadow-soft);transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease}
+input.f:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--ring),var(--shadow-soft);background:var(--surface-solid)!important}
+input.f::placeholder{color:var(--muted);opacity:.72}
+#s-stats>div:first-child,#s-history>div:first-child,#s-settings>div:first-child{position:relative;padding-top:max(50px,calc(env(safe-area-inset-top) + 14px))!important}
+#s-stats>div:first-child::before,#s-history>div:first-child::before,#s-settings>div:first-child::before{content:"C  /  WALLET";display:block;color:var(--accent-ink);font:700 9.5px Anuphan;letter-spacing:.16em;margin-bottom:5px;opacity:.82}
+#s-add,#s-summary,#s-cats,#s-recur,#s-goals,#s-split,#s-debts,#s-install,#s-health,#s-wallets{background:var(--page-gradient)!important}
+#s-add>div:first-child,#s-summary>div:first-child,#s-cats>div:first-child,#s-recur>div:first-child,#s-goals>div:first-child,#s-split>div:first-child,#s-debts>div:first-child,#s-install>div:first-child,#s-health>div:first-child,#s-wallets>div:first-child{padding-top:max(48px,calc(env(safe-area-inset-top) + 12px))!important}
+button[onclick^="close"]{border:1px solid var(--line)!important;box-shadow:var(--shadow-soft)!important}
+button[style*="background:var(--accent)"]{background:var(--accent-gradient)!important;box-shadow:0 9px 22px rgba(83,67,218,.24)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:rgba(22,24,46,.94);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:12px 20px;font:600 13.5px Anuphan;animation:pop .35s ease-out;z-index:50;box-shadow:0 14px 34px rgba(0,0,0,.3);backdrop-filter:blur(18px);white-space:nowrap}
+.gray{color:var(--muted)}
+.emo{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+
+/* C-WALLET NOVA — V40 VISUAL SYSTEM */
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.ui-icon,.qa-icon,.setting-icon svg,.mini-icon{display:block;width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.head{background:radial-gradient(circle at 82% 18%,rgba(39,214,255,.35),transparent 28%),radial-gradient(circle at 52% 112%,rgba(138,87,255,.58),transparent 46%),linear-gradient(145deg,#101638 0%,#252267 48%,#5027A8 100%);padding-bottom:24px}
+.head::before{width:360px;height:360px;right:-176px;top:-186px;background:radial-gradient(circle at 42% 42%,rgba(73,232,255,.82),rgba(94,82,255,.42) 36%,transparent 68%);filter:blur(5px)}
+.head::after{transform:none;background-image:linear-gradient(115deg,transparent 12%,rgba(255,255,255,.08) 42%,transparent 66%),radial-gradient(rgba(255,255,255,.21) .65px,transparent .75px);background-size:auto,18px 18px;opacity:.72;mask-image:linear-gradient(to bottom,black,transparent 88%)}
+.home-topbar{padding:2px 0 0}
+.home-topbar::after{content:"";position:absolute;left:50px;right:0;bottom:-12px;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.16),transparent)}
+.build-badge{background:rgba(5,9,35,.24)!important;padding:5px 10px!important}
+.hero-main{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) 148px;align-items:center;min-height:164px;margin-top:12px}
+.hero-copy{min-width:0;position:relative;z-index:2}
+.hero-label-row{display:flex;align-items:center;gap:8px}
+.hero-label{font:500 12.5px Anuphan;opacity:.76;letter-spacing:.01em}
+.hero-art{position:relative;height:162px;pointer-events:none;filter:drop-shadow(0 18px 28px rgba(1,4,26,.3))}
+.hero-art::before{content:"";position:absolute;inset:20px 0 10px;border-radius:50%;background:radial-gradient(circle,rgba(65,220,255,.2),transparent 68%);filter:blur(10px)}
+.hero-art img{position:absolute;width:205px;max-width:none;right:-34px;top:-20px;object-fit:contain;animation:artFloat 7s ease-in-out infinite;filter:saturate(1.08) contrast(1.02)}
+@keyframes artFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(1deg)}}
+.hero-switcher{margin:10px 0 0!important;width:max-content;padding:2px 3px!important;background:rgba(4,8,35,.22)!important}
+.balance-amount{margin-top:5px!important}
+.balance-amount #balance{font-size:43px!important;line-height:1.05;white-space:nowrap}
+.hero-microtrend{display:flex;align-items:center;gap:7px;margin-top:9px;color:rgba(255,255,255,.78);font:500 11.5px Anuphan}
+.hero-microtrend svg{width:52px;height:16px;overflow:visible}
+.hero-microtrend path{fill:none;stroke:#55E4F5;stroke-width:2;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(85,228,245,.65))}
+.hero-metrics{margin-top:5px!important;gap:8px!important}
+.hero-metric{border-radius:17px!important;padding:11px 13px!important;background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.07))!important}
+.hero-metric-income{box-shadow:inset 2px 0 rgba(82,224,241,.72),inset 0 1px rgba(255,255,255,.12)}
+.hero-metric-expense{box-shadow:inset 2px 0 rgba(255,136,161,.78),inset 0 1px rgba(255,255,255,.12)}
+.real-balance{margin-top:8px!important;background:linear-gradient(90deg,rgba(4,8,35,.24),rgba(255,255,255,.08))!important;border-color:rgba(255,255,255,.13)}
+.real-balance .mini-icon{width:17px;height:17px;color:#FFD86A;filter:drop-shadow(0 0 8px rgba(255,216,106,.45))}
+.home-content{padding-top:17px!important;background:radial-gradient(circle at 86% 0,rgba(112,87,241,.09),transparent 24%)}
+.card{border-color:color-mix(in srgb,var(--line) 64%,rgba(255,255,255,.48));box-shadow:0 22px 55px rgba(27,30,72,.105),0 3px 10px rgba(27,30,72,.05),inset 0 1px rgba(255,255,255,.5)}
+[data-theme=dark] .card{box-shadow:0 22px 60px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.055)}
+.quick-card{padding:8px!important;border-radius:28px;background:linear-gradient(150deg,var(--surface),color-mix(in srgb,var(--surface) 84%,var(--accent-tint)))}
+.quick-grid{gap:3px!important}
+.qa{padding:9px 1px 8px}
+.qa .ic{position:relative;width:54px;height:54px;border-radius:19px;color:#fff;border:1px solid rgba(255,255,255,.22);box-shadow:0 13px 24px rgba(31,29,95,.18),inset 0 1px rgba(255,255,255,.32);overflow:hidden}
+.qa .ic::after{content:"";position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,.35),transparent 42%);pointer-events:none}
+.qa .ic .qa-icon{position:relative;z-index:1;width:25px;height:25px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.18))}
+.qa:nth-child(1) .ic{background:linear-gradient(145deg,#725CF5,#4E38CF)!important}
+.qa:nth-child(2) .ic{background:linear-gradient(145deg,#FFB64A,#E67724)!important}
+.qa:nth-child(3) .ic{background:linear-gradient(145deg,#2DD5D0,#168DAD)!important}
+.qa:nth-child(4) .ic{background:linear-gradient(145deg,#54A7FF,#3965D8)!important}
+.qa:nth-child(5) .ic{background:linear-gradient(145deg,#FF7893,#D44778)!important}
+.qa:nth-child(6) .ic{background:linear-gradient(145deg,#8C7CFF,#5747D6)!important}
+.qa:nth-child(7) .ic{background:linear-gradient(145deg,#43D59B,#168C6E)!important}
+.qa:nth-child(8) .ic{background:linear-gradient(145deg,#50C6FF,#2677D7)!important}
+.qa span{font-weight:650}
+.budget-card{padding:17px 18px!important;background:radial-gradient(circle at 95% -10%,rgba(255,210,81,.16),transparent 34%),linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--surface) 91%,var(--accent-tint)))}
+#wealthBadge{width:48px!important;height:48px!important;border-radius:17px;background:linear-gradient(145deg,var(--surface-solid),var(--accent-tint));border:1px solid var(--line);box-shadow:0 10px 20px rgba(39,39,94,.1);padding:2px}
+.recent-card{overflow:hidden}
+.recent-card::before{content:"";position:absolute;width:150px;height:150px;right:-95px;bottom:-95px;border-radius:50%;border:22px solid var(--accent-tint);opacity:.8}
+.stats-wrap{padding:8px 16px 18px!important;gap:13px!important}
+.stats-visual{position:relative;overflow:hidden;min-height:166px;padding:19px!important;color:#fff;background:radial-gradient(circle at 85% 10%,rgba(47,206,255,.35),transparent 34%),linear-gradient(145deg,#14193F,#4230A0 68%,#275FD0)!important;border-color:rgba(255,255,255,.12)!important}
+.stats-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.08),transparent 42%);pointer-events:none}
+.stats-copy{position:relative;z-index:2;max-width:58%}
+.stats-kicker{font:600 10px Anuphan;letter-spacing:.12em;text-transform:uppercase;color:#7DE8F3}
+.stats-net-label{font:500 12px Anuphan;opacity:.72;margin-top:18px}
+.stats-net{font:700 29px Anuphan;margin-top:1px;letter-spacing:-.035em;white-space:nowrap}
+.stats-caption{font:400 11.5px Anuphan;opacity:.7;margin-top:5px;line-height:1.45}
+.stats-art{position:absolute;width:190px;height:190px;right:-18px;bottom:-26px;object-fit:contain;filter:drop-shadow(0 18px 28px rgba(0,0,0,.25));z-index:1;animation:artFloat 8s ease-in-out infinite reverse}
+.stats-totals{padding:15px!important}
+.stat-metric{position:relative;padding:3px 10px;border-left:1px solid var(--line)}
+.stat-metric:first-child{border-left:none;padding-left:0}
+.history-search{position:relative;padding:4px 16px 0}
+.history-search::before{content:"";position:absolute;left:29px;top:16px;width:14px;height:14px;border:2px solid var(--muted);border-radius:50%;z-index:2;opacity:.65;pointer-events:none}
+.history-search::after{content:"";position:absolute;left:42px;top:29px;width:6px;height:2px;background:var(--muted);transform:rotate(45deg);border-radius:9px;z-index:2;opacity:.65;pointer-events:none}
+.history-search input{padding-left:43px!important}
+.settings-wrap{padding:8px 16px 20px!important}
+.settings-brand{position:relative;overflow:hidden;display:flex;align-items:center;gap:13px;padding:15px!important;color:#fff;background:radial-gradient(circle at 92% 8%,rgba(50,218,255,.34),transparent 28%),linear-gradient(145deg,#14193F,#4932A8)!important;border-color:rgba(255,255,255,.13)!important}
+.settings-brand::after{content:"";position:absolute;width:115px;height:115px;right:-56px;bottom:-70px;border-radius:50%;border:18px solid rgba(255,255,255,.07)}
+.settings-brand img{width:52px;height:52px;border-radius:17px;box-shadow:0 10px 24px rgba(0,0,0,.24);flex:none}
+.settings-brand-copy{min-width:0;position:relative;z-index:1}
+.settings-brand-title{font:700 16px Anuphan;letter-spacing:-.01em}
+.settings-brand-sub{font:400 11.5px Anuphan;opacity:.68;margin-top:2px}
+.privacy-chip{position:relative;z-index:1;margin-left:auto;display:flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.14);background:rgba(5,9,35,.2);padding:6px 8px;border-radius:99px;font:600 9.5px Anuphan;white-space:nowrap}
+.privacy-chip::before{content:"";width:6px;height:6px;border-radius:50%;background:#62E3AE;box-shadow:0 0 8px #62E3AE}
+.profile-card{background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--surface) 90%,var(--accent-tint)))}
+#setAvatar{border:2px solid color-mix(in srgb,var(--accent) 55%,white);box-shadow:0 12px 26px var(--ring)}
+.settings-group{padding:6px 15px!important}
+.setting-icon{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;flex:none;color:#fff;box-shadow:0 8px 18px rgba(35,35,83,.14)}
+.setting-icon svg{width:19px;height:19px}
+.si-violet{background:linear-gradient(145deg,#806CFF,#5440D2)}
+.si-blue{background:linear-gradient(145deg,#4FA8FF,#3267D8)}
+.si-cyan{background:linear-gradient(145deg,#38D7D2,#178DA7)}
+.si-gold{background:linear-gradient(145deg,#FFC85A,#E6862B)}
+.si-green{background:linear-gradient(145deg,#50D5A0,#168B6E)}
+.si-coral{background:linear-gradient(145deg,#FF7C96,#D84C73)}
+.setting-chevron{margin-left:4px;color:var(--muted);font-size:20px;font-weight:300}
+.amount-panel{position:relative;overflow:hidden;margin:18px 20px 8px;padding:22px 16px 19px!important;border:1px solid var(--line);border-radius:24px;background:radial-gradient(circle at 90% 0,var(--ring),transparent 37%),linear-gradient(145deg,var(--surface),var(--surface2));box-shadow:var(--shadow-soft)}
+.amount-panel::after{content:"";position:absolute;width:108px;height:108px;right:-65px;bottom:-70px;border:18px solid var(--accent-tint);border-radius:50%;opacity:.9}
+.amount-panel+#catRow{margin-top:4px}
+#s-add,#s-summary,#s-cats,#s-recur,#s-goals,#s-split,#s-debts,#s-install,#s-health,#s-wallets{max-width:560px!important}
+.empty-state{position:relative;text-align:center;padding:16px 8px 13px;color:var(--muted)}
+.empty-state img{width:116px;height:116px;object-fit:contain;filter:drop-shadow(0 14px 24px rgba(54,44,135,.15));margin:-8px auto -2px;display:block}
+.empty-title{font:650 14px Anuphan;color:var(--ink)}
+.empty-sub{font:450 12px Anuphan;margin-top:3px;line-height:1.5}
+.empty-compact{padding:8px 0 2px}
+.empty-compact img{width:94px;height:94px}
+@media(max-width:390px){.hero-main{grid-template-columns:minmax(0,1fr) 112px;min-height:152px}.hero-art img{width:180px;right:-42px;top:-10px}.balance-amount #balance{font-size:38px!important}.qa .ic{width:50px;height:50px}.qa span{font-size:10.5px}.privacy-chip{display:none}.stats-art{width:168px;right:-30px}}
+@media (hover:hover){
+  button:hover{transform:translateY(-1px)}
+  .qa:hover{background:var(--surface2)}
+  .qa:hover .ic{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 26px rgba(49,45,111,.17),inset 0 1px rgba(255,255,255,.7)}
+  .row[onclick]:hover{transform:translateX(3px)}
+  .nav button:hover{color:var(--ink)}
+  .fab:hover{transform:translateY(-9px) scale(1.04)}
+}
+button:active,.qa:active{transform:scale(.97)}
+.fab:active{transform:translateY(-7px) scale(.94)}
+@media (min-width:680px){#app{height:min(920px,calc(100% - 34px));margin:17px auto;border-radius:32px;border:1px solid rgba(255,255,255,.12)}.head{padding-top:34px}.nav{margin-bottom:12px}#s-stats>div:first-child,#s-history>div:first-child,#s-settings>div:first-child{padding-top:34px!important}#s-add>div:first-child,#s-summary>div:first-child,#s-cats>div:first-child,#s-recur>div:first-child,#s-goals>div:first-child,#s-split>div:first-child,#s-debts>div:first-child,#s-install>div:first-child,#s-health>div:first-child,#s-wallets>div:first-child{padding-top:32px!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="premium-shell">
+<div id="app">
+  <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="ic-pay" viewBox="0 0 24 24"><path d="M3.5 7.5h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2z"/><path d="M3.5 10.5h15M14.5 4.5h6v6M20.5 4.5l-7 7"/></symbol>
+    <symbol id="ic-chart" viewBox="0 0 24 24"><path d="M4 19V11M10 19V6M16 19v-9M21 19H2.5"/><path d="m4 7 5-4 5 3 6-4"/></symbol>
+    <symbol id="ic-split" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.3"/><circle cx="5" cy="18" r="2.3"/><circle cx="19" cy="18" r="2.3"/><path d="M12 7.5v3.2M12 10.7 5 15.5M12 10.7l7 4.8"/></symbol>
+    <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="11" cy="13" r="7.5"/><circle cx="11" cy="13" r="3.2"/><path d="m13.5 10.5 7-7M16 3.5h4.5V8"/></symbol>
+    <symbol id="ic-link" viewBox="0 0 24 24"><path d="m9.7 14.3-1.4 1.4a3.4 3.4 0 0 1-4.8-4.8l3.2-3.2a3.4 3.4 0 0 1 4.8 0"/><path d="m14.3 9.7 1.4-1.4a3.4 3.4 0 1 1 4.8 4.8l-3.2 3.2a3.4 3.4 0 0 1-4.8 0M8.5 12h7"/></symbol>
+    <symbol id="ic-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 9.5h18M7 15h4"/></symbol>
+    <symbol id="ic-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2.2-5 4.1 10 2.3-5H21"/><path d="M4 20h16"/></symbol>
+    <symbol id="ic-repeat" viewBox="0 0 24 24"><path d="M5 7h11.5A3.5 3.5 0 0 1 20 10.5v.5M17 4l3 3-3 3M19 17H7.5A3.5 3.5 0 0 1 4 13.5V13M7 20l-3-3 3-3"/></symbol>
+    <symbol id="ic-wallet" viewBox="0 0 24 24"><path d="M4 7.5h14a2 2 0 0 1 2 2v9H6a2 2 0 0 1-2-2z"/><path d="M4 9V6a2 2 0 0 1 2-2h11M15 12h6v4h-6a2 2 0 1 1 0-4Z"/></symbol>
+    <symbol id="ic-tag" viewBox="0 0 24 24"><path d="m3.5 12.5 8.8 8.2 8.4-8.4-8.2-8.8H4z"/><circle cx="8" cy="8" r="1.3"/></symbol>
+    <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M20 15.6A8 8 0 0 1 8.4 4a8.1 8.1 0 1 0 11.6 11.6Z"/><path d="M16.5 4v3M15 5.5h3"/></symbol>
+    <symbol id="ic-backup" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="7.5" ry="3"/><path d="M4.5 5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V5M4.5 11v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/><path d="M12 17v-6M9.5 13.5 12 11l2.5 2.5"/></symbol>
+    <symbol id="ic-restore" viewBox="0 0 24 24"><path d="M4.5 8.5A8 8 0 1 1 5 16M4.5 4v4.5H9"/><path d="M12 8v5l3 2"/></symbol>
+    <symbol id="ic-export" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20H6zM14 3.5V8h4"/><path d="M9 14h6M12 11l3 3-3 3"/></symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></symbol>
+  </svg>
+  <!-- HOME -->
+  <div class="screen on" id="s-home">
+    <div class="head">
+      <div class="home-topbar" style="display:flex;align-items:center;gap:12px">
+        <div id="avatar" style="width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:700 16px Anuphan"></div>
+        <div class="profile-stack" style="flex:1"><div id="greet" style="font:400 12.5px Anuphan;opacity:.75"></div><div id="whoWallet" onclick="openWallets()" style="font:600 16px Anuphan;cursor:pointer"></div></div>
+        <div class="build-badge" style="font:600 10px Anuphan;background:rgba(255,255,255,.18);padding:5px 9px;border-radius:99px">v40</div>
+      </div>
+      <div class="hero-main">
+        <div class="hero-copy">
+          <div class="hero-label-row"><span class="hero-label">เหลือใช้ในเดือนนี้</span></div>
+          <div class="balance-amount" style="display:flex;align-items:baseline;gap:4px"><span style="font:600 23px Anuphan">฿</span><span id="balance" style="font:700 42px Anuphan;letter-spacing:-.025em"></span></div>
+          <div class="hero-microtrend"><svg viewBox="0 0 52 16"><path d="M1 13 9 9l7 2 9-7 8 4 8-5 10 2"/></svg><span>ภาพรวมเดือนนี้</span></div>
+          <div class="hero-switcher" style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.16);border-radius:99px;padding:3px 4px">
+            <button onclick="shiftMonth(-1)" aria-label="เดือนก่อนหน้า" style="border:none;background:none;color:inherit;font:600 16px Anuphan;padding:2px 9px;cursor:pointer">‹</button>
+            <span id="monthLbl" style="font:600 13px Anuphan;min-width:64px;text-align:center"></span>
+            <button onclick="shiftMonth(1)" aria-label="เดือนถัดไป" style="border:none;background:none;color:inherit;font:600 16px Anuphan;padding:2px 9px;cursor:pointer">›</button>
+          </div>
+        </div>
+        <div class="hero-art"><img src="./assets/hero-orbit.webp" alt="" aria-hidden="true"></div>
+      </div>
+      <div class="hero-metrics" style="display:flex;gap:10px;margin-top:16px">
+        <div class="hero-metric hero-metric-income" style="flex:1;background:rgba(255,255,255,.13);border-radius:18px;padding:12px 14px"><div style="font:400 12px Anuphan;opacity:.8">↗ รายรับ</div><div id="incomeTop" style="font:700 17px Anuphan;margin-top:2px"></div></div>
+        <div class="hero-metric hero-metric-expense" style="flex:1;background:rgba(255,255,255,.13);border-radius:18px;padding:12px 14px"><div style="font:400 12px Anuphan;opacity:.8">↘ รายจ่าย</div><div id="expenseTop" style="font:700 17px Anuphan;margin-top:2px"></div></div>
+      </div>
+      <div class="real-balance" onclick="openWallets()" style="margin-top:10px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.11);border-radius:16px;padding:10px 14px;cursor:pointer">
+        <svg class="mini-icon" aria-hidden="true"><use href="#ic-wallet"></use></svg>
+        <span style="font:400 12.5px Anuphan;opacity:.85">เงินคงเหลือจริง<span id="realBalScope" style="opacity:.7"></span></span>
+        <span id="realBalTop" style="margin-left:auto;font:700 17px Anuphan"></span>
+      </div>
+    </div>
+    <div class="home-content" style="padding:14px 16px 8px;display:flex;flex-direction:column;gap:11px">
+      <div class="card quick-card" style="padding:14px 12px">
+        <div class="quick-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px 4px">
+          <button class="qa" onclick="openAdd('out')"><div class="ic"><svg class="qa-icon"><use href="#ic-pay"></use></svg></div><span>จ่ายเงิน</span></button>
+          <button class="qa" onclick="openSummary()"><div class="ic"><svg class="qa-icon"><use href="#ic-chart"></use></svg></div><span>สรุป</span></button>
+          <button class="qa" onclick="openSplit()"><div class="ic"><svg class="qa-icon"><use href="#ic-split"></use></svg></div><span>หารบิล</span></button>
+          <button class="qa" onclick="openGoals()"><div class="ic"><svg class="qa-icon"><use href="#ic-target"></use></svg></div><span>เป้าหมาย</span></button>
+          <button class="qa" onclick="openDebts()"><div class="ic"><svg class="qa-icon"><use href="#ic-link"></use></svg></div><span>หนี้/ลูกหนี้</span></button>
+          <button class="qa" onclick="openInstall()"><div class="ic"><svg class="qa-icon"><use href="#ic-card"></use></svg></div><span>ผ่อนชำระ</span></button>
+          <button class="qa" onclick="openHealth()"><div class="ic"><svg class="qa-icon"><use href="#ic-pulse"></use></svg></div><span>สุขภาพเงิน</span></button>
+          <button class="qa" onclick="openRecur()"><div class="ic"><svg class="qa-icon"><use href="#ic-repeat"></use></svg></div><span>ประจำ</span></button>
+        </div>
+      </div>
+      <div class="card budget-card" style="padding:16px 17px">
+        <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">งบเดือนนี้</span><span id="budgetLeft" style="margin-left:auto;font:500 13px Anuphan" class="gray"></span></div>
+        <div style="display:flex;align-items:center;gap:11px;margin-top:11px">
+          <div id="wealthBadge" style="flex:none;width:42px;height:42px"></div>
+          <div style="flex:1;min-width:0">
+            <div style="height:10px;border-radius:99px;background:var(--track);overflow:hidden"><div id="budgetFill" style="height:100%;border-radius:99px;background:var(--accent);width:0%;transition:width .6s cubic-bezier(.22,1,.36,1)"></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;margin-top:9px;font:500 13px Anuphan"><span class="gray">ใช้ไป <b id="usedLbl" style="color:var(--ink)"></b> จาก <span id="budgetTotalLbl"></span></span><span id="wealthName" style="margin:0 8px;font:600 12.5px Anuphan"></span><span id="budgetPct" style="margin-left:auto;font-weight:600;color:var(--accent-ink)"></span></div>
+      </div>
+      <div class="card recent-card" style="padding:16px 17px 13px">
+        <div style="display:flex;align-items:center"><span style="font:600 15px Anuphan">รายการล่าสุด</span><button onclick="go('history')" style="margin-left:auto;border:none;background:none;color:var(--accent-ink);font:600 13px Anuphan;cursor:pointer">ดูทั้งหมด ›</button></div>
+        <div id="recentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="screen" id="s-stats">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 8px"><div style="font:700 24px Anuphan;letter-spacing:-.01em">สถิติ</div><div id="statsMonth" class="gray" style="font:500 14px Anuphan;margin-top:2px"></div></div>
+    <div class="stats-wrap" style="padding:8px 16px;display:flex;flex-direction:column;gap:11px">
+      <div class="card stats-visual">
+        <div class="stats-copy"><div class="stats-kicker">Financial pulse</div><div class="stats-net-label">กระแสเงินสุทธิ</div><div id="statsSpotNet" class="stats-net">฿0.00</div><div class="stats-caption">เห็นภาพรวมรายรับและรายจ่าย<br>ในเดือนเดียวอย่างชัดเจน</div></div>
+        <img class="stats-art" src="./assets/insight-orbit.webp" alt="" aria-hidden="true">
+      </div>
+      <div class="card stats-totals" style="padding:16px">
+        <div style="display:flex;gap:10px">
+          <div class="stat-metric" style="flex:1"><div class="gray" style="font:500 12.5px Anuphan">รายรับ</div><div id="statIn" style="font:700 20px Anuphan;color:var(--accent-ink);margin-top:2px"></div></div>
+          <div class="stat-metric" style="flex:1"><div class="gray" style="font:500 12.5px Anuphan">รายจ่าย</div><div id="statOut" style="font:700 20px Anuphan;color:var(--danger);margin-top:2px"></div></div>
+          <div class="stat-metric" style="flex:1"><div class="gray" style="font:500 12.5px Anuphan">คงเหลือสุทธิ</div><div id="statNet" style="font:700 20px Anuphan;margin-top:2px"></div></div>
+        </div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div style="font:600 15px Anuphan;margin-bottom:6px">รายจ่ายตามหมวด</div>
+        <div id="catBreak"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen" id="s-history">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 8px;display:flex;align-items:center">
+      <div style="font:700 24px Anuphan;letter-spacing:-.01em">ประวัติ</div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:3px 4px">
+        <button onclick="shiftMonth(-1)" style="border:none;background:none;color:var(--ink);font:600 16px Anuphan;padding:2px 9px;cursor:pointer">‹</button>
+        <span id="monthLbl2" style="font:600 13px Anuphan;min-width:64px;text-align:center"></span>
+        <button onclick="shiftMonth(1)" style="border:none;background:none;color:var(--ink);font:600 16px Anuphan;padding:2px 9px;cursor:pointer">›</button>
+      </div>
+    </div>
+    <div class="history-search"><input class="f" id="histSearch" placeholder="ค้นหาจากคำหรือโน้ต" oninput="render()" style="box-shadow:none;background:var(--surface2);padding:11px 14px"></div>
+    <div style="padding:10px 16px 0;display:flex;gap:8px">
+      <div class="seg" style="flex:1"><button id="hsMonth" class="on" onclick="histSetScope(false)">เดือนนี้</button><button id="hsAll" onclick="histSetScope(true)">ทุกเดือน</button></div>
+      <div class="seg" style="flex:1.35"><button id="hkAll" class="on" onclick="histSetKind('all')">ทั้งหมด</button><button id="hkIn" onclick="histSetKind('in')">รับ</button><button id="hkOut" onclick="histSetKind('out')">จ่าย</button></div>
+    </div>
+    <div id="histFilters" style="display:flex;gap:8px;overflow-x:auto;padding:10px 16px 4px" class="noscroll"></div>
+    <div id="historyList" style="padding:2px 16px;overflow-y:auto" class="noscroll"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="s-settings">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 8px"><div style="font:700 24px Anuphan;letter-spacing:-.01em">ตั้งค่า</div></div>
+    <div class="settings-wrap" style="padding:8px 16px;display:flex;flex-direction:column;gap:12px">
+      <div class="card settings-brand"><img src="./icon-192.png" alt="C-Wallet"><div class="settings-brand-copy"><div class="settings-brand-title">C-Wallet Nova</div><div class="settings-brand-sub">เงินของคุณ ชัดเจนในแบบที่สวยกว่า</div></div><div class="privacy-chip">อยู่ในเครื่อง</div></div>
+      <div class="card profile-card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div id="setAvatar" onclick="document.getElementById('avatarFile').click()" style="width:64px;height:64px;border-radius:20px;background:var(--accent);display:grid;place-items:center;font:700 26px Anuphan;color:#fff;cursor:pointer;overflow:hidden;flex:none;background-size:cover;background-position:center"></div>
+          <div style="flex:1">
+            <div style="font:600 14px Anuphan">รูปโปรไฟล์</div>
+            <div class="gray" style="font:500 12px Anuphan;margin-top:1px">แตะที่รูปเพื่อเลือกจากเครื่อง</div>
+            <button id="rmAvatar" onclick="removeAvatar()" style="margin-top:6px;padding:5px 12px;border:1px solid var(--line);border-radius:99px;background:none;color:var(--danger);font:600 12px Anuphan;cursor:pointer;display:none">ลบรูป</button>
+          </div>
+          <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="pickAvatar(this)">
+        </div>
+        <div><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">ชื่อคุณ</div><input class="f" id="setName" style="box-shadow:none;background:var(--surface2)"></div>
+        <button onclick="saveSettings()" style="height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึกการตั้งค่า</button>
+      </div>
+      <div class="card settings-group" style="padding:6px 16px">
+        <div class="row" onclick="openWallets()" style="cursor:pointer"><span class="setting-icon si-violet"><svg><use href="#ic-wallet"></use></svg></span><span style="flex:1;font:500 15px Anuphan">กระเป๋า / บัญชี (งบต่อกระเป๋า)</span><span id="walletCount" class="gray" style="font:500 13px Anuphan"></span><span class="setting-chevron">›</span></div>
+        <div class="row" onclick="openCats()" style="cursor:pointer"><span class="setting-icon si-gold"><svg><use href="#ic-tag"></use></svg></span><span style="flex:1;font:500 15px Anuphan">จัดการหมวด</span><span class="setting-chevron">›</span></div>
+        <div class="row" style="border:none" onclick="openRecur()"><span class="setting-icon si-cyan"><svg><use href="#ic-repeat"></use></svg></span><span style="flex:1;font:500 15px Anuphan">รายการประจำ</span><span id="recurCount" class="gray" style="font:500 13px Anuphan"></span><span class="setting-chevron">›</span></div>
+      </div>
+      <div class="card settings-group" style="padding:6px 16px">
+        <div class="row" style="border:none" onclick="toggleTheme()"><span class="setting-icon si-blue"><svg><use href="#ic-moon"></use></svg></span><span style="flex:1;font:500 15px Anuphan">โหมดมืด / สว่าง</span><span id="themeLbl" class="gray" style="font:500 13px Anuphan"></span></div>
+      </div>
+      <div class="card settings-group" style="padding:6px 16px">
+        <div class="row" onclick="backupData()" style="cursor:pointer"><span class="setting-icon si-green"><svg><use href="#ic-backup"></use></svg></span><span style="flex:1;font:500 15px Anuphan">สำรองข้อมูล (ไฟล์ backup)</span><span class="setting-chevron">›</span></div>
+        <div class="row" onclick="document.getElementById('restoreFile').click()" style="cursor:pointer"><span class="setting-icon si-cyan"><svg><use href="#ic-restore"></use></svg></span><span style="flex:1;font:500 15px Anuphan">กู้คืนข้อมูลจากไฟล์</span><span class="setting-chevron">›</span></div>
+        <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreData(this)">
+        <div class="row" onclick="exportXLS()" style="cursor:pointer"><span class="setting-icon si-gold"><svg><use href="#ic-export"></use></svg></span><span style="flex:1;font:500 15px Anuphan">ส่งออก Excel (.xls)</span><span class="setting-chevron">›</span></div>
+        <div class="row" onclick="exportCSV()" style="cursor:pointer"><span class="setting-icon si-violet"><svg><use href="#ic-export"></use></svg></span><span style="flex:1;font:500 15px Anuphan">ส่งออก CSV</span><span class="setting-chevron">›</span></div>
+        <div class="row" style="border:none" onclick="clearAll()"><span class="setting-icon si-coral"><svg><use href="#ic-trash"></use></svg></span><span style="flex:1;font:500 15px Anuphan;color:var(--danger)">ล้างข้อมูลทั้งหมด</span></div>
+      </div>
+      <div class="gray" style="text-align:center;font:400 12px Anuphan;padding:4px">C-Wallet · ข้อมูลเก็บในเครื่องนี้เท่านั้น</div>
+    </div>
+  </div>
+
+  <!-- ADD (overlay) -->
+  <div class="screen" id="s-add" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:40;padding:0;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeAdd()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div id="addTitle" style="font:600 17px Anuphan">บันทึกรายการ</div>
+      <button id="addDate" onclick="pickAddDate()" style="margin-left:auto;font:600 13.5px Anuphan;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 14px;cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:6px">📅 <span id="addDateLbl"></span></button>
+      <input type="date" id="addDateInput" onchange="onAddDate(this.value)" style="position:absolute;top:0;right:0;width:1px;height:1px;opacity:0;pointer-events:none">
+    </div>
+    <div style="padding:16px 20px 0"><div class="seg"><button id="tabOut" class="on" onclick="setKind('out')">รายจ่าย</button><button id="tabIn" onclick="setKind('in')">รายรับ</button></div></div>
+    <div class="amount-panel" style="padding:24px 20px 8px;text-align:center">
+      <div class="gray" style="font:500 13px Anuphan">จำนวนเงิน</div>
+      <div id="amountTap" onclick="showKeypad()" style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;cursor:pointer"><span id="draftSign" style="font:600 26px Anuphan;color:var(--danger)">-฿</span><span id="draft" style="font:700 46px Anuphan;letter-spacing:-.02em">0</span></div>
+    </div>
+    <div style="padding:6px 20px 0;text-align:center"><button id="addWalletChip" onclick="cycleAddWallet()" style="display:none;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font:600 12.5px Anuphan;color:var(--ink);cursor:pointer"></button></div>
+    <div style="padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto" class="noscroll" id="catRow"></div>
+    <div style="padding:14px 20px 0"><input class="f" id="noteInput" placeholder="โน้ต เช่น ข้าวมันไก่หน้าออฟฟิศ"></div>
+    <div id="editActions" style="display:none;padding:12px 20px 0;gap:8px">
+      <button onclick="duplicateTx()" style="flex:1;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:600 13.5px Anuphan;cursor:pointer">🔁 ทำซ้ำเป็นวันนี้</button>
+      <button onclick="deleteEditingTx()" style="flex:1;height:44px;border:none;border-radius:12px;background:var(--danger-tint);color:var(--danger);font:700 13.5px Anuphan;cursor:pointer">🗑️ ลบรายการนี้</button>
+    </div>
+    <div class="kbwrap" id="kbwrap">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--line)">
+        <span class="gray" style="font:500 13px Anuphan">แตะตัวเลขเพื่อคีย์</span>
+        <button onclick="saveTx()" style="margin-left:auto;padding:11px 26px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 15px Anuphan;cursor:pointer">บันทึก</button>
+      </div>
+      <div class="kb" id="keypad"></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY (overlay) -->
+  <div id="s-summary" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeSummary()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">สรุปรายเดือน 📊</div>
+    </div>
+    <div id="summaryBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- CATEGORIES (overlay) -->
+  <div id="s-cats" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeCats()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">จัดการหมวด 🏷️</div>
+    </div>
+    <div id="catsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- RECURRING (overlay) -->
+  <div id="s-recur" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeRecur()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">รายการประจำ 🔁</div>
+      <button onclick="recurAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div class="gray" style="padding:6px 20px 0;font:400 11.5px Anuphan">* พอถึงวันที่กำหนดของแต่ละเดือน ระบบจะบันทึกให้อัตโนมัติเมื่อเปิดแอป (ถ้าไม่ได้เปิดข้ามเดือน จะเก็บงวดที่ตกหล่นให้ครบ)</div>
+    <div id="recurBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- GOALS (overlay) -->
+  <div id="s-goals" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeGoals()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">เป้าหมายเก็บเงิน 🐷</div>
+      <button onclick="goalAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่มเป้า</button>
+    </div>
+    <div id="goalsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- SPLIT BILL (overlay) -->
+  <div id="s-split" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:45;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeSplit()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">หารค่าอาหาร</div>
+    </div>
+    <div style="padding:14px 20px 0"><div class="seg"><button id="spTabEq" class="on" onclick="splitMode('equal')">หารเท่ากัน</button><button id="spTabIt" onclick="splitMode('items')">จ่ายตามที่สั่ง</button></div></div>
+    <div id="splitForm" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 20px 12px"></div>
+    <div id="splitResult" style="padding:14px 20px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--line);background:var(--surface)"></div>
+  </div>
+
+  <!-- DEBTS / IOU (overlay) -->
+  <div id="s-debts" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeDebts()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">หนี้ / ลูกหนี้ 🤝</div>
+      <button onclick="debtAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div id="debtsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- INSTALLMENTS (overlay) -->
+  <div id="s-install" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeInstall()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">ผ่อนชำระ / งวด 💳</div>
+      <button onclick="instAddToggle()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div id="installBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- FINANCIAL HEALTH (overlay) -->
+  <div id="s-health" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeHealth()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">สุขภาพการเงิน 📈</div>
+      <div id="healthMonth" style="margin-left:auto;font:600 13px Anuphan" class="gray"></div>
+    </div>
+    <div id="healthBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- WALLETS (overlay) -->
+  <div id="s-wallets" style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--bg);z-index:46;display:none;flex-direction:column;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)">
+    <div style="padding:max(52px, calc(env(safe-area-inset-top) + 12px)) 20px 0;display:flex;align-items:center;gap:12px">
+      <button onclick="closeWallets()" style="width:44px;height:44px;flex:none;border-radius:99px;border:none;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);font:600 24px Anuphan;line-height:1;padding-bottom:3px">‹</button>
+      <div style="font:700 18px Anuphan">กระเป๋า / บัญชี 👛</div>
+      <button onclick="wFormOpen()" style="margin-left:auto;padding:9px 16px;border:none;border-radius:99px;background:var(--accent);color:#fff;font:700 13.5px Anuphan;cursor:pointer">+ เพิ่ม</button>
+    </div>
+    <div id="walletsBody" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(env(safe-area-inset-bottom) + 20px)"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav" id="nav">
+    <button data-nav="home" class="act" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20a1 1 0 0 1-1 1h-4.5v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg><span>หน้าแรก</span></button>
+    <button data-nav="stats" onclick="go('stats')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 20V11M10 20V5M16 20v-6M21.5 20h-19"/></svg><span>สถิติ</span></button>
+    <button onclick="openAdd('out')" aria-label="เพิ่มรายการ" style="flex:0 0 auto"><div class="fab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div></button>
+    <button data-nav="history" onclick="go('history')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>ประวัติ</span></button>
+    <button data-nav="settings" onclick="go('settings')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.2v2M12 18.8v2M4.8 7.6l1.8 1M17.4 15.4l1.8 1M4.8 16.4l1.8-1M17.4 8.6l1.8-1"/></svg><span>ตั้งค่า</span></button>
+  </div>
+</div>
+
+<script>
+const DB="cwallet.v1";
+const DEFAULT_CATS={out:[["อาหาร","🍜"],["เดินทาง","🚌"],["ช้อปปิ้ง","🛍️"],["บิล/ค่าบ้าน","🧾"],["บันเทิง","🎬"],["สุขภาพ","💊"],["อื่นๆ","📦"]],in:[["เงินเดือน","💰"],["โบนัส","🎁"],["ขายของ","🏷️"],["ดอกเบี้ย","🏦"],["อื่นๆ","📦"]]};
+let CATS_OUT=DEFAULT_CATS.out.map(a=>a.slice()), CATS_IN=DEFAULT_CATS.in.map(a=>a.slice());
+function syncCats(){ CATS_OUT=state.cats.out; CATS_IN=state.cats.in; }
+const THMONTH=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+
+let state = load();
+syncCats();
+let view = new Date();           // month being viewed
+var histFilterCat = "all";
+var histScopeAll = false;        // false = this month, true = all months
+var histKind = "all";            // all | in | out
+function histSetCat(c){ histFilterCat = c; render(); }
+function histSetScope(all){ histScopeAll = !!all; render(); }
+function histSetKind(k){ histKind = k; render(); }
+let draft = "0", kind="out", cat=CATS_OUT[0][0];
+let editingTxId = null;          // null = adding new; otherwise editing this tx id
+let addDateVal = new Date();     // date chosen for the current add/edit
+let addWallet = null;            // wallet id the current add/edit will be saved to
+
+function migrateWallets(s){
+  if(!Array.isArray(s.tx)) s.tx=[];
+  if(!Array.isArray(s.recurring)) s.recurring=[];
+  if(!Array.isArray(s.wallets) || !s.wallets.length){
+    s.wallets=[{id:"w1", name:s.wallet||"กระเป๋าหลัก", emoji:"👛", budget:(+s.budget||0)}];
+    s.tx.forEach(t=>{ if(!t.w) t.w="w1"; });
+    s.recurring.forEach(r=>{ if(!r.w) r.w="w1"; });
+  } else {
+    const first=s.wallets[0].id;
+    s.tx.forEach(t=>{ if(!t.w || !s.wallets.some(w=>w.id===t.w)) t.w=first; });
+    s.recurring.forEach(r=>{ if(!r.w || !s.wallets.some(w=>w.id===r.w)) r.w=first; });
+  }
+  if(!s.activeWallet || (s.activeWallet!=="all" && !s.wallets.some(w=>w.id===s.activeWallet))) s.activeWallet=s.wallets[0].id;
+  s.wallets.forEach(w=>{ if(typeof w.opening!=="number") w.opening=0; });
+  return s;
+}
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(DB)); if(s&&s.tx){ if(!s.goals) s.goals=[]; if(!s.recurring) s.recurring=[]; if(!s.catBudgets) s.catBudgets={}; if(!Array.isArray(s.debts)) s.debts=[]; if(!Array.isArray(s.installments)) s.installments=[]; if(!s.cats||!s.cats.out||!s.cats.in) s.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}; return migrateWallets(s); } }catch(e){}
+  return migrateWallets({name:"ฉัน", theme:"light", tx:[], goals:[], recurring:[], catBudgets:{}, debts:[], installments:[], wallets:[{id:"w1",name:"กระเป๋าหลัก",emoji:"👛",budget:25000}], activeWallet:"w1", cats:{out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())}});
+}
+function save(){ localStorage.setItem(DB, JSON.stringify(state)); }
+
+/* ---------- WALLET HELPERS ---------- */
+function isAllWallets(){ return state.activeWallet==="all"; }
+function activeWallet(){ return state.wallets.find(w=>w.id===state.activeWallet) || state.wallets[0]; }
+function walletById(id){ return state.wallets.find(w=>w.id===id); }
+function walletName(id){ const w=walletById(id); return w? w.name : "—"; }
+function walletEmoji(id){ const w=walletById(id); return w? (w.emoji||"👛") : "👛"; }
+function walletMatch(t){ return isAllWallets() || t.w===state.activeWallet; }
+function curBudget(){ return isAllWallets()? state.wallets.reduce((s,w)=>s+(+w.budget||0),0) : (+activeWallet().budget||0); }
+function inScope(t){ return inView(t) && walletMatch(t); }
+// real running balance (cumulative across ALL months): opening + all income - all expense
+function walletBalance(id){ var w=walletById(id); var bal=+(w&&w.opening||0); state.tx.forEach(t=>{ if(t.w===id) bal += (t.kind==="in"? t.amt : -t.amt); }); return bal; }
+function realBalance(){ return isAllWallets()? state.wallets.reduce((s,w)=>s+walletBalance(w.id),0) : walletBalance(state.activeWallet); }
+
+function fmt(n){ return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function emptyState(title, sub, compact){
+  return `<div class="empty-state ${compact?'empty-compact':''}"><img src="./assets/cora-empty.webp" alt=""><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`;
+}
+function ym(d){ return d.getFullYear()+"-"+d.getMonth(); }
+function inView(t){ const d=new Date(t.date); return d.getFullYear()===view.getFullYear() && d.getMonth()===view.getMonth(); }
+function monthLabel(d){ let by=d.getFullYear()+543; return THMONTH[d.getMonth()]+" "+String(by).slice(2); }
+
+function totals(){
+  let inc=0,exp=0;
+  state.tx.filter(inScope).forEach(t=> t.kind==="in"? inc+=t.amt : exp+=t.amt);
+  return {inc,exp};
+}
+
+function go(s){
+  document.querySelectorAll(".screen").forEach(e=>e.classList.remove("on"));
+  document.getElementById("s-"+s).classList.add("on");
+  document.querySelectorAll("#nav [data-nav]").forEach(b=>b.classList.toggle("act", b.dataset.nav===s));
+  document.getElementById("nav").style.display = "flex";
+  window.scrollTo(0,0);
+  render();
+}
+
+/* ---------- ADD ---------- */
+function pad2(n){ return (n<10?"0":"")+n; }
+function toDateInput(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function renderAddDate(){
+  const today=new Date(); const same = addDateVal.toDateString()===today.toDateString();
+  document.getElementById("addDateLbl").textContent = same? "วันนี้" : addDateVal.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});
+  document.getElementById("addDateInput").value = toDateInput(addDateVal);
+}
+function pickAddDate(){ const el=document.getElementById("addDateInput"); if(el.showPicker){ try{el.showPicker();return;}catch(e){} } el.click(); }
+function onAddDate(v){ if(!v) return; const p=v.split("-"); addDateVal=new Date(+p[0], +p[1]-1, +p[2], 12,0,0); renderAddDate(); }
+function openAdd(k){
+  editingTxId=null; addDateVal=new Date();
+  addWallet = isAllWallets()? state.wallets[0].id : state.activeWallet;
+  draft="0"; kind=k||"out"; cat = (k==="in"?CATS_IN:CATS_OUT)[0][0];
+  document.getElementById("noteInput").value="";
+  document.getElementById("addTitle").textContent="บันทึกรายการ";
+  document.getElementById("editActions").style.display="none";
+  renderAddDate(); renderAddWallet();
+  setKind(kind);
+  document.getElementById("s-add").classList.add("on");
+  document.getElementById("kbwrap").classList.remove("down");
+  document.getElementById("nav").style.display="none";
+}
+function openEdit(id){
+  const t=state.tx.find(x=>x.id===id); if(!t) return;
+  editingTxId=id; addDateVal=new Date(t.date); addWallet = t.w || state.wallets[0].id;
+  kind=t.kind; cat=t.cat; draft=String(t.amt);
+  document.getElementById("noteInput").value = (t.note && t.note!==t.cat)? t.note : "";
+  document.getElementById("addTitle").textContent="แก้ไขรายการ";
+  document.getElementById("editActions").style.display="flex";
+  renderAddDate(); renderAddWallet();
+  setKind(kind);
+  // keep chosen category after setKind reset it to first
+  cat=t.cat; renderCats(); updateDraft();
+  document.getElementById("s-add").classList.add("on");
+  document.getElementById("kbwrap").classList.remove("down");
+  document.getElementById("nav").style.display="none";
+}
+function renderAddWallet(){
+  const el=document.getElementById("addWalletChip"); if(!el) return;
+  if(state.wallets.length<=1){ el.style.display="none"; return; }
+  el.style.display="inline-flex";
+  el.innerHTML = walletEmoji(addWallet)+" "+esc(walletName(addWallet))+' <span style="opacity:.6">▾</span>';
+}
+function cycleAddWallet(){
+  const i=state.wallets.findIndex(w=>w.id===addWallet);
+  addWallet = state.wallets[(i+1)%state.wallets.length].id;
+  renderAddWallet();
+}
+function closeAdd(){ document.getElementById("s-add").classList.remove("on"); document.getElementById("nav").style.display="flex"; }
+function showKeypad(){ document.getElementById("noteInput").blur(); document.getElementById("kbwrap").classList.remove("down"); }
+function hideKeypad(){ document.getElementById("kbwrap").classList.add("down"); }
+function setKind(k){
+  kind=k;
+  document.getElementById("tabOut").classList.toggle("on",k==="out");
+  document.getElementById("tabIn").classList.toggle("on",k==="in");
+  document.getElementById("draftSign").textContent = k==="out"?"-฿":"+฿";
+  document.getElementById("draftSign").style.color = k==="out"?"var(--danger)":"var(--accent-ink)";
+  cat = (k==="in"?CATS_IN:CATS_OUT)[0][0];
+  renderCats();
+  updateDraft();
+}
+function renderCats(){
+  const list = kind==="in"?CATS_IN:CATS_OUT;
+  document.getElementById("catRow").innerHTML = list.map(([c,e])=>
+    `<button class="chip ${c===cat?'on':''}" onclick="pickCat('${esa(c)}')"><span class="emo" style="font-size:16px">${e}</span><span>${esc(c)}</span></button>`).join("");
+}
+function pickCat(c){ cat=c; renderCats(); }
+function keyPress(v){
+  if(v==="del"){ draft = draft.length>1? draft.slice(0,-1) : "0"; }
+  else if(v==="."){ if(!draft.includes(".")) draft+="."; }
+  else { if(draft==="0"&&v!=="."){draft=v;} else if(draft.replace(".","").length<9){ draft+=v; } }
+  updateDraft();
+}
+function updateDraft(){
+  let d=draft;
+  if(!d.includes(".")){ d = Number(d).toLocaleString("en-US"); }
+  else { let [a,b]=draft.split("."); d = Number(a||0).toLocaleString("en-US")+"."+b.slice(0,2); }
+  document.getElementById("draft").textContent = d;
+}
+function saveTx(){
+  const amt = parseFloat(draft)||0;
+  if(amt<=0){ toast("ใส่จำนวนเงินก่อนนะ"); return; }
+  const note = document.getElementById("noteInput").value.trim() || cat;
+  const emoji = ((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["", "📦"])[1];
+  const iso = addDateVal.toISOString();
+  const w = addWallet || (state.wallets[0] && state.wallets[0].id);
+  if(editingTxId!=null){
+    const t=state.tx.find(x=>x.id===editingTxId);
+    if(t){ t.kind=kind; t.amt=amt; t.cat=cat; t.emoji=emoji; t.note=note; t.date=iso; t.w=w; }
+    save(); closeAdd(); toast("แก้ไขรายการแล้ว ✓");
+  } else {
+    state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:iso, w});
+    save(); closeAdd(); toast(kind==="out"?"บันทึกรายจ่ายแล้ว ✓":"บันทึกรายรับแล้ว ✓");
+  }
+  if(!isAllWallets() && w) state.activeWallet=w; // follow the tx into its wallet
+  view=new Date(addDateVal.getFullYear(), addDateVal.getMonth(), 1); // jump to that month
+  go("home");
+}
+function duplicateTx(){
+  const amt=parseFloat(draft)||0; if(amt<=0){ toast("ใส่จำนวนเงินก่อนนะ"); return; }
+  const note=document.getElementById("noteInput").value.trim()||cat;
+  const emoji=((kind==="in"?CATS_IN:CATS_OUT).find(c=>c[0]===cat)||["","📦"])[1];
+  const w = addWallet || (state.wallets[0] && state.wallets[0].id);
+  state.tx.push({id:Date.now(), kind, amt, cat, emoji, note, date:new Date().toISOString(), w});
+  save(); closeAdd(); toast("ทำซ้ำเป็นวันนี้แล้ว ✓"); view=new Date(); go("home");
+}
+function deleteEditingTx(){
+  if(editingTxId==null) return;
+  if(!confirm("ลบรายการนี้?")) return;
+  state.tx=state.tx.filter(t=>t.id!==editingTxId); save(); closeAdd(); toast("ลบแล้ว"); go("home");
+}
+
+function delTx(id){
+  if(!confirm("ลบรายการนี้?")) return;
+  state.tx = state.tx.filter(t=>t.id!==id); save(); render();
+}
+
+function shiftMonth(n){ view = new Date(view.getFullYear(), view.getMonth()+n, 1); render(); }
+
+/* ---------- RENDER ---------- */
+function render(){
+  document.documentElement.setAttribute("data-theme", state.theme);
+  const {inc,exp}=totals();
+  const remain = curBudget() + inc - exp;   // เหลือใช้ = งบ + รายรับ − รายจ่าย
+  // home head
+  const h=new Date().getHours();
+  document.getElementById("greet").textContent = h<12?"สวัสดีตอนเช้า":h<17?"สวัสดีตอนบ่าย":"สวัสดีตอนเย็น";
+  var av=document.getElementById("avatar");
+  if(state.avatar){ av.style.backgroundImage="url("+state.avatar+")"; av.style.backgroundSize="cover"; av.style.backgroundPosition="center"; av.textContent=""; }
+  else { av.style.backgroundImage="none"; av.textContent=(state.name||"C").slice(0,1); }
+  const aw=activeWallet();
+  document.getElementById("whoWallet").innerHTML = esc(state.name)+" · "+(isAllWallets()? "รวมทุกกระเป๋า" : walletEmoji(state.activeWallet)+" "+esc(aw.name))+' <span style="opacity:.7">▾</span>';
+  document.getElementById("monthLbl").textContent = monthLabel(view);
+  document.getElementById("monthLbl2").textContent = monthLabel(view);
+  document.getElementById("balance").textContent = fmt(remain);
+  document.getElementById("incomeTop").textContent = "฿"+fmt(inc);
+  document.getElementById("expenseTop").textContent = "฿"+fmt(exp);
+  { const rb=realBalance(); document.getElementById("realBalTop").textContent=(rb<0?"−฿"+fmt(-rb):"฿"+fmt(rb));
+    document.getElementById("realBalScope").textContent = isAllWallets()? " · ทุกกระเป๋า" : ""; }
+  // budget (per active wallet, or summed across all)
+  const bud=curBudget();
+  const pct = bud>0? Math.min(100, exp/bud*100):0;
+  renderWealth(pct);
+  document.getElementById("usedLbl").textContent = "฿"+fmt(exp);
+  document.getElementById("budgetTotalLbl").textContent = "฿"+fmt(bud);
+  document.getElementById("budgetPct").textContent = Math.round(pct)+"%";
+  document.getElementById("budgetLeft").textContent = (bud-exp)>=0? "เหลือ ฿"+fmt(bud-exp) : "เกินงบ ฿"+fmt(exp-bud);
+  // recent
+  const recent = state.tx.filter(inScope).sort((a,b)=>b.id-a.id).slice(0,4);
+  document.getElementById("recentList").innerHTML = recent.length? recent.map(t=>rowHTML(t)).join("")
+    : emptyState("เริ่มบันทึกเงินของคุณ","แตะปุ่ม + เพื่อเพิ่มรายการแรก","compact");
+  // history + search/filter (scope: this month / all, and kind: all/in/out)
+  document.getElementById("hsMonth").classList.toggle("on", !histScopeAll);
+  document.getElementById("hsAll").classList.toggle("on", histScopeAll);
+  document.getElementById("hkAll").classList.toggle("on", histKind==="all");
+  document.getElementById("hkIn").classList.toggle("on", histKind==="in");
+  document.getElementById("hkOut").classList.toggle("on", histKind==="out");
+  let baseTx = (histScopeAll ? state.tx.filter(walletMatch) : state.tx.filter(inScope)).sort((a,b)=>b.id-a.id);
+  if(histKind!=="all") baseTx = baseTx.filter(t=>t.kind===histKind);
+  const q = (document.getElementById("histSearch")?.value||"").trim().toLowerCase();
+  // category filter chips (categories present in current scope+kind)
+  const catsPresent = [...new Set(baseTx.map(t=>t.cat))];
+  if(!catsPresent.includes(histFilterCat) && histFilterCat!=="all") histFilterCat="all";
+  const chips = ['<button class="chip '+(histFilterCat==="all"?"on":"")+'" onclick="histSetCat(\'all\')">ทั้งหมด</button>']
+    .concat(catsPresent.map(c=>{
+      const em=(CATS_OUT.concat(CATS_IN).find(x=>x[0]===c)||["","📦"])[1];
+      return '<button class="chip '+(histFilterCat===c?"on":"")+'" onclick="histSetCat(\''+esa(c)+'\')"><span class="emo" style="font-size:15px">'+em+'</span><span>'+esc(c)+'</span></button>';
+    })).join("");
+  document.getElementById("histFilters").innerHTML = chips;
+  let all = baseTx.filter(t=> histFilterCat==="all" || t.cat===histFilterCat);
+  if(q) all = all.filter(t=> (t.note||"").toLowerCase().includes(q) || (t.cat||"").toLowerCase().includes(q));
+  document.getElementById("historyList").innerHTML = all.length? all.map(t=>rowHTML(t,true)).join("")
+    : emptyState(baseTx.length?"ไม่พบรายการที่ค้นหา":"ยังไม่มีประวัติ",baseTx.length?"ลองเปลี่ยนคำค้นหรือหมวดหมู่":"รายการทั้งหมดจะปรากฏตรงนี้","compact");
+  // stats
+  document.getElementById("statsMonth").textContent = monthLabel(view);
+  document.getElementById("statIn").textContent = "฿"+fmt(inc);
+  document.getElementById("statOut").textContent = "฿"+fmt(exp);
+  document.getElementById("statNet").textContent = "฿"+fmt(inc-exp);
+  { const sn=document.getElementById("statsSpotNet"); if(sn){ const net=inc-exp; sn.textContent=(net<0?"−฿"+fmt(-net):"฿"+fmt(net)); sn.style.color=net<0?"#FF9AAF":"#FFFFFF"; } }
+  const byCat={};
+  state.tx.filter(inScope).filter(t=>t.kind==="out").forEach(t=> byCat[t.cat]=(byCat[t.cat]||0)+t.amt);
+  const entries=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max=entries.length?entries[0][1]:1;
+  document.getElementById("catBreak").innerHTML = entries.length? entries.map(([c,v])=>{
+    const em=(CATS_OUT.find(x=>x[0]===c)||["","📦"])[1];
+    const b=(state.catBudgets||{})[c]||0;
+    if(b>0){
+      const cp=Math.min(100, v/b*100), over=v>b;
+      return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${esc(c)}</span><span style="margin-left:auto;font-weight:600;color:${over?'var(--danger)':'var(--ink)'}">฿${fmt(v)} <span class="gray" style="font-weight:500">/ ฿${fmt(b)}</span></span></div>
+      <div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(4,cp)}%;background:${over?'var(--danger)':'var(--accent)'};border-radius:99px"></div></div>
+      <div class="gray" style="font:600 11px Anuphan;margin-top:3px">${Math.round(v/b*100)}%${over?' · เกินงบ ฿'+fmt(v-b):' · เหลือ ฿'+fmt(b-v)}</div></div>`;
+    }
+    return `<div style="margin-top:12px"><div style="display:flex;font:500 13.5px Anuphan"><span>${em} ${esc(c)}</span><span style="margin-left:auto;font-weight:600">฿${fmt(v)}</span></div>
+    <div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(6,v/max*100)}%;background:var(--accent);border-radius:99px"></div></div></div>`;
+  }).join("") : emptyState("ยังไม่มีรายจ่าย","เมื่อเริ่มบันทึก สัดส่วนแต่ละหมวดจะแสดงที่นี่","compact");
+  // settings labels
+  document.getElementById("themeLbl").textContent = state.theme==="dark"?"มืด":"สว่าง";
+  { const wc=document.getElementById("walletCount"); if(wc) wc.textContent = state.wallets.length>1? state.wallets.length+" กระเป๋า" : ""; }
+}
+function rowHTML(t, del){
+  const sign = t.kind==="in"?"+":"-";
+  const col = t.kind==="in"?"var(--accent-ink)":"var(--ink)";
+  const d=new Date(t.date);
+  const wtag = (isAllWallets() && t.w)? walletEmoji(t.w)+" " : "";
+  const meta = wtag+esc(t.cat)+" · "+d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})+" "+d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+  return `<div class="row" onclick="openEdit(${t.id})" style="cursor:pointer">
+    <div class="em">${t.emoji||"📦"}</div>
+    <div style="flex:1;min-width:0"><div style="font:600 14.5px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</div><div class="gray" style="font:400 12.5px Anuphan;margin-top:1px">${meta}</div></div>
+    <div style="font:700 15px Anuphan;color:${col}">${sign}฿${fmt(t.amt)}</div>
+  </div>`;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+/* escape a value used as a single-quoted JS arg inside a double-quoted onclick attribute */
+function esa(s){ return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,"&quot;"); }
+
+/* ---------- WEALTH MASCOT (custom SVG graphic set) ---------- */
+function wealthStage(pctSpent){
+  if(pctSpent < 20) return {s:0,name:"เศรษฐีเต็มขั้น",sub:"งบยังแน่นกระเป๋า",col:"#E1A83B"};
+  if(pctSpent < 40) return {s:1,name:"กระเป๋าหนัก",sub:"สบายๆ เหลือเยอะ",col:"#2563EB"};
+  if(pctSpent < 60) return {s:2,name:"พอมีพอใช้",sub:"กำลังดี มีสติ",col:"#4D8BF5"};
+  if(pctSpent < 85) return {s:3,name:"เริ่มฝืด",sub:"ระวัง ใกล้หมดงบ",col:"#E0883D"};
+  return {s:4,name:"ถังแตก!",sub:"รัดเข็มขัดด่วน",col:"#E0483D"};
+}
+function mascotBadge(st){
+  const face=[
+    '<circle cx="26" cy="30" r="1.8" fill="#3A2A18"/><circle cx="38" cy="30" r="1.8" fill="#3A2A18"/><path d="M25 35 Q32 42 39 35" stroke="#3A2A18" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="21" cy="34" r="2.2" fill="#FF9AA0" opacity=".6"/><circle cx="43" cy="34" r="2.2" fill="#FF9AA0" opacity=".6"/>',
+    '<circle cx="26" cy="30" r="1.7" fill="#3A2A18"/><circle cx="38" cy="30" r="1.7" fill="#3A2A18"/><path d="M26 35 Q32 40 38 35" stroke="#3A2A18" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+    '<circle cx="26" cy="31" r="1.7" fill="#3A2A18"/><circle cx="38" cy="31" r="1.7" fill="#3A2A18"/><path d="M27 36 Q32 39 37 36" stroke="#3A2A18" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    '<circle cx="26" cy="31" r="1.7" fill="#3A2A18"/><circle cx="38" cy="31" r="1.7" fill="#3A2A18"/><path d="M27 38 Q32 34 37 38" stroke="#3A2A18" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M45 27 q2 4 0 6 q-2 -2 0 -6" fill="#5CC8F5"/>',
+    '<path d="M23 30 l5 0 M36 30 l5 0" stroke="#3A2A18" stroke-width="1.8" stroke-linecap="round"/><path d="M27 39 Q32 35 37 39" stroke="#3A2A18" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M27 33 q1.8 4 0 6 q-1.8 -2 0 -6" fill="#5CC8F5"/>'
+  ][st];
+  const hat=[
+    '<path d="M18 18 L22 8 L28 15 L32 6 L36 15 L42 8 L46 18 Z" fill="#F2C14E" stroke="#D9A93C" stroke-width="1" stroke-linejoin="round"/><circle cx="32" cy="7" r="1.6" fill="#E0483D"/>',
+    '<rect x="22" y="6" width="20" height="11" rx="2" fill="#22314D"/><rect x="17" y="15" width="30" height="3.5" rx="2" fill="#22314D"/><rect x="22" y="12" width="20" height="2.5" fill="#2563EB"/>',
+    '','',
+    '<path d="M18 17 q14 -10 28 0 Z" fill="#8A94A3"/>'
+  ][st];
+  return `<svg viewBox="0 0 64 60" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="33" r="15" fill="#FFE0C2"/>${hat}${face}</svg>`;
+}
+function renderWealth(pctSpent){
+  const w=wealthStage(pctSpent);
+  const badge=document.getElementById("wealthBadge");
+  badge.innerHTML=mascotBadge(w.s); badge.style.animation="pop .45s ease-out";
+  document.getElementById("wealthName").textContent="· "+w.name;
+  document.getElementById("wealthName").style.color=w.col;
+  const bar=document.getElementById("budgetFill");
+  bar.style.background = pctSpent>=90?"var(--danger)":"var(--accent)";
+  requestAnimationFrame(()=>{ bar.style.width=Math.min(100,pctSpent)+"%"; });
+}
+function mascotSVG(st){
+  // shared face center ~ (110,64), head r22
+  const face=[
+    // 0 huge grin + rosy
+    '<circle cx="102" cy="60" r="2.6" fill="#3A2A18"/><circle cx="118" cy="60" r="2.6" fill="#3A2A18"/><path d="M100 68 Q110 80 120 68" stroke="#3A2A18" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="95" cy="66" r="3" fill="#FF9AA0" opacity=".6"/><circle cx="125" cy="66" r="3" fill="#FF9AA0" opacity=".6"/>',
+    // 1 happy
+    '<circle cx="102" cy="60" r="2.5" fill="#3A2A18"/><circle cx="118" cy="60" r="2.5" fill="#3A2A18"/><path d="M101 68 Q110 76 119 68" stroke="#3A2A18" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+    // 2 content
+    '<circle cx="102" cy="61" r="2.4" fill="#3A2A18"/><circle cx="118" cy="61" r="2.4" fill="#3A2A18"/><path d="M102 69 Q110 73 118 69" stroke="#3A2A18" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+    // 3 worried + sweat
+    '<circle cx="102" cy="61" r="2.4" fill="#3A2A18"/><circle cx="118" cy="61" r="2.4" fill="#3A2A18"/><path d="M103 72 Q110 67 117 72" stroke="#3A2A18" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M128 54 q3 6 0 9 q-3 -3 0 -9" fill="#5CC8F5"/>',
+    // 4 sad + tear
+    '<path d="M99 60 l6 0 M115 60 l6 0" stroke="#3A2A18" stroke-width="2.4" stroke-linecap="round"/><path d="M103 73 Q110 68 117 73" stroke="#3A2A18" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M104 64 q2.4 5 0 8 q-2.4 -3 0 -8" fill="#5CC8F5"/>'
+  ][st];
+  const hat=[
+    // crown gold
+    '<path d="M86 42 L92 26 L102 38 L110 22 L118 38 L128 26 L134 42 Z" fill="#F2C14E" stroke="#D9A93C" stroke-width="1.5" stroke-linejoin="round"/><circle cx="110" cy="24" r="2.6" fill="#E0483D"/><circle cx="92" cy="27" r="2" fill="#2563EB"/><circle cx="128" cy="27" r="2" fill="#2563EB"/>',
+    // top hat
+    '<rect x="90" y="20" width="40" height="20" rx="3" fill="#22314D"/><rect x="82" y="38" width="56" height="6" rx="3" fill="#22314D"/><rect x="90" y="33" width="40" height="4" fill="#2563EB"/>',
+    '', 
+    '',
+    // poor flat cap
+    '<path d="M86 40 q24 -16 48 0 Z" fill="#8A94A3"/><path d="M84 40 q6 4 14 3 l-12 0 Z" fill="#6E7887"/>'
+  ][st];
+  const shirt=["#E1A83B","#2563EB","#4D8BF5","#7C8AA3","#9AA3AD"][st];
+  // side props
+  const props=[
+    // 0 coin stacks + sparkles + floating $
+    '<g><rect x="18" y="96" width="26" height="7" rx="3.5" fill="#F2C14E"/><rect x="18" y="88" width="26" height="7" rx="3.5" fill="#F5CE6E"/><rect x="18" y="80" width="26" height="7" rx="3.5" fill="#F2C14E"/><rect x="176" y="92" width="26" height="7" rx="3.5" fill="#F5CE6E"/><rect x="176" y="84" width="26" height="7" rx="3.5" fill="#F2C14E"/><text x="31" y="72" font-size="12" fill="#E1A83B" text-anchor="middle">฿</text><text x="189" y="74" font-size="12" fill="#E1A83B" text-anchor="middle">฿</text><path d="M60 30 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z" fill="#F5CE6E"/><path d="M158 34 l1.5 4 l4 1.5 l-4 1.5 l-1.5 4 l-1.5 -4 l-4 -1.5 l4 -1.5 Z" fill="#F5CE6E"/></g>',
+    // 1 money bag
+    '<g transform="translate(170,78)"><path d="M6 8 q10 -8 20 0 q10 10 6 24 q-2 8 -16 8 q-14 0 -16 -8 q-4 -14 6 -24Z" fill="#2E7D46"/><rect x="8" y="2" width="16" height="6" rx="2" fill="#215C33"/><text x="16" y="30" font-size="13" fill="#CFEBD8" text-anchor="middle">฿</text></g>',
+    // 2 single coin
+    '<g transform="translate(178,86)"><circle cx="12" cy="12" r="12" fill="#F2C14E"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="#D9A93C" stroke-width="1.5"/><text x="12" y="16" font-size="11" fill="#B8862B" text-anchor="middle">฿</text></g>',
+    // 3 near-empty wallet
+    '<g transform="translate(172,86)"><rect x="0" y="4" width="30" height="20" rx="4" fill="#7C5A3A"/><rect x="0" y="4" width="30" height="7" rx="4" fill="#8E6A46"/><circle cx="23" cy="15" r="2.5" fill="#F2C14E"/></g>',
+    // 4 empty pocket turned out + moth
+    '<g transform="translate(172,88)"><path d="M4 2 q11 -3 22 0 l-3 14 q-8 4 -16 0 Z" fill="#C9CED6"/><path d="M9 16 q4 6 8 0" fill="#B4BAC4"/></g><g transform="translate(150,40)"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#B0A98F" opacity=".9"/><ellipse cx="8" cy="0" rx="6" ry="4" fill="#B0A98F" opacity=".9"/><rect x="3" y="-1.5" width="2" height="8" rx="1" fill="#6E6A57"/></g>'
+  ][st];
+  return `<svg viewBox="0 0 220 150" width="100%" style="max-width:300px" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="110" cy="138" rx="46" ry="7" fill="rgba(0,0,0,.12)"/>
+    ${props}
+    <path d="M84 132 q-6 -34 26 -34 q32 0 26 34 Z" fill="${shirt}"/>
+    <rect x="96" y="126" width="28" height="10" rx="4" fill="${shirt}"/>
+    <circle cx="110" cy="64" r="24" fill="#FFE0C2"/>
+    <path d="M88 60 q22 -12 44 0" stroke="#EBC6A0" stroke-width="1" fill="none" opacity=".6"/>
+    ${hat}
+    ${face}
+    ${st===4?'<path d="M92 120 l6 -4 M120 116 l6 4" stroke="#7B8494" stroke-width="2" stroke-linecap="round"/>':''}
+  </svg>`;
+}
+
+function refreshSetAvatar(){
+  var el=document.getElementById("setAvatar"), rm=document.getElementById("rmAvatar");
+  if(!el) return;
+  if(state.avatar){ el.style.backgroundImage="url("+state.avatar+")"; el.textContent=""; if(rm) rm.style.display="inline-block"; }
+  else { el.style.backgroundImage="none"; el.textContent=(state.name||"C").slice(0,1); if(rm) rm.style.display="none"; }
+}
+function pickAvatar(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  if(file.size>6*1024*1024){ toast("รูปใหญ่ไป (เกิน 6MB)"); input.value=""; return; }
+  var img=new Image(), url=URL.createObjectURL(file);
+  img.onload=function(){
+    var size=256, c=document.createElement("canvas"); c.width=size; c.height=size;
+    var ctx=c.getContext("2d");
+    var s=Math.min(img.width,img.height), sx=(img.width-s)/2, sy=(img.height-s)/2;
+    ctx.drawImage(img,sx,sy,s,s,0,0,size,size);   // center-crop square
+    state.avatar=c.toDataURL("image/jpeg",0.82);
+    URL.revokeObjectURL(url);
+    save(); refreshSetAvatar(); render(); toast("อัปเดตรูปโปรไฟล์แล้ว ✓");
+  };
+  img.onerror=function(){ toast("เปิดรูปไม่ได้"); };
+  img.src=url; input.value="";
+}
+function removeAvatar(){ state.avatar=null; save(); refreshSetAvatar(); render(); }
+
+/* ---------- MONTHLY SUMMARY ---------- */
+var summarySel=null;
+function monthTotals(y,m){ let inc=0,exp=0; state.tx.forEach(t=>{const d=new Date(t.date); if(d.getFullYear()===y&&d.getMonth()===m&&walletMatch(t)){ t.kind==="in"?inc+=t.amt:exp+=t.amt; }}); return {inc,exp}; }
+function lastMonths(n){ const arr=[], now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); arr.push({y:d.getFullYear(),m:d.getMonth()}); } return arr; }
+function openSummary(){ const now=new Date(); if(!summarySel) summarySel={y:now.getFullYear(),m:now.getMonth()}; document.getElementById("s-summary").style.display="flex"; document.getElementById("nav").style.display="none"; summaryRender(); }
+function closeSummary(){ document.getElementById("s-summary").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function setSummaryMonth(y,m){ summarySel={y:y,m:m}; summaryRender(); }
+function summaryRender(){
+  const box=document.getElementById("summaryBody");
+  const months=lastMonths(6);
+  const data=months.map(o=>({o:o, t:monthTotals(o.y,o.m)}));
+  const maxV=Math.max(1, ...data.map(d=>Math.max(d.t.inc,d.t.exp)));
+  const kfmt=n=> n>=1000? (n/1000).toFixed(n>=10000?0:1)+"k" : Math.round(n);
+  // grouped bar chart (income = accent, expense = danger)
+  const bars=data.map(d=>{
+    const sel=summarySel && d.o.y===summarySel.y && d.o.m===summarySel.m;
+    const hi=Math.max(3,Math.round(d.t.inc/maxV*100)), ho=Math.max(3,Math.round(d.t.exp/maxV*100));
+    const dim=sel?"1":".5";
+    return '<div onclick="setSummaryMonth('+d.o.y+','+d.o.m+')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;gap:5px">'+
+      '<div style="display:flex;align-items:flex-end;gap:3px;height:100%;width:100%;justify-content:center">'+
+        '<div title="รายรับ" style="width:38%;min-height:3px;height:'+hi+'%;border-radius:6px 6px 2px 2px;background:var(--accent);opacity:'+dim+';transition:height .4s cubic-bezier(.22,1,.36,1)"></div>'+
+        '<div title="รายจ่าย" style="width:38%;min-height:3px;height:'+ho+'%;border-radius:6px 6px 2px 2px;background:var(--danger);opacity:'+dim+';transition:height .4s cubic-bezier(.22,1,.36,1)"></div>'+
+      '</div>'+
+      '<div style="font:'+(sel?"700":"500")+' 11px Anuphan;color:'+(sel?"var(--ink)":"var(--muted)")+'">'+THMONTH[d.o.m]+'</div>'+
+    '</div>';
+  }).join("");
+  // selected month
+  const s=summarySel, tot=monthTotals(s.y,s.m), net=tot.inc-tot.exp;
+  const byCat={}; state.tx.forEach(t=>{const d=new Date(t.date); if(d.getFullYear()===s.y&&d.getMonth()===s.m&&t.kind==="out"&&walletMatch(t)) byCat[t.cat]=(byCat[t.cat]||0)+t.amt;});
+  const entries=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const catMax=entries.length?entries[0][1]:1;
+  const catRows = entries.length? entries.map(([c,v])=>{
+    const em=(CATS_OUT.concat(CATS_IN).find(x=>x[0]===c)||["","📦"])[1];
+    const pctc=Math.round(v/Math.max(1,tot.exp)*100);
+    return '<div style="margin-top:13px"><div style="display:flex;font:500 13.5px Anuphan"><span><span class="emo">'+em+'</span> '+esc(c)+'</span><span style="margin-left:auto;font-weight:600">'+money(v)+' <span class="gray" style="font-weight:500">('+pctc+'%)</span></span></div>'+
+      '<div style="height:8px;border-radius:99px;background:var(--track);margin-top:6px;overflow:hidden"><div style="height:100%;width:'+Math.max(5,Math.round(v/catMax*100))+'%;background:var(--accent);border-radius:99px"></div></div></div>';
+  }).join("") : emptyState("ไม่มีรายจ่ายเดือนนี้","เลือกเดือนอื่นหรือเพิ่มรายการใหม่","compact");
+
+  box.innerHTML =
+    '<div class="card" style="padding:16px 16px 12px;margin-bottom:14px">'+
+      '<div style="display:flex;align-items:center;margin-bottom:12px"><span style="font:600 14px Anuphan">รายรับ–รายจ่าย 6 เดือน</span>'+
+      '<span style="margin-left:auto;display:flex;gap:12px;font:600 11px Anuphan"><span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:var(--accent);display:inline-block"></span>รับ</span><span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:var(--danger);display:inline-block"></span>จ่าย</span></span></div>'+
+      '<div style="display:flex;align-items:flex-end;gap:6px;height:130px">'+bars+'</div>'+
+      '<div class="gray" style="font:400 11px Anuphan;text-align:center;margin-top:10px">แตะแท่งเพื่อดูรายละเอียดเดือนนั้น</div>'+
+    '</div>'+
+    '<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 16px Anuphan;margin-bottom:12px">'+THMONTH[s.m]+' '+String(s.y+543).slice(2)+'</div>'+
+      '<div style="display:flex;gap:10px">'+
+        '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">รายรับ</div><div style="font:700 18px Anuphan;color:var(--accent-ink);margin-top:2px">'+money(tot.inc)+'</div></div>'+
+        '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">รายจ่าย</div><div style="font:700 18px Anuphan;color:var(--danger);margin-top:2px">'+money(tot.exp)+'</div></div>'+
+        '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">คงเหลือ</div><div style="font:700 18px Anuphan;margin-top:2px;color:'+(net>=0?"var(--ink)":"var(--danger)")+'">'+money(net)+'</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card" style="padding:16px">'+
+      '<div style="font:600 15px Anuphan">รายจ่ายตามหมวด</div>'+catRows+
+    '</div>';
+}
+
+/* ---------- CATEGORY MANAGER ---------- */
+var catForm = {open:false, kind:"out", editing:null, emoji:"", name:"", budget:""};
+function openCats(){ document.getElementById("s-cats").style.display="flex"; document.getElementById("nav").style.display="none"; catForm.open=false; catsRender(); }
+function closeCats(){ document.getElementById("s-cats").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function catFormOpen(kind, editName){
+  catForm.open=true; catForm.kind=kind; catForm.editing=editName||null;
+  if(editName){ var arr=state.cats[kind], f=arr.find(x=>x[0]===editName); catForm.name=f?f[0]:""; catForm.emoji=f?f[1]:""; catForm.budget=((state.catBudgets||{})[editName]||"")+""; }
+  else { catForm.name=""; catForm.emoji=""; catForm.budget=""; }
+  catsRender();
+  var n=document.getElementById("catName"); n&&n.focus();
+}
+function catFormCancel(){ catForm.open=false; catsRender(); }
+function catFormSave(){
+  var name=(document.getElementById("catName").value||"").trim();
+  var emoji=(document.getElementById("catEmoji").value||"").trim()||"📦";
+  emoji=Array.from(emoji)[0]||"📦";   // first glyph only
+  var kind=catForm.kind, arr=state.cats[kind];
+  if(!name){ toast("ใส่ชื่อหมวดก่อน"); return; }
+  // duplicate check (except the one being edited)
+  if(arr.some(x=>x[0]===name && x[0]!==catForm.editing)){ toast("มีหมวดชื่อนี้แล้ว"); return; }
+  if(!state.catBudgets) state.catBudgets={};
+  var budEl=document.getElementById("catBudget");
+  var bud = budEl ? (parseFloat((budEl.value||"").replace(/,/g,""))||0) : 0;
+  if(catForm.editing){
+    var old=catForm.editing, item=arr.find(x=>x[0]===old);
+    if(item){ item[0]=name; item[1]=emoji; }
+    // propagate rename/emoji to existing tx + recurring
+    state.tx.forEach(t=>{ if(t.cat===old){ t.cat=name; t.emoji=emoji; } });
+    state.recurring.forEach(r=>{ if(r.cat===old){ r.cat=name; r.emoji=emoji; } });
+    if(kind==="out"){ delete state.catBudgets[old]; if(bud>0) state.catBudgets[name]=bud; }
+    toast("แก้ไขหมวดแล้ว ✓");
+  } else {
+    arr.push([name,emoji]);
+    if(kind==="out" && bud>0) state.catBudgets[name]=bud;
+    toast("เพิ่มหมวดแล้ว ✓");
+  }
+  save(); syncCats(); catForm.open=false; catsRender();
+}
+function catDelete(kind, name){
+  if(state.cats[kind].length<=1){ toast("ต้องเหลืออย่างน้อย 1 หมวด"); return; }
+  if(!confirm('ลบหมวด "'+name+'"? รายการเก่าที่ใช้หมวดนี้ยังอยู่ครบ')) return;
+  state.cats[kind]=state.cats[kind].filter(x=>x[0]!==name);
+  if(state.catBudgets) delete state.catBudgets[name];
+  save(); syncCats(); catsRender();
+}
+function catsRender(){
+  var box=document.getElementById("catsBody");
+  var form="";
+  if(catForm.open){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 15px Anuphan;margin-bottom:10px">'+(catForm.editing?"แก้ไขหมวด":"หมวดใหม่")+' ('+(catForm.kind==="out"?"รายจ่าย":"รายรับ")+')</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:12px">'+
+        '<input class="f" id="catEmoji" value="'+esc(catForm.emoji)+'" placeholder="🙂" maxlength="4" style="width:64px;text-align:center;font-size:22px;box-shadow:none;background:var(--surface2)">'+
+        '<input class="f" id="catName" value="'+esc(catForm.name)+'" placeholder="ชื่อหมวด เช่น กาแฟ" style="flex:1;box-shadow:none;background:var(--surface2)">'+
+      '</div>'+
+      '<div class="gray" style="font:400 11.5px Anuphan;margin-bottom:12px">* ช่องซ้ายพิมพ์/วางอิโมจิ 1 ตัว · แก้ชื่อแล้วรายการเก่าจะเปลี่ยนตาม</div>'+
+      (catForm.kind==="out" ? '<div style="margin-bottom:12px"><div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">งบต่อเดือนของหมวดนี้ (ไม่บังคับ)</div><input class="f" id="catBudget" inputmode="decimal" value="'+esc(catForm.budget)+'" placeholder="เช่น 8000 · เว้นว่าง = ไม่จำกัด" style="box-shadow:none;background:var(--surface2)"></div>' : '')+
+      '<div style="display:flex;gap:8px"><button onclick="catFormCancel()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="catFormSave()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  function section(title,kind){
+    var rows=state.cats[kind].map(function(c){
+      var bud=(kind==="out" && state.catBudgets)? (state.catBudgets[c[0]]||0):0;
+      var sub = bud>0? '<div class="gray" style="font:600 11px Anuphan;margin-top:1px">งบ ฿'+fmt(bud)+'/เดือน</div>' : '';
+      return '<div class="row" style="border-bottom:1px solid var(--line)">'+
+        '<div class="em" style="width:40px;height:40px;border-radius:13px;background:var(--surface2);display:grid;place-items:center;font-size:19px;flex:none">'+c[1]+'</div>'+
+        '<div style="flex:1;min-width:0"><span style="font:500 15px Anuphan">'+esc(c[0])+'</span>'+sub+'</div>'+
+        '<button onclick="catFormOpen(\''+kind+'\',\''+esa(c[0])+'\')" style="width:34px;height:34px;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
+        '<button onclick="catDelete(\''+kind+'\',\''+esa(c[0])+'\')" style="width:34px;height:34px;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
+      '</div>';
+    }).join("");
+    return '<div style="font:700 14px Anuphan;margin:6px 2px 8px">'+title+'</div>'+
+      '<div class="card" style="padding:2px 14px;margin-bottom:8px">'+rows+'</div>'+
+      '<button onclick="catFormOpen(\''+kind+'\')" style="width:100%;padding:11px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--accent-ink);font:600 13.5px Anuphan;cursor:pointer;margin-bottom:18px">+ เพิ่มหมวด'+(kind==="out"?"รายจ่าย":"รายรับ")+'</button>';
+  }
+  box.innerHTML = form + section("หมวดรายจ่าย","out") + section("หมวดรายรับ","in");
+}
+
+/* ---------- DEBTS / IOU ---------- */
+var debtAddOpen=false, debtDir="lend"; // lend = เขายืมเรา (ลูกหนี้), borrow = เรายืมเขา (หนี้)
+function openDebts(){ document.getElementById("s-debts").style.display="flex"; document.getElementById("nav").style.display="none"; debtAddOpen=false; debtsRender(); }
+function closeDebts(){ document.getElementById("s-debts").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function debtAddToggle(){ debtAddOpen=!debtAddOpen; debtDir="lend"; debtsRender(); if(debtAddOpen){ var n=document.getElementById("dPerson"); n&&n.focus(); } }
+function debtPickDir(d){ debtDir=d; debtsRender(); }
+function debtCreate(){
+  var person=(document.getElementById("dPerson").value||"").trim();
+  var amt=parseFloat((document.getElementById("dAmt").value||"").replace(/,/g,""))||0;
+  var note=(document.getElementById("dNote").value||"").trim();
+  var due=(document.getElementById("dDue").value||"");
+  if(!person){ toast("ใส่ชื่อคนก่อน"); return; }
+  if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
+  state.debts.push({id:Date.now(), dir:debtDir, person:person, amount:amt, paid:0, note:note, due:due, date:new Date().toISOString()});
+  save(); debtAddOpen=false; toast("เพิ่มแล้ว ✓"); debtsRender();
+}
+function debtPay(id){
+  var d=state.debts.find(x=>x.id===id); if(!d) return;
+  var rem=d.amount-d.paid;
+  var v=prompt((d.dir==="lend"?"รับคืน":"จ่าย")+"เท่าไร? (คงเหลือ ฿"+fmt(rem)+")", String(rem));
+  if(v===null) return;
+  var amt=parseFloat(String(v).replace(/,/g,""))||0;
+  if(amt<=0) return;
+  d.paid=Math.min(d.amount, d.paid+amt);
+  save(); debtsRender();
+}
+function debtClear(id){ var d=state.debts.find(x=>x.id===id); if(d){ d.paid=d.amount; save(); toast("เคลียร์แล้ว ✓"); debtsRender(); } }
+function debtDelete(id){ if(confirm("ลบรายการนี้?")){ state.debts=state.debts.filter(x=>x.id!==id); save(); debtsRender(); } }
+function debtsRender(){
+  var box=document.getElementById("debtsBody");
+  var lend=state.debts.filter(d=>d.dir==="lend"), borrow=state.debts.filter(d=>d.dir==="borrow");
+  var owedToMe=lend.reduce((s,d)=>s+(d.amount-d.paid),0);
+  var iOwe=borrow.reduce((s,d)=>s+(d.amount-d.paid),0);
+  var form="";
+  if(debtAddOpen){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div class="seg" style="margin-bottom:12px"><button class="'+(debtDir==="lend"?"on":"")+'" onclick="debtPickDir(\'lend\')">เขายืมเรา</button><button class="'+(debtDir==="borrow"?"on":"")+'" onclick="debtPickDir(\'borrow\')">เรายืมเขา</button></div>'+
+      '<input class="f" id="dPerson" placeholder="ชื่อคน เช่น พี่โจ้" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="dAmt" inputmode="decimal" placeholder="จำนวนเงิน (บาท)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="dNote" placeholder="โน้ต (ไม่บังคับ)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">ครบกำหนด (ไม่บังคับ)</div>'+
+      '<input class="f" id="dDue" type="date" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="debtAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="debtCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  var summary='<div class="card" style="padding:16px;margin-bottom:14px;display:flex;gap:10px">'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">เขายืมเรา (รับคืน)</div><div style="font:700 20px Anuphan;color:var(--accent-ink);margin-top:2px">฿'+fmt(owedToMe)+'</div></div>'+
+    '<div style="width:1px;background:var(--line)"></div>'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">เรายืมเขา (ต้องจ่าย)</div><div style="font:700 20px Anuphan;color:var(--danger);margin-top:2px">฿'+fmt(iOwe)+'</div></div>'+
+  '</div>';
+  function card(d){
+    var rem=d.amount-d.paid, done=rem<=0.001, pct=Math.min(100, d.paid/d.amount*100);
+    var col=d.dir==="lend"?"var(--accent)":"var(--danger)";
+    var dueTxt="";
+    if(d.due){ var dd=new Date(d.due+"T12:00:00"); var over=!done && dd < new Date(new Date().toDateString()); dueTxt=' · ครบ '+dd.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+(over?' ⚠️เลยกำหนด':''); }
+    return '<div class="card" style="padding:14px 16px;margin-bottom:10px;opacity:'+(done?".6":"1")+'">'+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+        '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.person)+(done?' ✓':'')+'</div>'+
+        '<div class="gray" style="font:500 12px Anuphan;margin-top:1px">'+(d.note?esc(d.note):(d.dir==="lend"?"ให้ยืม":"ยืมมา"))+dueTxt+'</div></div>'+
+        '<div style="text-align:right"><div style="font:700 16px Anuphan;color:'+col+'">฿'+fmt(rem)+'</div>'+(d.paid>0&&!done?'<div class="gray" style="font:500 11px Anuphan">แล้ว ฿'+fmt(d.paid)+'/'+fmt(d.amount)+'</div>':'')+'</div>'+
+      '</div>'+
+      (done?'':'<div style="height:7px;border-radius:99px;background:var(--track);margin-top:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:99px"></div></div>')+
+      '<div style="display:flex;gap:8px;margin-top:12px">'+
+        (done?'':'<button onclick="debtPay('+d.id+')" style="flex:1;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 13px Anuphan;cursor:pointer">'+(d.dir==="lend"?"รับคืนบางส่วน":"จ่ายบางส่วน")+'</button>'+
+        '<button onclick="debtClear('+d.id+')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--accent);color:#fff;font:700 13px Anuphan;cursor:pointer">เคลียร์ครบ</button>')+
+        '<button onclick="debtDelete('+d.id+')" style="width:44px;height:38px;flex:none;border:none;border-radius:10px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }
+  var body="";
+  if(!state.debts.length && !debtAddOpen){
+    body=emptyState("ยังไม่มีหนี้หรือลูกหนี้","บันทึกเงินที่ยืมหรือให้ยืมด้วยปุ่ม + เพิ่ม","");
+  } else {
+    var actL=lend.filter(d=>d.amount-d.paid>0.001), actB=borrow.filter(d=>d.amount-d.paid>0.001), cleared=state.debts.filter(d=>d.amount-d.paid<=0.001);
+    if(actL.length) body+='<div class="gray" style="font:700 13px Anuphan;margin:4px 2px 8px">💚 เขายืมเรา</div>'+actL.map(card).join("");
+    if(actB.length) body+='<div class="gray" style="font:700 13px Anuphan;margin:14px 2px 8px">❤️ เรายืมเขา</div>'+actB.map(card).join("");
+    if(cleared.length) body+='<div class="gray" style="font:700 13px Anuphan;margin:14px 2px 8px">✓ เคลียร์แล้ว</div>'+cleared.map(card).join("");
+  }
+  box.innerHTML = form + (state.debts.length||debtAddOpen? summary:"") + body;
+}
+
+/* ---------- INSTALLMENTS ---------- */
+var instAddOpen=false;
+function openInstall(){ document.getElementById("s-install").style.display="flex"; document.getElementById("nav").style.display="none"; instAddOpen=false; installRender(); }
+function closeInstall(){ document.getElementById("s-install").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function instAddToggle(){ instAddOpen=!instAddOpen; installRender(); if(instAddOpen){ var n=document.getElementById("iName"); n&&n.focus(); } }
+function instCreate(){
+  var name=(document.getElementById("iName").value||"").trim();
+  var total=parseFloat((document.getElementById("iTotal").value||"").replace(/,/g,""))||0;
+  var months=parseInt(document.getElementById("iMonths").value)||0;
+  var note=(document.getElementById("iNote").value||"").trim();
+  if(!name){ toast("ใส่ชื่อรายการ"); return; }
+  if(total<=0){ toast("ใส่ยอดรวม"); return; }
+  if(months<=0){ toast("ใส่จำนวนงวด"); return; }
+  state.installments.push({id:Date.now(), name:name, total:total, months:months, paidCount:0, note:note, date:new Date().toISOString()});
+  save(); instAddOpen=false; toast("เพิ่มแล้ว ✓"); installRender();
+}
+function instPay(id){ var it=state.installments.find(x=>x.id===id); if(it && it.paidCount<it.months){ it.paidCount++; save(); toast("จ่ายงวดที่ "+it.paidCount+" แล้ว ✓"); installRender(); } }
+function instUnpay(id){ var it=state.installments.find(x=>x.id===id); if(it && it.paidCount>0){ it.paidCount--; save(); installRender(); } }
+function instDelete(id){ if(confirm("ลบรายการผ่อนนี้?")){ state.installments=state.installments.filter(x=>x.id!==id); save(); installRender(); } }
+function installRender(){
+  var box=document.getElementById("installBody");
+  var form="";
+  if(instAddOpen){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<input class="f" id="iName" placeholder="ชื่อ เช่น iPhone 16 / ตู้เย็น" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+        '<input class="f" id="iTotal" inputmode="decimal" placeholder="ยอดรวม (บาท)" style="flex:1;box-shadow:none;background:var(--surface2)">'+
+        '<input class="f" id="iMonths" inputmode="numeric" placeholder="กี่งวด" style="width:104px;box-shadow:none;background:var(--surface2)">'+
+      '</div>'+
+      '<input class="f" id="iNote" placeholder="โน้ต (ไม่บังคับ)" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="instAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="instCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  var totalRemain=0, perMonthSum=0;
+  state.installments.forEach(it=>{ var per=it.total/it.months, remM=it.months-it.paidCount; totalRemain+=per*remM; if(remM>0) perMonthSum+=per; });
+  var summary = state.installments.length? '<div class="card" style="padding:16px;margin-bottom:14px;display:flex;gap:10px">'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">ยอดผ่อนคงเหลือ</div><div style="font:700 20px Anuphan;color:var(--danger);margin-top:2px">฿'+fmt(totalRemain)+'</div></div>'+
+    '<div style="width:1px;background:var(--line)"></div>'+
+    '<div style="flex:1"><div class="gray" style="font:500 12px Anuphan">ต้องจ่าย/เดือน</div><div style="font:700 20px Anuphan;margin-top:2px">฿'+fmt(perMonthSum)+'</div></div>'+
+  '</div>' : "";
+  var cards="";
+  if(!state.installments.length && !instAddOpen){
+    cards=emptyState("ยังไม่มีรายการผ่อน","เพิ่มมือถือ เครื่องใช้ไฟฟ้า หรือรายการผ่อนอื่น ๆ","");
+  } else {
+    cards=state.installments.slice().sort((a,b)=>((a.paidCount>=a.months?1:0)-(b.paidCount>=b.months?1:0))||(b.id-a.id)).map(it=>{
+      var per=it.total/it.months, remM=it.months-it.paidCount, remAmt=per*remM, done=remM<=0, pct=it.paidCount/it.months*100;
+      return '<div class="card" style="padding:14px 16px;margin-bottom:10px;opacity:'+(done?".6":"1")+'">'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+          '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(it.name)+(done?' ✓ ครบแล้ว':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">฿'+fmt(per)+'/งวด · งวด '+it.paidCount+'/'+it.months+(it.note?' · '+esc(it.note):'')+'</div></div>'+
+          '<div style="text-align:right"><div style="font:700 16px Anuphan;color:'+(done?"var(--accent-ink)":"var(--danger)")+'">฿'+fmt(remAmt)+'</div><div class="gray" style="font:500 11px Anuphan">เหลือ '+remM+' งวด</div></div>'+
+        '</div>'+
+        '<div style="height:7px;border-radius:99px;background:var(--track);margin-top:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--accent);border-radius:99px"></div></div>'+
+        '<div style="display:flex;gap:8px;margin-top:12px">'+
+          (done?'':'<button onclick="instPay('+it.id+')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--accent);color:#fff;font:700 13px Anuphan;cursor:pointer">จ่ายงวดนี้ (+1)</button>')+
+          (it.paidCount>0?'<button onclick="instUnpay('+it.id+')" style="width:44px;height:38px;flex:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:700 14px Anuphan;cursor:pointer">↩︎</button>':'')+
+          '<button onclick="instDelete('+it.id+')" style="width:44px;height:38px;flex:none;border:none;border-radius:10px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">🗑️</button>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+  }
+  box.innerHTML = form + summary + cards;
+}
+
+/* ---------- FINANCIAL HEALTH ---------- */
+function openHealth(){ document.getElementById("s-health").style.display="flex"; document.getElementById("nav").style.display="none"; healthRender(); }
+function closeHealth(){ document.getElementById("s-health").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function healthRender(){
+  document.getElementById("healthMonth").textContent = monthLabel(view)+(isAllWallets()?" · รวม":" · "+activeWallet().name);
+  var t=totals(), inc=t.inc, exp=t.exp, net=inc-exp;
+  var rate = inc>0? (net/inc*100) : 0;
+  var now=new Date();
+  var isCurrent = view.getFullYear()===now.getFullYear() && view.getMonth()===now.getMonth();
+  var dim=new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+  var daysElapsed = isCurrent? now.getDate() : dim;
+  var avgDay = daysElapsed>0? exp/daysElapsed : 0;
+  var projection = isCurrent? avgDay*dim : exp;
+  var bud=curBudget();
+  var rlabel, rcol;
+  if(inc<=0){ rlabel="ยังไม่มีรายรับในเดือนนี้"; rcol="var(--muted)"; }
+  else if(rate>=20){ rlabel="เยี่ยม ออมได้ดีมาก 🎉"; rcol="var(--accent-ink)"; }
+  else if(rate>=10){ rlabel="ดี กำลังไปได้สวย 👍"; rcol="var(--accent-ink)"; }
+  else if(rate>=0){ rlabel="พอไหว แต่ออมได้ค่อนข้างน้อย"; rcol="var(--ink)"; }
+  else { rlabel="จ่ายมากกว่ารับ ⚠️ ระวังหน่อย"; rcol="var(--danger)"; }
+  function metric(label, val, sub, col){ return '<div class="card" style="padding:16px;margin-bottom:10px"><div class="gray" style="font:500 12.5px Anuphan">'+label+'</div><div style="font:700 24px Anuphan;margin-top:3px;color:'+(col||"var(--ink)")+'">'+val+'</div>'+(sub?'<div class="gray" style="font:500 12px Anuphan;margin-top:3px">'+sub+'</div>':'')+'</div>'; }
+  var body='<div class="card" style="padding:18px 16px;margin-bottom:10px">'+
+    '<div style="display:flex;align-items:baseline"><span class="gray" style="font:500 13px Anuphan">อัตราการออมเดือนนี้</span><span style="margin-left:auto;font:700 26px Anuphan;color:'+rcol+'">'+(inc>0?Math.round(rate)+"%":"—")+'</span></div>'+
+    '<div style="height:9px;border-radius:99px;background:var(--track);margin-top:10px;overflow:hidden"><div style="height:100%;width:'+Math.max(0,Math.min(100,rate))+'%;background:var(--accent);border-radius:99px"></div></div>'+
+    '<div style="font:600 13px Anuphan;margin-top:9px;color:'+rcol+'">'+rlabel+'</div>'+
+    '<div class="gray" style="font:500 12px Anuphan;margin-top:4px">รายรับ ฿'+fmt(inc)+' · เก็บได้ ฿'+fmt(net)+'</div>'+
+  '</div>';
+  body+=metric("จ่ายเฉลี่ยต่อวัน", "฿"+fmt(avgDay), "จาก "+daysElapsed+" วันที่ผ่านมา");
+  if(isCurrent) body+=metric("คาดการณ์ยอดจ่ายสิ้นเดือน", "฿"+fmt(projection), (bud>0? (projection>bud? "⚠️ อาจเกินงบ ฿"+fmt(projection-bud) : "✓ น่าจะอยู่ในงบ (งบ ฿"+fmt(bud)+")") : "อิงค่าเฉลี่ยที่ผ่านมา"), (bud>0&&projection>bud?"var(--danger)":"var(--ink)"));
+  body+=metric("คงเหลือสุทธิ (รับ − จ่าย)", (net>=0?"+":"−")+"฿"+fmt(Math.abs(net)), null, net>=0?"var(--accent-ink)":"var(--danger)");
+  var byCat={}; state.tx.filter(inScope).filter(x=>x.kind==="out").forEach(x=>byCat[x.cat]=(byCat[x.cat]||0)+x.amt);
+  var top=Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+  if(top){ var em=(CATS_OUT.find(x=>x[0]===top[0])||["","📦"])[1]; body+=metric("หมวดที่จ่ายเยอะสุด", em+" "+esc(top[0]), "฿"+fmt(top[1])+" ("+Math.round(exp>0?top[1]/exp*100:0)+"% ของรายจ่าย)"); }
+  document.getElementById("healthBody").innerHTML = body;
+}
+
+/* ---------- WALLETS ---------- */
+var wForm={open:false, editing:null, emoji:"👛", name:"", budget:"", opening:""};
+function openWallets(){ document.getElementById("s-wallets").style.display="flex"; document.getElementById("nav").style.display="none"; wForm.open=false; walletsRender(); }
+function closeWallets(){ document.getElementById("s-wallets").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function switchWallet(id){ state.activeWallet=id; save(); closeWallets(); }
+function wFormOpen(editId){
+  wForm.open=true; wForm.editing=editId||null;
+  if(editId){ var w=walletById(editId); wForm.emoji=w?(w.emoji||"👛"):"👛"; wForm.name=w?w.name:""; wForm.budget=w?((+w.budget||0)?w.budget+"":""):""; wForm.opening=w?((+w.opening||0)?w.opening+"":""):""; }
+  else { wForm.emoji="👛"; wForm.name=""; wForm.budget=""; wForm.opening=""; }
+  walletsRender(); var n=document.getElementById("wName"); n&&n.focus();
+}
+function wFormCancel(){ wForm.open=false; walletsRender(); }
+function wFormSave(){
+  var name=(document.getElementById("wName").value||"").trim();
+  var emoji=(document.getElementById("wEmoji").value||"").trim()||"👛"; emoji=Array.from(emoji)[0]||"👛";
+  var budget=parseFloat((document.getElementById("wBudget").value||"").replace(/,/g,""))||0;
+  var opening=parseFloat((document.getElementById("wOpening").value||"").replace(/,/g,""))||0;
+  if(!name){ toast("ใส่ชื่อกระเป๋าก่อน"); return; }
+  if(wForm.editing){ var w=walletById(wForm.editing); if(w){ w.name=name; w.emoji=emoji; w.budget=budget; w.opening=opening; } toast("แก้ไขกระเป๋าแล้ว ✓"); }
+  else { var id="w"+Date.now(); state.wallets.push({id:id, name:name, emoji:emoji, budget:budget, opening:opening}); toast("เพิ่มกระเป๋าแล้ว ✓"); }
+  save(); wForm.open=false; walletsRender();
+}
+function wDelete(id){
+  if(state.wallets.length<=1){ toast("ต้องเหลืออย่างน้อย 1 กระเป๋า"); return; }
+  var w=walletById(id); var n=state.tx.filter(t=>t.w===id).length;
+  if(!confirm('ลบกระเป๋า "'+(w?w.name:"")+'"?'+(n?(' รายการ '+n+' รายการจะย้ายไปกระเป๋าแรก'):''))) return;
+  state.wallets=state.wallets.filter(x=>x.id!==id);
+  var first=state.wallets[0].id;
+  state.tx.forEach(t=>{ if(t.w===id) t.w=first; });
+  state.recurring.forEach(r=>{ if(r.w===id) r.w=first; });
+  if(state.activeWallet===id) state.activeWallet=first;
+  save(); walletsRender();
+}
+function walletsRender(){
+  var box=document.getElementById("walletsBody");
+  var form="";
+  if(wForm.open){
+    form='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 15px Anuphan;margin-bottom:10px">'+(wForm.editing?"แก้ไขกระเป๋า":"กระเป๋าใหม่")+'</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+        '<input class="f" id="wEmoji" value="'+esc(wForm.emoji)+'" maxlength="4" style="width:64px;text-align:center;font-size:22px;box-shadow:none;background:var(--surface2)">'+
+        '<input class="f" id="wName" value="'+esc(wForm.name)+'" placeholder="ชื่อ เช่น เงินสด/ธนาคาร/บัตร" style="flex:1;box-shadow:none;background:var(--surface2)">'+
+      '</div>'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">งบต่อเดือน (ไม่บังคับ)</div>'+
+      '<input class="f" id="wBudget" inputmode="decimal" value="'+esc(wForm.budget)+'" placeholder="เช่น 25000 · เว้นว่าง = ไม่จำกัด" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">💰 ยอดตั้งต้น (เงินที่มีในกระเป๋านี้ตอนนี้)</div>'+
+      '<input class="f" id="wOpening" inputmode="decimal" value="'+esc(wForm.opening)+'" placeholder="เช่น 20000 · เว้นว่าง = 0" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="wFormCancel()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="wFormSave()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  var allSel = isAllWallets();
+  var allBal = state.wallets.reduce((s,w)=>s+walletBalance(w.id),0);
+  var allRow='<div onclick="switchWallet(\'all\')" class="card" style="padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid '+(allSel?"var(--accent)":"transparent")+'">'+
+    '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">🗂️</div>'+
+    '<div style="flex:1"><div style="font:700 15px Anuphan">รวมทุกกระเป๋า'+(allSel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">เงินคงเหลือจริงรวม</div></div>'+
+    '<div style="text-align:right;font:700 16px Anuphan;color:'+(allBal<0?"var(--danger)":"var(--ink)")+'">'+(allBal<0?"−฿"+fmt(-allBal):"฿"+fmt(allBal))+'</div>'+
+  '</div>';
+  var rows=state.wallets.map(function(w){
+    var sel = !allSel && state.activeWallet===w.id;
+    var bal = walletBalance(w.id);
+    var bud = (+w.budget||0)? 'งบ ฿'+fmt(w.budget)+'/เดือน' : 'ไม่จำกัดงบ';
+    return '<div class="card" style="padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:2px solid '+(sel?"var(--accent)":"transparent")+'">'+
+      '<div onclick="switchWallet(\''+w.id+'\')" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer">'+
+        '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(w.emoji||"👛")+'</div>'+
+        '<div style="flex:1;min-width:0"><div style="font:700 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(w.name)+(sel?' <span style="color:var(--accent-ink)">●</span>':'')+'</div><div class="gray" style="font:500 12px Anuphan;margin-top:1px">'+bud+'</div></div>'+
+        '<div style="text-align:right"><div style="font:700 15px Anuphan;color:'+(bal<0?"var(--danger)":"var(--ink)")+'">'+(bal<0?"−฿"+fmt(-bal):"฿"+fmt(bal))+'</div><div class="gray" style="font:500 10.5px Anuphan">คงเหลือจริง</div></div>'+
+      '</div>'+
+      '<button onclick="wFormOpen(\''+w.id+'\')" style="width:34px;height:34px;flex:none;border:none;border-radius:9px;background:var(--surface2);cursor:pointer;font-size:15px">✏️</button>'+
+      '<button onclick="wDelete(\''+w.id+'\')" style="width:34px;height:34px;flex:none;margin-left:6px;border:none;border-radius:9px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>'+
+    '</div>';
+  }).join("");
+  box.innerHTML = form + allRow + rows;
+}
+
+/* ---------- RECURRING ---------- */
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function ymKey(y,m){ return y+"-"+m; }
+function runRecurring(){
+  const now=new Date(), cy=now.getFullYear(), cm=now.getMonth();
+  let posted=0;
+  (state.recurring||[]).forEach(r=>{
+    // migrate older records
+    if(!r.postedMonths) r.postedMonths = r.lastPosted? [r.lastPosted] : [];
+    if(r.since===undefined) r.since = ymKey(cy,cm); // don't back-fill months before this feature existed
+    const sp=String(r.since).split("-"); let Y=+sp[0], M=+sp[1];
+    let guard=0;
+    while(guard++<120 && (Y<cy || (Y===cy && M<=cm))){
+      const key=ymKey(Y,M);
+      const isCurrent = (Y===cy && M===cm);
+      const due = isCurrent ? (now.getDate() >= r.day) : true;
+      if(due && r.postedMonths.indexOf(key)===-1){
+        const dd=Math.min(r.day, daysInMonth(Y,M));
+        const d=new Date(Y, M, dd, 9, 0, 0);
+        state.tx.push({id:Date.now()+posted*13, kind:r.kind, amt:r.amt, cat:r.cat, emoji:r.emoji, note:r.name+" (ประจำ)", date:d.toISOString(), recur:true, w:(r.w||(state.wallets[0]&&state.wallets[0].id))});
+        r.postedMonths.push(key); r.lastPosted=key; posted++;
+      }
+      M++; if(M>11){ M=0; Y++; }
+    }
+  });
+  if(posted){ save(); }
+  return posted;
+}
+var recurAddOpen=false, recurDraft={kind:"out", cat:CATS_OUT[0][0], emoji:CATS_OUT[0][1]};
+function openRecur(){ document.getElementById("s-recur").style.display="flex"; document.getElementById("nav").style.display="none"; recurAddOpen=false; recurRender(); }
+function closeRecur(){ document.getElementById("s-recur").style.display="none"; document.getElementById("nav").style.display="flex"; render(); }
+function recurAddToggle(){ recurAddOpen=!recurAddOpen; recurDraft={kind:"out",cat:CATS_OUT[0][0],emoji:CATS_OUT[0][1]}; recurRender(); }
+function recurPickKind(k){ recurDraft.kind=k; const l=k==="in"?CATS_IN:CATS_OUT; recurDraft.cat=l[0][0]; recurDraft.emoji=l[0][1]; recurRender(); }
+function recurPickCat(c){ const l=recurDraft.kind==="in"?CATS_IN:CATS_OUT; const f=l.find(x=>x[0]===c); recurDraft.cat=c; recurDraft.emoji=f?f[1]:"📦"; recurRender(); }
+function recurCreate(){
+  const amt=parseFloat((document.getElementById("rcAmt").value||"").replace(/,/g,""))||0;
+  const name=(document.getElementById("rcName").value||"").trim()||recurDraft.cat;
+  let day=parseInt(document.getElementById("rcDay").value)||1; day=Math.max(1,Math.min(31,day));
+  if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
+  const now=new Date();
+  const rw = isAllWallets()? state.wallets[0].id : state.activeWallet;
+  state.recurring.push({id:Date.now(), kind:recurDraft.kind, amt:amt, cat:recurDraft.cat, emoji:recurDraft.emoji, name:name, day:day, w:rw, since:ymKey(now.getFullYear(),now.getMonth()), postedMonths:[], lastPosted:""});
+  save(); recurAddOpen=false;
+  const n=runRecurring();  // post immediately if already due this month
+  toast(n? "เพิ่ม + บันทึกงวดนี้แล้ว ✓" : "เพิ่มรายการประจำแล้ว ✓");
+  recurRender();
+}
+function recurDelete(id){ if(confirm("ลบรายการประจำนี้?")){ state.recurring=state.recurring.filter(r=>r.id!==id); save(); recurRender(); } }
+function recurRender(){
+  const box=document.getElementById("recurBody"), cnt=document.getElementById("recurCount");
+  if(cnt) cnt.textContent = state.recurring.length? state.recurring.length+" รายการ" : "";
+  let addForm="";
+  if(recurAddOpen){
+    const list=recurDraft.kind==="in"?CATS_IN:CATS_OUT;
+    const chips=list.map(([c,e])=>`<button class="chip ${c===recurDraft.cat?'on':''}" onclick="recurPickCat('${esa(c)}')"><span class="emo" style="font-size:16px">${e}</span><span>${esc(c)}</span></button>`).join("");
+    addForm='<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div class="seg" style="margin-bottom:12px"><button class="'+(recurDraft.kind==="out"?"on":"")+'" onclick="recurPickKind(\'out\')">รายจ่าย</button><button class="'+(recurDraft.kind==="in"?"on":"")+'" onclick="recurPickKind(\'in\')">รายรับ</button></div>'+
+      '<input class="f" id="rcAmt" inputmode="decimal" placeholder="จำนวนเงิน (บาท)" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="rcName" placeholder="ชื่อ เช่น ค่าเช่าห้อง / Netflix" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<div class="gray" style="font:500 12px Anuphan;margin-bottom:6px">หมวด</div>'+
+      '<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px" class="noscroll">'+chips+'</div>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font:500 13.5px Anuphan">ทุกวันที่</span><input class="f" id="rcDay" inputmode="numeric" value="1" style="width:70px;text-align:center;box-shadow:none;background:var(--surface2);padding:10px"><span class="gray" style="font:500 13px Anuphan">ของเดือน</span></div>'+
+      '<div style="display:flex;gap:8px"><button onclick="recurAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="recurCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึก</button></div>'+
+    '</div>';
+  }
+  let cards="";
+  const rlist=state.recurring.filter(r=> isAllWallets() || r.w===state.activeWallet);
+  if(cnt) cnt.textContent = rlist.length? rlist.length+" รายการ" : "";
+  if(rlist.length===0 && !recurAddOpen){
+    cards=emptyState("ยังไม่มีรายการประจำ","เพิ่มค่าเช่า ค่าเน็ต ค่าไฟ หรือรายรับประจำ","");
+  } else {
+    cards=rlist.slice().sort((a,b)=>a.day-b.day).map(r=>{
+      const col=r.kind==="in"?"var(--accent-ink)":"var(--ink)", sign=r.kind==="in"?"+":"-";
+      const wtag = isAllWallets()? " · "+walletEmoji(r.w)+" "+esc(walletName(r.w)) : "";
+      return '<div class="card" style="padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">'+
+        '<div class="em" style="width:44px;height:44px;border-radius:14px;background:var(--surface2);display:grid;place-items:center;font-size:20px;flex:none">'+(r.emoji||"📦")+'</div>'+
+        '<div style="flex:1;min-width:0"><div style="font:600 15px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+'</div><div class="gray" style="font:500 12.5px Anuphan;margin-top:1px">'+esc(r.cat)+' · ทุกวันที่ '+r.day+wtag+'</div></div>'+
+        '<div style="font:700 15px Anuphan;color:'+col+'">'+sign+money(r.amt)+'</div>'+
+        '<button onclick="recurDelete('+r.id+')" style="flex:none;width:30px;height:30px;border:none;border-radius:8px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">×</button>'+
+      '</div>';
+    }).join("");
+  }
+  box.innerHTML=addForm+cards;
+}
+
+/* ---------- GOALS (savings) ---------- */
+function piggySVG(p){
+  var st = p>=1?4 : p>=.75?3 : p>=.5?2 : p>=.25?1 : 0;
+  var body=["#F3C6D6","#F1B9CD","#EFA9C1","#F195B4","#F07AA5"][st];
+  var scale=[0.86,0.92,1.0,1.07,1.14][st], coins=[0,1,2,3,4][st];
+  var cheek = st>=3 ? '<circle cx="78" cy="96" r="6" fill="#FF9AA0" opacity=".55"/><circle cx="142" cy="96" r="6" fill="#FF9AA0" opacity=".55"/>' : '';
+  var sparkle = st===4 ? '<path d="M52 40 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2Z" fill="#F5CE6E"/><path d="M168 46 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5Z" fill="#F5CE6E"/>' : '';
+  var drop=""; for(var i=0;i<coins;i++){ drop+='<circle cx="'+(96+i*7-((coins-1)*3.5))+'" cy="'+(34+i*8)+'" r="6" fill="#F2C14E" stroke="#D9A93C" stroke-width="1"/>'; }
+  return '<svg viewBox="0 0 220 170" width="100%" xmlns="http://www.w3.org/2000/svg">'+
+    '<ellipse cx="110" cy="156" rx="52" ry="8" fill="rgba(0,0,0,.12)"/>'+sparkle+drop+
+    '<g transform="translate(110,108) scale('+scale+') translate(-110,-108)">'+
+    '<ellipse cx="110" cy="104" rx="56" ry="44" fill="'+body+'"/>'+
+    '<rect x="74" y="138" width="14" height="16" rx="6" fill="'+body+'"/><rect x="132" y="138" width="14" height="16" rx="6" fill="'+body+'"/>'+
+    '<path d="M150 70 l14 -12 -2 20Z" fill="'+body+'"/>'+
+    '<ellipse cx="150" cy="104" rx="18" ry="15" fill="#E89AB6"/><circle cx="145" cy="104" r="2.6" fill="#B5507A"/><circle cx="155" cy="104" r="2.6" fill="#B5507A"/>'+
+    '<circle cx="128" cy="88" r="3.2" fill="#5A3A48"/>'+cheek+
+    '<rect x="92" y="66" width="30" height="5" rx="2.5" fill="#C97E9C"/>'+
+    '<path d="M56 100 q-12 -4 -8 -14 q6 -6 10 2" stroke="'+body+'" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+    '</g></svg>';
+}
+var goalAddOpen=false;
+function openGoals(){ document.getElementById("s-goals").style.display="flex"; document.getElementById("nav").style.display="none"; goalAddOpen=false; goalsRender(); }
+function closeGoals(){ document.getElementById("s-goals").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function goalAddToggle(){ goalAddOpen=!goalAddOpen; goalsRender(); if(goalAddOpen){ var n=document.getElementById("gName"); n&&n.focus(); } }
+function goalCreate(){
+  var name=(document.getElementById("gName").value||"").trim();
+  var target=parseFloat((document.getElementById("gTarget").value||"").replace(/,/g,""))||0;
+  if(!name){ toast("ใส่ชื่อเป้าก่อนนะ"); return; }
+  if(target<=0){ toast("ใส่จำนวนเป้าหมาย"); return; }
+  state.goals.push({id:Date.now(), name:name, target:target, saved:0});
+  save(); goalAddOpen=false; toast("เพิ่มเป้าแล้ว ✓"); goalsRender();
+}
+function goalDelete(id){ if(confirm("ลบเป้านี้?")){ state.goals=state.goals.filter(g=>g.id!==id); save(); goalsRender(); } }
+function goalTopup(id){
+  var el=document.getElementById("gtop"+id); var amt=parseFloat((el.value||"").replace(/,/g,""))||0;
+  if(amt<=0){ toast("ใส่จำนวนเงิน"); return; }
+  var g=state.goals.find(x=>x.id===id); if(!g) return;
+  var was=g.saved>=g.target;
+  g.saved=Math.max(0, g.saved+amt); save();
+  if(!was && g.saved>=g.target) toast("🎉 เก็บครบเป้าแล้ว!"); else toast("เติม "+money(amt)+" ✓");
+  goalsRender();
+}
+function goalsRender(){
+  var box=document.getElementById("goalsBody");
+  var addForm = goalAddOpen ?
+    '<div class="card" style="padding:16px;margin-bottom:14px">'+
+      '<div style="font:700 15px Anuphan;margin-bottom:10px">เป้าใหม่</div>'+
+      '<input class="f" id="gName" placeholder="ชื่อเป้า เช่น iPhone 16" style="box-shadow:none;background:var(--surface2);margin-bottom:10px">'+
+      '<input class="f" id="gTarget" inputmode="decimal" placeholder="จำนวนเป้าหมาย (บาท) เช่น 40000" style="box-shadow:none;background:var(--surface2);margin-bottom:12px">'+
+      '<div style="display:flex;gap:8px"><button onclick="goalAddToggle()" style="flex:1;height:46px;border:1px solid var(--line);border-radius:12px;background:none;color:var(--ink);font:600 14px Anuphan;cursor:pointer">ยกเลิก</button>'+
+      '<button onclick="goalCreate()" style="flex:1;height:46px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">บันทึกเป้า</button></div>'+
+    '</div>' : '';
+  var cards="";
+  if(state.goals.length===0 && !goalAddOpen){
+    cards=emptyState("ยังไม่มีเป้าหมาย","กด + เพิ่มเป้า เพื่อเริ่มเก็บเงินในสิ่งที่ต้องการ","");
+  } else {
+    cards=state.goals.map(function(g){
+      var p=g.target>0? Math.min(1,g.saved/g.target):0, pct=Math.round(p*100), done=g.saved>=g.target;
+      return '<div class="card" style="padding:16px;margin-bottom:14px">'+
+        '<div style="display:flex;gap:14px;align-items:center">'+
+          '<div style="width:88px;flex:none">'+piggySVG(p)+'</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="display:flex;align-items:center"><span style="font:700 16px Anuphan;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(g.name)+'</span>'+(done?'<span style="margin-left:6px;font:700 12px Anuphan;color:var(--accent-ink)">🎉 สำเร็จ</span>':'')+'<button onclick="goalDelete('+g.id+')" style="margin-left:auto;flex:none;width:30px;height:30px;border:none;border-radius:8px;background:var(--danger-tint);color:var(--danger);font:700 15px Anuphan;cursor:pointer">×</button></div>'+
+            '<div style="font:700 18px Anuphan;margin-top:3px">'+money(g.saved)+' <span class="gray" style="font:500 13px Anuphan">/ '+money(g.target)+'</span></div>'+
+            '<div style="height:9px;border-radius:99px;background:var(--track);overflow:hidden;margin-top:8px"><div style="height:100%;border-radius:99px;background:var(--accent);width:'+pct+'%;transition:width .5s cubic-bezier(.22,1,.36,1)"></div></div>'+
+            '<div class="gray" style="font:600 12px Anuphan;margin-top:4px">'+pct+'%'+(done?'':' · เหลืออีก '+money(g.target-g.saved))+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;margin-top:12px">'+
+          '<input class="f" id="gtop'+g.id+'" inputmode="decimal" placeholder="จำนวนเงินที่เติม" style="flex:1;box-shadow:none;background:var(--surface2);padding:11px 14px">'+
+          '<button onclick="goalTopup('+g.id+')" style="flex:none;padding:0 20px;border:none;border-radius:12px;background:var(--accent);color:#fff;font:700 14px Anuphan;cursor:pointer">เติม</button>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+  }
+  box.innerHTML = addForm + cards;
+}
+function piggySVGmini(){ return '<div style="width:110px;margin:0 auto;opacity:.5">'+piggySVG(0.35)+'</div>'; }
+
+/* ---------- SPLIT BILL ---------- */
+var splitState = {mode:"equal", people:2, vat:0, service:0, items:[{name:"คนที่ 1",amt:""},{name:"คนที่ 2",amt:""}]};
+function money(n){ return "฿"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function openSplit(){
+  document.getElementById("s-split").style.display="flex";
+  document.getElementById("nav").style.display="none";
+  splitForm(); splitCalc();
+}
+function closeSplit(){ document.getElementById("s-split").style.display="none"; document.getElementById("nav").style.display="flex"; }
+function splitMode(m){
+  splitState.mode=m;
+  document.getElementById("spTabEq").classList.toggle("on",m==="equal");
+  document.getElementById("spTabIt").classList.toggle("on",m==="items");
+  splitForm(); splitCalc();
+}
+function fld(label,id,val,ph){
+  return '<div style="margin-bottom:12px"><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">'+label+'</div><input class="f" id="'+id+'" inputmode="decimal" value="'+(val==null?"":val)+'" placeholder="'+(ph||"")+'" style="box-shadow:none;background:var(--surface)" oninput="splitCalc()"></div>';
+}
+function splitForm(){
+  var box=document.getElementById("splitForm"), s=splitState;
+  if(s.mode==="equal"){
+    box.innerHTML =
+      fld("ยอดรวมค่าอาหาร (ก่อน VAT)","spSub",s.sub,"เช่น 1200")+
+      '<div style="margin-bottom:12px"><div class="gray" style="font:500 12.5px Anuphan;margin-bottom:6px">จำนวนคน</div>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+        '<button onclick="splitPeople(-1)" style="width:44px;height:44px;border:none;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font:700 22px Anuphan;color:var(--ink);cursor:pointer">−</button>'+
+        '<span id="spPplLbl" style="font:700 20px Anuphan;min-width:40px;text-align:center">'+s.people+'</span>'+
+        '<button onclick="splitPeople(1)" style="width:44px;height:44px;border:none;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font:700 22px Anuphan;color:var(--ink);cursor:pointer">+</button>'+
+        '</div></div>'+
+      '<div style="display:flex;gap:12px">'+
+        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"0")+'</div>'+
+        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"0")+'</div>'+
+      '</div>'+
+      '<div class="gray" style="font:400 11.5px Anuphan">* คิด Service ก่อน แล้ว VAT บนยอดรวม (แบบใบเสร็จร้านไทย) — ไม่คิดช่องไหนใส่ 0</div>';
+  } else {
+    var rows = s.items.map(function(it,i){
+      return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">'+
+        '<input class="f" value="'+esc(it.name)+'" oninput="splitState.items['+i+'].name=this.value" style="flex:1;box-shadow:none;background:var(--surface);padding:11px 12px">'+
+        '<input class="f" inputmode="decimal" value="'+(it.amt||"")+'" placeholder="0" oninput="splitState.items['+i+'].amt=this.value;splitCalc()" style="width:96px;box-shadow:none;background:var(--surface);padding:11px 12px;text-align:right">'+
+        (s.items.length>1?'<button onclick="splitDel('+i+')" style="width:36px;height:36px;flex:none;border:none;border-radius:10px;background:var(--danger-tint);color:var(--danger);font:700 16px Anuphan;cursor:pointer">×</button>':'<span style="width:36px"></span>')+
+      '</div>';
+    }).join("");
+    box.innerHTML =
+      '<div class="gray" style="font:500 12.5px Anuphan;margin-bottom:8px">แต่ละคน + เมนูที่สั่ง (ยอดก่อน VAT)</div>'+
+      rows+
+      '<button onclick="splitAdd()" style="width:100%;padding:11px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--accent-ink);font:600 13.5px Anuphan;cursor:pointer;margin:4px 0 14px">+ เพิ่มคน</button>'+
+      '<div style="display:flex;gap:12px">'+
+        '<div style="flex:1">'+fld("VAT %","spVat",s.vat,"0")+'</div>'+
+        '<div style="flex:1">'+fld("Service %","spSvc",s.service,"0")+'</div>'+
+      '</div>'+
+      '<div class="gray" style="font:400 11.5px Anuphan">* VAT/Service เฉลี่ยตามสัดส่วนที่แต่ละคนสั่ง</div>';
+  }
+}
+function splitPeople(d){ splitState.people=Math.max(1,Math.min(50,splitState.people+d)); document.getElementById("spPplLbl").textContent=splitState.people; splitCalc(); }
+function splitAdd(){ splitState.items.push({name:"คนที่ "+(splitState.items.length+1),amt:""}); splitForm(); splitCalc(); }
+function splitDel(i){ splitState.items.splice(i,1); splitForm(); splitCalc(); }
+function factorOf(){
+  var vat=parseFloat((document.getElementById("spVat")||{}).value)||0;
+  var svc=parseFloat((document.getElementById("spSvc")||{}).value)||0;
+  splitState.vat=vat; splitState.service=svc;
+  return {f:(1+svc/100)*(1+vat/100), vat:vat, svc:svc};
+}
+function splitCalc(){
+  var res=document.getElementById("splitResult"), s=splitState, F=factorOf();
+  if(s.mode==="equal"){
+    var sub=parseFloat((document.getElementById("spSub")||{}).value)||0; s.sub=(document.getElementById("spSub")||{}).value;
+    var svcAmt=sub*F.svc/100, vatAmt=(sub+svcAmt)*F.vat/100, grand=sub+svcAmt+vatAmt, per=grand/Math.max(1,s.people);
+    res.innerHTML =
+      '<div style="display:flex;font:500 13px Anuphan;color:var(--muted);margin-bottom:3px"><span>ยอดอาหาร</span><span style="margin-left:auto;color:var(--ink)">'+money(sub)+'</span></div>'+
+      '<div style="display:flex;font:500 13px Anuphan;color:var(--muted);margin-bottom:3px"><span>Service '+F.svc+'%</span><span style="margin-left:auto;color:var(--ink)">'+money(svcAmt)+'</span></div>'+
+      '<div style="display:flex;font:500 13px Anuphan;color:var(--muted);margin-bottom:6px"><span>VAT '+F.vat+'%</span><span style="margin-left:auto;color:var(--ink)">'+money(vatAmt)+'</span></div>'+
+      '<div style="display:flex;font:700 15px Anuphan;padding-top:8px;border-top:1px solid var(--line)"><span>รวมทั้งบิล</span><span style="margin-left:auto">'+money(grand)+'</span></div>'+
+      '<div style="display:flex;align-items:baseline;margin-top:8px"><span style="font:600 14px Anuphan">หาร '+s.people+' คน</span><span style="margin-left:auto;font:700 24px Anuphan;color:var(--accent-ink)">คนละ '+money(per)+'</span></div>';
+  } else {
+    var lines="", grand=0;
+    s.items.forEach(function(it){
+      var a=parseFloat(it.amt)||0, g=a*F.f; grand+=g;
+      lines+='<div style="display:flex;font:600 14px Anuphan;margin-bottom:4px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%">'+esc(it.name||"—")+'</span><span style="margin-left:auto;color:var(--accent-ink)">'+money(g)+'</span></div>';
+    });
+    res.innerHTML = lines +
+      '<div style="display:flex;font:700 15px Anuphan;padding-top:8px;margin-top:4px;border-top:1px solid var(--line)"><span>รวมทั้งบิล (VAT '+F.vat+'% · Service '+F.svc+'%)</span><span style="margin-left:auto">'+money(grand)+'</span></div>';
+  }
+}
+
+/* ---------- SETTINGS ---------- */
+function saveSettings(){
+  state.name = document.getElementById("setName").value.trim()||"ฉัน";
+  save(); toast("บันทึกแล้ว ✓"); render(); refreshSetAvatar();
+}
+function toggleTheme(){ state.theme = state.theme==="dark"?"light":"dark"; save(); render(); }
+function backupData(){
+  const payload={ app:"C-Wallet", version:1, exportedAt:new Date().toISOString(), data:state };
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+  a.download="cwallet-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+  toast("สำรองข้อมูลแล้ว 💾");
+}
+function restoreData(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const obj=JSON.parse(reader.result);
+      const d=obj && obj.data ? obj.data : obj;   // accept wrapped or raw
+      if(!d || !Array.isArray(d.tx)) throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
+      if(!confirm("กู้คืนจะเขียนทับข้อมูลปัจจุบันทั้งหมด ยืนยันไหม?")){ input.value=""; return; }
+      state = Object.assign({name:"ฉัน",theme:"light",tx:[],goals:[],recurring:[],catBudgets:{},debts:[],installments:[]}, d);
+      if(!Array.isArray(state.goals)) state.goals=[];
+      if(!Array.isArray(state.recurring)) state.recurring=[];
+      if(!Array.isArray(state.debts)) state.debts=[];
+      if(!Array.isArray(state.installments)) state.installments=[];
+      if(!state.catBudgets || typeof state.catBudgets!=="object") state.catBudgets={};
+      if(!state.cats||!state.cats.out||!state.cats.in) state.cats={out:DEFAULT_CATS.out.map(a=>a.slice()),in:DEFAULT_CATS.in.map(a=>a.slice())};
+      migrateWallets(state);
+      syncCats();
+      save();
+      document.getElementById("setName").value=state.name;
+      render(); refreshSetAvatar();
+      toast("กู้คืนข้อมูลสำเร็จ ✓");
+    }catch(e){ toast("ไฟล์ไม่ถูกต้อง กู้คืนไม่ได้"); }
+    input.value="";
+  };
+  reader.readAsText(file);
+}
+function exportCSV(){
+  const rows=[["วันที่","กระเป๋า","ประเภท","หมวด","โน้ต","จำนวนเงิน"]];
+  state.tx.slice().sort((a,b)=>a.id-b.id).forEach(t=> rows.push([new Date(t.date).toLocaleString("th-TH"), walletName(t.w), t.kind==="in"?"รายรับ":"รายจ่าย", t.cat, t.note, t.amt]));
+  const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="cwallet-"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+}
+function clearAll(){ if(confirm("ล้างรายการทั้งหมด? กู้คืนไม่ได้")){ state.tx=[]; save(); toast("ล้างข้อมูลแล้ว"); render(); } }
+function exportXLS(){
+  const rows=state.tx.slice().sort((a,b)=>a.id-b.id);
+  let inc=0,exp=0; rows.forEach(t=> t.kind==="in"? inc+=t.amt : exp+=t.amt);
+  const cell=v=>'<td style="border:1px solid #C9D3E0;padding:6px 10px;font-family:Sarabun,Arial">'+String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</td>';
+  const num=v=>'<td style="border:1px solid #C9D3E0;padding:6px 10px;text-align:right;mso-number-format:\'#,##0.00\'">'+Number(v||0).toFixed(2)+'</td>';
+  let body="";
+  rows.forEach(t=>{
+    const d=new Date(t.date);
+    body+='<tr>'+cell(d.toLocaleDateString("th-TH"))+cell(d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}))+cell(walletName(t.w))+
+      '<td style="border:1px solid #C9D3E0;padding:6px 10px;color:'+(t.kind==="in"?"#1E4FC4":"#C0392B")+'">'+(t.kind==="in"?"รายรับ":"รายจ่าย")+'</td>'+
+      cell(t.cat)+cell(t.note)+num(t.amt)+'</tr>';
+  });
+  const th='style="border:1px solid #1B4DB3;padding:8px 10px;background:#1B4DB3;color:#fff;font-weight:bold;font-family:Sarabun,Arial"';
+  const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body>'+
+    '<table style="border-collapse:collapse">'+
+    '<tr><th '+th+'>วันที่</th><th '+th+'>เวลา</th><th '+th+'>กระเป๋า</th><th '+th+'>ประเภท</th><th '+th+'>หมวด</th><th '+th+'>โน้ต</th><th '+th+'>จำนวนเงิน (฿)</th></tr>'+
+    body+
+    '<tr><td colspan="6" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายรับ</td>'+num(inc)+'</tr>'+
+    '<tr><td colspan="6" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">รวมรายจ่าย</td>'+num(exp)+'</tr>'+
+    '<tr><td colspan="6" style="border:1px solid #C9D3E0;padding:6px 10px;font-weight:bold;text-align:right;font-family:Sarabun,Arial">คงเหลือสุทธิ</td>'+num(inc-exp)+'</tr>'+
+    '</table></body></html>';
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+html],{type:"application/vnd.ms-excel"}));
+  a.download="cwallet-"+new Date().toISOString().slice(0,10)+".xls"; a.click();
+  toast("ส่งออก Excel แล้ว 📊");
+}
+
+/* ---------- toast ---------- */
+let toTimer;
+function toast(msg){
+  clearTimeout(toTimer);
+  let el=document.getElementById("toastEl");
+  if(!el){ el=document.createElement("div"); el.id="toastEl"; el.className="toast"; document.body.appendChild(el); }
+  el.textContent=msg; el.style.display="block";
+  toTimer=setTimeout(()=>el.style.display="none",1600);
+}
+
+/* ---------- init ---------- */
+(function(){
+  // keypad
+  const keys=["1","2","3","4","5","6","7","8","9",".","0","del"];
+  document.getElementById("keypad").innerHTML = keys.map(function(k){
+    var label = k==='del' ? '⌫' : (k==='.' ? "<span style='font-size:30px;transform:translateY(-3px)'>.</span>" : k);
+    return "<button class='key "+(k==='del'?'act':'')+"' onclick=\"keyPress('"+k+"')\">"+label+"</button>";
+  }).join("");
+  // settings fields
+  document.getElementById("setName").value=state.name;
+  runRecurring();
+  refreshSetAvatar();
+  render();
+  document.getElementById("s-add").addEventListener("click", function(e){
+    var kb=document.getElementById("kbwrap"), amt=document.getElementById("amountTap"), note=document.getElementById("noteInput");
+    if(kb.contains(e.target)) return;
+    if(amt.contains(e.target)) return;
+    if(note.contains(e.target)){ hideKeypad(); return; }
+    hideKeypad();
+  });
+  document.getElementById("noteInput").addEventListener("focus", hideKeypad);
+  if("serviceWorker" in navigator){ window.addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }); }
+})();
+</script>
+</body>
+</html>
